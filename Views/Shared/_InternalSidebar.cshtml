@@ -66,10 +66,13 @@
             <i class="fas fa-code-branch"></i>
             <span>Fluxo Árvore</span>
         </a>
-        <a href="/Organograma" class="@NavClass("organograma")" title="Organograma">
-            <i class="fas fa-building-columns"></i>
-            <span>Organograma</span>
-        </a>
+        @if (canOperate)
+        {
+            <a href="/Organograma" class="@NavClass("organograma")" title="Organograma">
+                <i class="fas fa-building-columns"></i>
+                <span>Organograma</span>
+            </a>
+        }
 
         <div class="sidebar__section-label">Análise</div>
         <a href="/DASHBOARD-CONF" class="@NavClass("dashboard-conf")" title="Dashboard Análise CI">

@@ -57,6 +57,7 @@ namespace versaoCsharp.Controllers
         }
 
         [HttpGet("/Organograma")]
+        [Authorize(Roles = PerfisAcesso.UserAdm + "," + PerfisAcesso.UserCi)]
         public IActionResult Organograma()
         {
             return View("Organograma");

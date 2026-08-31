@@ -33,7 +33,7 @@ services:
       db:
         condition: service_healthy
     ports:
-      - "${APP_HTTP_PORT:-5015}:5014"
+      - "${APP_HTTP_PORT:-5016}:5014"
     volumes:
       - app_ci_v2_keys:/root/.aspnet/DataProtection-Keys
       - app_ci_v2_logs:/app/Logs

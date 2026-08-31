@@ -453,7 +453,7 @@
         const elementosPorId = new Map((elementos || []).map(el => [el.id, el.elemento || '-']));
         const naoConformes = itensImpressao.filter(i => i.analise_normalizada === 'nao_conforme');
         const ncSection = naoConformes.length === 0
-            ? '<div class="alert-ok">Nenhuma nao conformidade registrada.</div>'
+            ? '<div class="alert-ok">Nenhuma não conformidade registrada.</div>'
             : naoConformes.map(i => {
                 const elementoNome = elementosPorId.get(i.elemento_id) || '-';
                 const apontamento = i.justificativa
@@ -462,7 +462,7 @@
                 return `<div class="nc-card"><div class="nc-title">${elementoNome}</div><div class="nc-just">${apontamento}</div></div>`;
             }).join('');
         const parecerTexto = itensPendentes.length > 0
-            ? 'O checklist ainda esta em preenchimento. Existem itens pendentes de resposta e o documento precisa ser concluido antes de representar um parecer final de conformidade.'
+            ? 'O checklist ainda está em preenchimento. Existem itens pendentes de resposta e o documento precisa ser concluído antes de representar um parecer final de conformidade.'
             : naoConformes.length > 0
                 ? 'Recomendamos que o processo não prossiga neste momento, uma vez que foram identificadas não conformidades que demandam correção. Assim, será necessário realizar o ajuste do(s) apontamento(s) registrado(s) e, após a regularização, submeter novamente para nova verificação de conformidade e continuidade dos trâmites.'
                 : 'Recomendamos o prosseguimento dos trâmites do processo, considerando que, após verificação, não foram identificadas não conformidades ou pendências impeditivas, estando a documentação e as informações apresentadas em conformidade.';
@@ -488,7 +488,7 @@
             const statusTexto = isPendente ? 'Em preenchimento' : (isNaoConforme ? 'Não Conforme' : 'Conforme');
             const apontamentos = naoConformesEl.map(it => it.justificativa).filter(Boolean).join('<br>');
             const apontamentoHTML = isPendente
-                ? `<div class="elem-apontamento"><strong>Pendencias:</strong> ${pendentesEl.length} item(ns) sem resposta neste elemento.</div>`
+                ? `<div class="elem-apontamento"><strong>Pendências:</strong> ${pendentesEl.length} item(ns) sem resposta neste elemento.</div>`
                 : isNaoConforme
                     ? `<div class="elem-apontamento"><strong>Apontamento:</strong> ${apontamentos || 'Sem apontamento informado.'}</div>`
                     : '';
@@ -507,7 +507,7 @@
     <html lang="pt-BR">
       <head>
         <meta charset="utf-8" />
-        <title>Relatorio de Checklist</title>
+        <title>Relatório de Checklist</title>
         <style>
           @page { size: A4; margin: 14mm 14mm 16mm 14mm; }
           body { font-family: Segoe UI, Inter, Arial, sans-serif; color:#0f172a; background:#ffffff; }
@@ -574,7 +574,7 @@
         <div class="banner">
           <div class="banner-inner">
             <span class="banner-accent" aria-hidden="true"></span>
-            <div class="banner-text">RELATORIO DE CHECKLIST CONTROLE DE PROCESSOS - CONTROLE INTERNO AGEVAP</div>
+            <div class="banner-text">RELATÓRIO DE CHECKLIST CONTROLE DE PROCESSOS - CONTROLE INTERNO AGEVAP</div>
           </div>
         </div>
         <div class="meta-card">

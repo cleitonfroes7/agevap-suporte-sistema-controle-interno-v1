@@ -9,8 +9,8 @@ namespace versaoCsharp.Services
     {
         private static readonly IReadOnlyDictionary<string, string> MapaModalidades = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
         {
-            ["pedido-cotacao"] = "Pedido de cotacao",
-            ["ato-convocatorio"] = "Ato convocatorio",
+            ["pedido-cotacao"] = "Pedido de cotação",
+            ["ato-convocatorio"] = "Ato convocatório",
             ["dispensa"] = "Dispensa",
             ["inexigibilidade"] = "Inexigibilidade"
         };
@@ -128,7 +128,7 @@ namespace versaoCsharp.Services
             var registrosNc = itensImpressao.Where(i => i.Analise == "nao_conforme").ToList();
 
             var registroNcHtml = registrosNc.Count == 0
-                ? """<div class="alert-ok">Nenhuma nao conformidade registrada.</div>"""
+                ? """<div class="alert-ok">Nenhuma não conformidade registrada.</div>"""
                 : string.Join("", registrosNc.Select(item =>
                 {
                     var nomeElemento = elementosPorId.TryGetValue(item.ElementoId, out var nome) ? nome : "-";
@@ -146,16 +146,16 @@ namespace versaoCsharp.Services
             var tratativaHtml = itensPendentes.Count > 0
                 ? """<div class="exec exec-pendente"><strong>Checklist em preenchimento.</strong> Existem itens sem resposta. Finalize o checklist para que a tratativa e o parecer reflitam o resultado definitivo.</div>"""
                 : request.AjustesConfirmados && naoConformes > 0
-                    ? $$"""<div class="exec exec-tratativa"><strong>Tratativa registrada.</strong> As correcoes informadas pelo gestor foram conferidas pelo Controle Interno. Confirmacao registrada por <strong>{{Html(request.AjustesConfirmadosPor ?? "usuario do sistema")}}</strong> em <strong>{{Html(request.AjustesConfirmadosEm ?? "data nao informada")}}</strong>. As nao conformidades originais permanecem preservadas neste checklist para historico e rastreabilidade.</div>"""
+                    ? $$"""<div class="exec exec-tratativa"><strong>Tratativa registrada.</strong> As correções informadas pelo gestor foram conferidas pelo Controle Interno. Confirmação registrada por <strong>{{Html(request.AjustesConfirmadosPor ?? "usuário do sistema")}}</strong> em <strong>{{Html(request.AjustesConfirmadosEm ?? "data não informada")}}</strong>. As não conformidades originais permanecem preservadas neste checklist para histórico e rastreabilidade.</div>"""
                     : naoConformes > 0
-                        ? """<div class="exec exec-pendente"><strong>Tratativa pendente.</strong> Este checklist possui nao conformidades registradas que deverao ser tratadas pelo setor responsavel.</div>"""
-                        : """<div class="exec exec-ok"><strong>Sem tratativa pendente.</strong> Este checklist nao possui nao conformidades registradas, portanto nao ha tratativa pendente para confirmacao.</div>""";
+                        ? """<div class="exec exec-pendente"><strong>Tratativa pendente.</strong> Este checklist possui não conformidades registradas que deverão ser tratadas pelo setor responsável.</div>"""
+                        : """<div class="exec exec-ok"><strong>Sem tratativa pendente.</strong> Este checklist não possui não conformidades registradas, portanto não há tratativa pendente para confirmação.</div>""";
 
             var parecerTexto = itensPendentes.Count > 0
-                ? "O checklist ainda esta em preenchimento. Existem itens pendentes de resposta e o documento precisa ser concluido antes de representar um parecer final de conformidade."
+                ? "O checklist ainda está em preenchimento. Existem itens pendentes de resposta e o documento precisa ser concluído antes de representar um parecer final de conformidade."
                 : naoConformes > 0
-                    ? "Recomendamos que o processo nao prossiga neste momento, uma vez que foram identificadas nao conformidades que demandam correcao. Assim, sera necessario realizar o ajuste do(s) apontamento(s) registrado(s) e, apos a regularizacao, submeter novamente para nova verificacao de conformidade e continuidade dos tramites."
-                    : "Recomendamos o prosseguimento dos tramites do processo, considerando que, apos verificacao, nao foram identificadas nao conformidades ou pendencias impeditivas, estando a documentacao e as informacoes apresentadas em conformidade.";
+                    ? "Recomendamos que o processo não prossiga neste momento, uma vez que foram identificadas não conformidades que demandam correção. Assim, será necessário realizar o ajuste do(s) apontamento(s) registrado(s) e, após a regularização, submeter novamente para nova verificação de conformidade e continuidade dos trâmites."
+                    : "Recomendamos o prosseguimento dos trâmites do processo, considerando que, após verificação, não foram identificadas não conformidades ou pendências impeditivas, estando a documentação e as informações apresentadas em conformidade.";
 
             var elementosHtml = string.Join("", request.Elementos.Select(elemento =>
             {
@@ -170,13 +170,13 @@ namespace versaoCsharp.Services
                 var isPendente = pendentesElemento.Count > 0;
                 var isNaoConforme = naoConformesElemento.Count > 0;
                 var statusClasse = isPendente ? "st-nao_se_aplica" : isNaoConforme ? "st-nao_conforme" : "st-conforme";
-                var statusTexto = isPendente ? "Em preenchimento" : isNaoConforme ? "Nao Conforme" : "Conforme";
+                var statusTexto = isPendente ? "Em preenchimento" : isNaoConforme ? "Não Conforme" : "Conforme";
                 var nup = string.IsNullOrWhiteSpace(elemento.Nup) || elemento.Nup == "0" ? "N/A" : elemento.Nup;
                 var apontamentos = string.Join("<br>", naoConformesElemento
                     .Select(i => string.IsNullOrWhiteSpace(i.Justificativa) ? "Sem apontamento informado." : Html(i.Justificativa)));
 
                 var apontamentoHtml = isPendente
-                    ? $$"""<div class="elem-apontamento"><strong>Pendencias:</strong> {{pendentesElemento.Count}} item(ns) sem resposta neste elemento.</div>"""
+                    ? $$"""<div class="elem-apontamento"><strong>Pendências:</strong> {{pendentesElemento.Count}} item(ns) sem resposta neste elemento.</div>"""
                     : isNaoConforme
                         ? $$"""<div class="elem-apontamento"><strong>Apontamento:</strong> {{(string.IsNullOrWhiteSpace(apontamentos) ? "Sem apontamento informado." : apontamentos)}}</div>"""
                         : string.Empty;
@@ -269,7 +269,7 @@ namespace versaoCsharp.Services
                 <div class="banner">
                   <div class="banner-inner">
                     <span class="banner-accent" aria-hidden="true"></span>
-                    <div class="banner-text">RELATORIO DE CHECKLIST CONTROLE DE PROCESSOS - CONTROLE INTERNO AGEVAP</div>
+                    <div class="banner-text">RELATÓRIO DE CHECKLIST CONTROLE DE PROCESSOS - CONTROLE INTERNO AGEVAP</div>
                   </div>
                 </div>
                 <div class="meta-card">
@@ -277,21 +277,21 @@ namespace versaoCsharp.Services
                     <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"></path><path d="M14 3v6h6"></path><path d="M9 13h6"></path><path d="M9 17h6"></path></svg><div class="cell-copy"><div class="label">Processo</div><div class="value">{{Html(request.NumeroProcesso)}}</div></div></div></div>
                     <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="8" r="4"></circle></svg><div class="cell-copy"><div class="label">Gestor</div><div class="value">{{Html(gestor)}}</div></div></div></div>
                     <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"></path><path d="M10 7h7v7"></path><path d="M7 7h3"></path><path d="M14 14 7 21"></path></svg><div class="cell-copy"><div class="label">Modalidade</div><div class="value">{{Html(modalidade)}}</div></div></div></div>
-                    <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg><div class="cell-copy"><div class="label">Data de Criacao</div><div class="value">{{Html(request.DataCriacao)}}</div></div></div></div>
-                    <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 22h18"></path><path d="M5 22V9l7-4 7 4v13"></path><path d="M9 22V12h6v10"></path><path d="M4 9h16"></path></svg><div class="cell-copy"><div class="label">Area</div><div class="value">{{Html(area)}}</div></div></div></div>
+                    <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"></rect><path d="M16 2v4"></path><path d="M8 2v4"></path><path d="M3 10h18"></path></svg><div class="cell-copy"><div class="label">Data de Criação</div><div class="value">{{Html(request.DataCriacao)}}</div></div></div></div>
+                    <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 22h18"></path><path d="M5 22V9l7-4 7 4v13"></path><path d="M9 22V12h6v10"></path><path d="M4 9h16"></path></svg><div class="cell-copy"><div class="label">Área</div><div class="value">{{Html(area)}}</div></div></div></div>
                     <div class="cell--row">
-                      <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="8" r="4"></circle></svg><div class="cell-copy"><div class="label">Responsavel pela Analise</div><div class="value">{{Html(responsavelAnalise)}}</div></div></div></div>
-                      <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 7h8"></path><path d="M8 11h8"></path><path d="M8 15h5"></path><path d="m6.5 10 .8.8 1.7-1.7"></path><path d="m6.5 14 .8.8 1.7-1.7"></path></svg><div class="cell-copy"><div class="label">Competencias</div><div class="value value--compact">{{Html(competencia)}}</div></div></div></div>
+                      <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21a8 8 0 0 0-16 0"></path><circle cx="12" cy="8" r="4"></circle></svg><div class="cell-copy"><div class="label">Responsável pela Análise</div><div class="value">{{Html(responsavelAnalise)}}</div></div></div></div>
+                      <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"></rect><path d="M8 7h8"></path><path d="M8 11h8"></path><path d="M8 15h5"></path><path d="m6.5 10 .8.8 1.7-1.7"></path><path d="m6.5 14 .8.8 1.7-1.7"></path></svg><div class="cell-copy"><div class="label">Competências</div><div class="value value--compact">{{Html(competencia)}}</div></div></div></div>
                     </div>
                   </div>
                 </div>
-                <div class="section-title">Sumario Executivo</div>
+                <div class="section-title">Sumário Executivo</div>
                 <div class="exec">
-                  Este relatorio apresenta uma analise qualitativa de conformidade do processo {{Html(request.NumeroProcesso)}} ({{Html(modalidade)}}), com {{itensImpressao.Count}} itens avaliados a partir de uma relacao de {{request.Elementos.Count}} documentos presentes no referido processo. Do total, {{conformes}} itens estao conformes, {{naoConformes}} nao conformes, {{naoSeAplica}} nao se aplicam e {{itensPendentes.Count}} permanecem sem resposta, com uma taxa de {{taxa}}% de conformidade sobre os itens efetivamente avaliados. As secoes seguintes detalham os registros de nao conformidade, o status de conformidade por documento e o parecer do Controle Interno.
+                  Este relatório apresenta uma análise qualitativa de conformidade do processo {{Html(request.NumeroProcesso)}} ({{Html(modalidade)}}), com {{itensImpressao.Count}} itens avaliados a partir de uma relação de {{request.Elementos.Count}} documentos presentes no referido processo. Do total, {{conformes}} itens estão conformes, {{naoConformes}} não conformes, {{naoSeAplica}} não se aplicam e {{itensPendentes.Count}} permanecem sem resposta, com uma taxa de {{taxa}}% de conformidade sobre os itens efetivamente avaliados. As seções seguintes detalham os registros de não conformidade, o status de conformidade por documento e o parecer do Controle Interno.
                 </div>
-                <div class="section-title">Tratativa das nao conformidades</div>
+                <div class="section-title">Tratativa das não conformidades</div>
                 {{tratativaHtml}}
-                <div class="section-title">Registro de nao conformidades</div>
+                <div class="section-title">Registro de não conformidades</div>
                 {{registroNcHtml}}
                 <div class="section-title">Detalhamento por Elemento</div>
                 {{elementosHtml}}
@@ -301,7 +301,7 @@ namespace versaoCsharp.Services
                   <div class="footer">
                     <div><strong>{{Html(responsavelAnalise)}}</strong><br>Controle Interno</div>
                     <div>Data/Hora: {{DateTime.Now.ToString("dd/MM/yyyy HH:mm", new CultureInfo("pt-BR"))}}</div>
-                  </div>
+                </div>
                 </div>
               </body>
             </html>

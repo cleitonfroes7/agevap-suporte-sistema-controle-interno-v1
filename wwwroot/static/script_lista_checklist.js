@@ -1932,7 +1932,7 @@ function gerarHTMLComprovanteCorrecao(ctx) {
     <html lang="pt-BR">
       <head>
         <meta charset="utf-8" />
-        <title>Comprovante de Correcao de Nao Conformidades</title>
+        <title>Comprovante de Correção de Não Conformidades</title>
         <style>
           @page { size: A4; margin: 14mm 14mm 16mm 14mm; }
           body { font-family: Segoe UI, Inter, Arial, sans-serif; color:#0f172a; background:#ffffff; }
@@ -1998,17 +1998,17 @@ function gerarHTMLComprovanteCorrecao(ctx) {
             <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg><div class="cell-copy"><div class="label">Processo</div><div class="value">${checklist.numero_processo || '-'}</div></div></div></div>
             <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="4"/></svg><div class="cell-copy"><div class="label">Gestor</div><div class="value">${gestor || '-'}</div></div></div></div>
             <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M10 7h7v7"/><path d="M7 7h3"/><path d="M14 14 7 21"/></svg><div class="cell-copy"><div class="label">Modalidade</div><div class="value">${mapearModalidade(checklist.modalidade) || '-'}</div></div></div></div>
-            <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg><div class="cell-copy"><div class="label">Data de Criacao</div><div class="value">${formatarData(checklist.data_criacao) || '-'}</div></div></div></div>
-            <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 22h18"/><path d="M5 22V9l7-4 7 4v13"/><path d="M9 22V12h6v10"/><path d="M4 9h16"/></svg><div class="cell-copy"><div class="label">Area</div><div class="value">${area || '-'}</div></div></div></div>
+            <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg><div class="cell-copy"><div class="label">Data de Criação</div><div class="value">${formatarData(checklist.data_criacao) || '-'}</div></div></div></div>
+            <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 22h18"/><path d="M5 22V9l7-4 7 4v13"/><path d="M9 22V12h6v10"/><path d="M4 9h16"/></svg><div class="cell-copy"><div class="label">Área</div><div class="value">${area || '-'}</div></div></div></div>
             <div class="cell--row">
-              <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="4"/></svg><div class="cell-copy"><div class="label">Responsavel pela Analise</div><div class="value">${responsavelAnalise}</div></div></div></div>
-              <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/><path d="m6.5 10 .8.8 1.7-1.7"/><path d="m6.5 14 .8.8 1.7-1.7"/></svg><div class="cell-copy"><div class="label">Competencias</div><div class="value value--compact">${competencia || '-'}</div></div></div></div>
+              <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="4"/></svg><div class="cell-copy"><div class="label">Responsável pela Análise</div><div class="value">${responsavelAnalise}</div></div></div></div>
+              <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/><path d="m6.5 10 .8.8 1.7-1.7"/><path d="m6.5 14 .8.8 1.7-1.7"/></svg><div class="cell-copy"><div class="label">Competências</div><div class="value value--compact">${competencia || '-'}</div></div></div></div>
             </div>
           </div>
         </div>
         <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg><span>Resumo da Regularizacao</span></div>
         <div class="exec">
-          As nao conformidades identificadas durante a analise do checklist foram objeto de correcao pelo gestor responsavel.
+          As não conformidades identificadas durante a análise do checklist foram objeto de correção pelo gestor responsável.
           Os ajustes informados foram posteriormente confirmados pelo Controle Interno, ficando registrada a regularizacao dos apontamentos relacionados abaixo.
         </div>
         <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>Registro das Correcoes</span></div>
@@ -2037,7 +2037,7 @@ function gerarHTMLComprovanteCorrecao(ctx) {
             `).join('') || `
               <tr>
                 <td class="td-num">-</td>
-                <td colspan="4">Nao ha nao conformidades confirmadas para este comprovante.</td>
+                <td colspan="4">Não há não conformidades confirmadas para este comprovante.</td>
               </tr>
             `}
           </tbody>
@@ -2046,7 +2046,7 @@ function gerarHTMLComprovanteCorrecao(ctx) {
           <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4Z"/></svg><span>Conclusao do Controle Interno</span></div>
           <div class="exec">
             Apos a verificacao das correcoes apresentadas, os apontamentos indicados neste relatorio foram considerados regularizados.
-            O registro original das nao conformidades permanece preservado para fins de historico, controle e rastreabilidade.
+            O registro original das não conformidades permanece preservado para fins de histórico, controle e rastreabilidade.
           </div>
           <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="m9 12 2 2 4-4"/></svg><span>Confirmacao</span></div>
           <div class="confirm-grid">
@@ -2093,7 +2093,7 @@ function gerarHTMLImpressaoAGEVAP(ctx) {
     const elementosPorId = new Map((elementos || []).map(el => [el.id, el.elemento || '-']));
     const naoConformes = itensImpressao.filter(i => i.analise_normalizada === 'nao_conforme');
     const ncSection = naoConformes.length === 0
-        ? '<div class="alert-ok">Nenhuma nao conformidade registrada.</div>'
+        ? '<div class="alert-ok">Nenhuma não conformidade registrada.</div>'
         : naoConformes.map(i => {
             const elementoNome = elementosPorId.get(i.elemento_id) || '-';
         const apontamento = i.justificativa
@@ -2102,7 +2102,7 @@ function gerarHTMLImpressaoAGEVAP(ctx) {
             return `<div class="nc-card"><div class="nc-title">${elementoNome}</div><div class="nc-just">${apontamento}</div></div>`;
           }).join('');
     const parecerTexto = itensPendentes.length > 0
-        ? 'O checklist ainda esta em preenchimento. Existem itens pendentes de resposta e o documento precisa ser concluido antes de representar um parecer final de conformidade.'
+        ? 'O checklist ainda está em preenchimento. Existem itens pendentes de resposta e o documento precisa ser concluído antes de representar um parecer final de conformidade.'
         : naoConformes.length > 0
         ? 'Recomendamos que o processo não prossiga neste momento, uma vez que foram identificadas não conformidades que demandam correção. Assim, será necessário realizar o ajuste do(s) apontamento(s) registrado(s) e, após a regularização, submeter novamente para nova verificação de conformidade e continuidade dos trâmites.'
         : 'Recomendamos o prosseguimento dos trâmites do processo, considerando que, após verificação, não foram identificadas não conformidades ou pendências impeditivas, estando a documentação e as informações apresentadas em conformidade.';
@@ -2131,7 +2131,7 @@ function gerarHTMLImpressaoAGEVAP(ctx) {
             .filter(Boolean)
             .join('<br>');
         const apontamentoHTML = isPendente
-            ? `<div class="elem-apontamento"><strong>Pendencias:</strong> ${pendentesEl.length} item(ns) sem resposta neste elemento.</div>`
+            ? `<div class="elem-apontamento"><strong>Pendências:</strong> ${pendentesEl.length} item(ns) sem resposta neste elemento.</div>`
             : isNaoConforme
             ? `<div class="elem-apontamento"><strong>Apontamento:</strong> ${apontamentos || 'Sem apontamento informado.'}</div>`
             : '';
@@ -2150,7 +2150,7 @@ function gerarHTMLImpressaoAGEVAP(ctx) {
     <html lang="pt-BR">
       <head>
         <meta charset="utf-8" />
-        <title>Relatorio de Checklist</title>
+        <title>Relatório de Checklist</title>
         <style>
           @page { size: A4; margin: 14mm 14mm 16mm 14mm; }
           body { font-family: Segoe UI, Inter, Arial, sans-serif; color:#0f172a; background:#ffffff; }
@@ -2221,7 +2221,7 @@ function gerarHTMLImpressaoAGEVAP(ctx) {
         <div class="banner">
           <div class="banner-inner">
             <span class="banner-accent" aria-hidden="true"></span>
-            <div class="banner-text">RELATORIO DE CHECKLIST CONTROLE DE PROCESSOS - CONTROLE INTERNO AGEVAP</div>
+            <div class="banner-text">RELATÓRIO DE CHECKLIST CONTROLE DE PROCESSOS - CONTROLE INTERNO AGEVAP</div>
           </div>
         </div>
         <div class="meta-card">
@@ -2229,16 +2229,16 @@ function gerarHTMLImpressaoAGEVAP(ctx) {
             <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/></svg><div class="cell-copy"><div class="label">Processo</div><div class="value">${checklist.numero_processo || '-'}</div></div></div></div>
             <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="4"/></svg><div class="cell-copy"><div class="label">Gestor</div><div class="value">${gestor || '-'}</div></div></div></div>
             <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 17 17 7"/><path d="M10 7h7v7"/><path d="M7 7h3"/><path d="M14 14 7 21"/></svg><div class="cell-copy"><div class="label">Modalidade</div><div class="value">${mapearModalidade(checklist.modalidade) || '-'}</div></div></div></div>
-            <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg><div class="cell-copy"><div class="label">Data de Criacao</div><div class="value">${formatarData(checklist.data_criacao) || '-'}</div></div></div></div>
-            <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 22h18"/><path d="M5 22V9l7-4 7 4v13"/><path d="M9 22V12h6v10"/><path d="M4 9h16"/></svg><div class="cell-copy"><div class="label">Area</div><div class="value">${area || '-'}</div></div></div></div>
+            <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4"/><path d="M8 2v4"/><path d="M3 10h18"/></svg><div class="cell-copy"><div class="label">Data de Criação</div><div class="value">${formatarData(checklist.data_criacao) || '-'}</div></div></div></div>
+            <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 22h18"/><path d="M5 22V9l7-4 7 4v13"/><path d="M9 22V12h6v10"/><path d="M4 9h16"/></svg><div class="cell-copy"><div class="label">Área</div><div class="value">${area || '-'}</div></div></div></div>
             <div class="cell--row">
-              <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="4"/></svg><div class="cell-copy"><div class="label">Responsavel pela Analise</div><div class="value">${responsavelAnalise}</div></div></div></div>
-              <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/><path d="m6.5 10 .8.8 1.7-1.7"/><path d="m6.5 14 .8.8 1.7-1.7"/></svg><div class="cell-copy"><div class="label">Competencias</div><div class="value value--compact">${competencia || '-'}</div></div></div></div>
+            <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="8" r="4"/></svg><div class="cell-copy"><div class="label">Responsável pela Análise</div><div class="value">${responsavelAnalise}</div></div></div></div>
+              <div class="cell"><div class="cell-head"><svg class="cell-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h8"/><path d="M8 15h5"/><path d="m6.5 10 .8.8 1.7-1.7"/><path d="m6.5 14 .8.8 1.7-1.7"/></svg><div class="cell-copy"><div class="label">Competências</div><div class="value value--compact">${competencia || '-'}</div></div></div></div>
             </div>
           </div>
         </div>
 
-        <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg><span>Sumario Executivo</span></div>
+        <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg><span>Sumário Executivo</span></div>
         <div class="exec">
         Este relatório apresenta uma análise qualitativa de conformidade do processo ${checklist.numero_processo || '-'}
         (${mapearModalidade(checklist.modalidade) || '-'}), com ${total} itens avaliados a partir de uma
@@ -2246,10 +2246,10 @@ function gerarHTMLImpressaoAGEVAP(ctx) {
         conformes, ${nao} não conformes, ${na} não se aplicam e ${itensPendentes.length} permanecem sem resposta, com uma taxa de ${taxa}% de conformidade sobre os itens efetivamente avaliados. As seções seguintes detalham os registros de não conformidade, o Status de conformidade por Documento e o Parecer do Controle Interno.
         </div>
 
-        <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>Tratativa das nao conformidades</span></div>
+        <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>Tratativa das não conformidades</span></div>
         ${tratativaHtml}
 
-        <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg><span>Registro de nao conformidades</span></div>
+        <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M12 8v5"/><path d="M12 16h.01"/></svg><span>Registro de não conformidades</span></div>
         ${ncSection}
 
         <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16"/><path d="M4 12h16"/><path d="M4 18h10"/></svg><span>Detalhamento por Elemento</span></div>
