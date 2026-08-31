@@ -1,0 +1,2868 @@
+﻿@using versaoCsharp.Models
+@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Organograma";
+    ViewData["PageDescription"] = "Leitura institucional interativa do organograma, com sinalização visual de áreas implementadas e planejadas.";
+    ViewData["ActiveNav"] = "organograma";
+
+    var isAdmin = User?.IsInRole(PerfisAcesso.UserAdm) ?? false;
+}
+
+@section Head {
+    <style>
+        .org-shell {
+            display: grid;
+            gap: 18px;
+            min-width: 0;
+            width: 100%;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+
+        .org-shell > * {
+            min-width: 0;
+            max-width: 100%;
+        }
+
+        .org-card-surface,
+        .org-panel,
+        .org-detail,
+        .org-admin {
+            background: var(--color-surface);
+            border-radius: 24px;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+            min-width: 0;
+            max-width: 100%;
+            overflow: hidden;
+        }
+
+        .org-hero {
+            padding: 22px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .org-hero__top {
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(300px, 0.8fr);
+            gap: 18px;
+            align-items: start;
+            min-width: 0;
+        }
+
+        .org-hero__title {
+            margin: 0;
+            color: var(--color-heading);
+            font-size: 1.08rem;
+        }
+
+        .org-hero__text {
+            margin: 8px 0 0;
+            max-width: 78ch;
+            color: var(--color-text-muted);
+            font-size: 0.84rem;
+            line-height: 1.7;
+        }
+
+        .org-hero__aside {
+            padding: 16px;
+            border-radius: 18px;
+            border: 1px solid rgba(96, 165, 250, 0.14);
+            background: linear-gradient(180deg, rgba(239, 246, 255, 0.98), rgba(248, 250, 252, 0.98));
+            display: grid;
+            gap: 10px;
+        }
+
+        .org-hero__aside h3,
+        .org-panel__header h2,
+        .org-detail__header h2,
+        .org-admin__header h2 {
+            margin: 0;
+            color: var(--color-heading);
+            font-size: 0.96rem;
+        }
+
+        .org-hero__aside p,
+        .org-panel__header p,
+        .org-detail__header p,
+        .org-admin__header p {
+            margin: 0;
+            color: var(--color-text-muted);
+            font-size: 0.76rem;
+            line-height: 1.6;
+        }
+
+        .org-stats {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+            min-width: 0;
+        }
+
+        .org-stat {
+            border-radius: 18px;
+            padding: 14px 16px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(255, 255, 255, 1));
+            display: grid;
+            gap: 6px;
+        }
+
+        .org-stat__label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            color: #69809a;
+        }
+
+        .org-stat__value {
+            color: var(--color-heading);
+            font-size: 1.35rem;
+            font-weight: 900;
+        }
+
+        .org-stat__meta {
+            color: var(--color-text-muted);
+            font-size: 0.74rem;
+            line-height: 1.45;
+        }
+
+        .org-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .org-legend__item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(255, 255, 255, 0.96);
+            color: #5c7088;
+            font-size: 0.74rem;
+            font-weight: 700;
+        }
+
+        .org-legend__swatch {
+            width: 12px;
+            height: 12px;
+            border-radius: 999px;
+            border: 1px solid rgba(15, 23, 42, 0.1);
+            flex-shrink: 0;
+        }
+
+        .org-panel,
+        .org-detail,
+        .org-admin {
+            padding: 18px;
+            display: grid;
+            gap: 16px;
+        }
+
+        .org-panel__header,
+        .org-detail__header,
+        .org-admin__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: end;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .org-panel__header--stack {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .org-panel__header--stack .org-tabs {
+            align-self: flex-start;
+        }
+
+        .org-tabs {
+            display: inline-flex;
+            align-items: flex-end;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+            flex-wrap: wrap;
+            row-gap: 8px;
+            max-width: 100%;
+        }
+
+        .org-tab {
+            border: 1px solid transparent;
+            border-bottom: none;
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.92), rgba(241, 245, 249, 0.9));
+            color: #5c7392;
+            padding: 12px 18px;
+            border-radius: 18px 18px 0 0;
+            font-size: 0.84rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .org-tab.is-active {
+            color: var(--color-heading);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+            border-color: rgba(148, 163, 184, 0.24);
+            box-shadow: inset 0 -3px 0 #112a46;
+        }
+
+        .org-view {
+            display: none;
+        }
+
+        .org-view.is-active {
+            display: block;
+        }
+
+        .org-board {
+            position: relative;
+            overflow: hidden;
+            padding-bottom: 8px;
+            max-width: 100%;
+            zoom: 0.8;
+        }
+
+        .org-board__hero {
+            position: relative;
+            display: block;
+            gap: 12px;
+            align-items: start;
+            margin-bottom: 2px;
+            min-height: 0;
+        }
+
+        .org-board__hero > div {
+            display: none;
+        }
+
+        .org-board__legend-box,
+        .org-board__foot-card {
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+            padding: 12px 14px;
+        }
+
+        .org-board__legend-box {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 250px;
+            z-index: 2;
+            display: grid;
+            gap: 6px;
+            align-content: start;
+        }
+
+        .org-board__legend-box h3,
+        .org-board__foot-card h3 {
+            margin: 0;
+            color: #153a6b;
+            font-size: 0.76rem;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+
+        .org-board__legend-list {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 5px;
+        }
+
+        .org-board__legend-line {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: #304d72;
+            font-size: 0.62rem;
+            font-weight: 700;
+        }
+
+        .org-board__legend-stroke {
+            width: 34px;
+            height: 2px;
+            border-radius: 999px;
+            background: #1f4fb3;
+            flex-shrink: 0;
+        }
+
+        .org-board__legend-stroke--dashed {
+            background: none;
+            border-top: 2px dashed #7b3db6;
+            height: 0;
+        }
+
+        .org-board__svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+            z-index: 0;
+        }
+
+        .org-board__rows {
+            width: 100%;
+            min-width: 0;
+            display: grid;
+            gap: 64px;
+            position: relative;
+            z-index: 1;
+            padding: 8px 18px 38px;
+            margin: 0 auto;
+        }
+
+        .org-board__rows > .org-row {
+            flex-shrink: 0;
+        }
+
+        .org-row {
+            display: flex;
+            justify-content: center;
+            flex-wrap: nowrap;
+            gap: 44px 22px;
+            position: relative;
+            width: 100%;
+            margin: 0 auto;
+        }
+
+        .org-row--single {
+            max-width: 228px;
+        }
+
+        .org-row--duo {
+            max-width: 470px;
+        }
+
+        .org-row--trio {
+            max-width: 720px;
+            gap: 36px;
+        }
+
+        .org-row--directors {
+            max-width: 1060px;
+            gap: 28px;
+        }
+
+        .org-row--supports {
+            max-width: 760px;
+            gap: 28px;
+        }
+
+        .org-row--superintendencias {
+            max-width: 860px;
+            gap: 30px;
+        }
+
+        .org-row--gerencias {
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 28px 12px;
+        }
+
+        .org-row--gerencias-principais {
+            max-width: 1220px;
+        }
+
+        .org-row--gerencias-planejadas {
+            max-width: 860px;
+        }
+
+        .org-card {
+            min-width: 150px;
+            max-width: 182px;
+            border: 1px solid rgba(148, 163, 184, 0.24);
+            border-radius: 20px;
+            padding: 12px 12px 11px;
+            display: grid;
+            gap: 7px;
+            text-align: left;
+            cursor: pointer;
+            color: #0f172a;
+            background: #fff;
+            box-shadow: 0 18px 34px rgba(15, 23, 42, 0.08);
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease, opacity 0.18s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .org-card__topline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 8px;
+        }
+
+        .org-card__topline .org-card__title {
+            min-height: 0;
+            flex: 1;
+            text-align: left;
+        }
+
+        .org-card__icon {
+            width: 26px;
+            height: 26px;
+            border-radius: 10px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            background: rgba(255, 255, 255, 0.18);
+            color: currentColor;
+        }
+
+        .org-card__icon i {
+            font-size: 0.78rem;
+        }
+
+        .org-card__icon svg {
+            width: 16px;
+            height: 16px;
+            stroke: currentColor;
+        }
+
+        .org-card::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 5px;
+            background: rgba(255, 255, 255, 0.78);
+            opacity: 0.7;
+        }
+
+        .org-card:hover,
+        .org-mini-card:hover,
+        .org-group-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.08);
+        }
+
+        .org-card.is-active,
+        .org-mini-card.is-active,
+        .org-group-button.is-active {
+            border-color: rgba(37, 99, 235, 0.34);
+            box-shadow: 0 18px 36px rgba(37, 99, 235, 0.14);
+        }
+
+        .org-card.is-dimmed {
+            opacity: 0.3;
+            filter: grayscale(1);
+        }
+
+        .org-card.is-path {
+            opacity: 1;
+        }
+
+        .org-card__eyebrow {
+            display: none;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.56rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .org-card__title,
+        .org-mini-card__title {
+            font-size: 0.8rem;
+            font-weight: 900;
+            line-height: 1.22;
+        }
+
+        .org-card__meta,
+        .org-mini-card__meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            color: #52657f;
+            font-size: 0.58rem;
+        }
+
+        .org-card__hint {
+            color: #475569;
+            font-size: 0.62rem;
+            line-height: 1.34;
+        }
+
+        .org-card__meta .org-pill {
+            padding: 4px 7px;
+            font-size: 0.52rem;
+        }
+
+        .org-card--hero {
+            min-width: 214px;
+            max-width: 214px;
+            min-height: 74px;
+            text-align: center;
+            justify-items: center;
+            padding: 14px 15px 12px;
+        }
+
+        .org-card--hero .org-card__topline,
+        .org-card--leader .org-card__topline,
+        .org-card--regional .org-card__topline,
+        .org-card--manager .org-card__topline {
+            width: 100%;
+        }
+
+        .org-card--hero::before {
+            width: 0;
+        }
+
+        .org-card--leader {
+            min-width: 184px;
+            max-width: 184px;
+            min-height: 72px;
+            justify-items: center;
+            text-align: center;
+            padding: 13px 14px 12px;
+        }
+
+        .org-card--support {
+            min-width: 96px;
+            max-width: 96px;
+            min-height: 30px;
+            padding: 8px 10px;
+            gap: 4px;
+            justify-items: center;
+            text-align: center;
+        }
+
+        .org-card--support .org-card__eyebrow,
+        .org-card--support .org-card__meta,
+        .org-card--support .org-card__hint {
+            display: none;
+        }
+
+        .org-card--support .org-card__icon {
+            display: inline-flex;
+        }
+
+        .org-card--support .org-card__title {
+            font-size: 0.7rem;
+            line-height: 1.15;
+        }
+
+        .org-card--support .org-card__topline {
+            flex-direction: column;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .org-card--support .org-card__topline .org-card__title {
+            flex: none;
+            text-align: center;
+        }
+
+        .org-card--regional {
+            min-width: 150px;
+            max-width: 150px;
+            min-height: 70px;
+            justify-items: center;
+            text-align: center;
+        }
+
+        .org-card--regional .org-card__title {
+            overflow-wrap: anywhere;
+        }
+
+        .org-card--manager {
+            min-width: 126px;
+            max-width: 126px;
+            min-height: 88px;
+            padding: 9px 8px 8px;
+            gap: 6px;
+            justify-items: center;
+            text-align: center;
+        }
+
+        .org-card--manager .org-card__title {
+            font-size: 0.62rem;
+            line-height: 1.18;
+            min-height: 3.54em;
+            max-height: 3.54em;
+            overflow: hidden;
+            overflow-wrap: normal;
+            word-break: normal;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 3;
+        }
+
+        .org-card--manager .org-card__hint {
+            font-size: 0.52rem;
+            line-height: 1.24;
+        }
+
+        .org-card--manager .org-card__eyebrow {
+            font-size: 0.48rem;
+        }
+
+        .org-card--manager .org-card__meta {
+            justify-content: center;
+            gap: 3px;
+            font-size: 0.48rem;
+        }
+
+        .org-card--manager .org-pill {
+            padding: 4px 7px;
+            font-size: 0.52rem;
+        }
+
+        .org-pill,
+        .org-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            font-size: 0.68rem;
+            font-weight: 800;
+        }
+
+        .org-card--governanca {
+            background: linear-gradient(180deg, rgba(65, 105, 190, 0.96), rgba(79, 116, 196, 0.96));
+            color: #fff;
+        }
+
+        .org-card--governanca .org-card__hint,
+        .org-card--governanca .org-card__meta,
+        .org-card--governanca .org-card__eyebrow,
+        .org-card--presidencia .org-card__hint,
+        .org-card--presidencia .org-card__meta,
+        .org-card--presidencia .org-card__eyebrow {
+            color: rgba(255, 255, 255, 0.92);
+        }
+
+        .org-card--presidencia {
+            background: linear-gradient(180deg, rgba(114, 51, 163, 0.98), rgba(129, 63, 181, 0.98));
+            color: #fff;
+        }
+
+        .org-card--diretoria {
+            background: linear-gradient(180deg, rgba(255, 241, 71, 0.98), rgba(255, 234, 0, 0.96));
+            color: #294166;
+        }
+
+        .org-card--diretoria::before {
+            background: rgba(41, 65, 102, 0.2);
+        }
+
+        .org-card--implementada {
+            background: linear-gradient(180deg, rgba(11, 188, 92, 0.98), rgba(6, 166, 82, 0.96));
+            color: #fff;
+        }
+
+        .org-card--planejada {
+            background: linear-gradient(180deg, rgba(128, 234, 239, 0.98), rgba(104, 220, 231, 0.96));
+            color: #23516e;
+        }
+
+        .org-card--planejada::before {
+            background: rgba(35, 81, 110, 0.18);
+        }
+
+        .org-card--diretoria .org-card__hint,
+        .org-card--diretoria .org-card__meta,
+        .org-card--planejada .org-card__hint,
+        .org-card--planejada .org-card__meta {
+            color: rgba(35, 65, 102, 0.88);
+        }
+
+        .org-link {
+            fill: none;
+            stroke: rgba(37, 99, 235, 0.42);
+            stroke-width: 2.3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .org-link--highlight {
+            stroke: rgba(29, 78, 216, 0.82);
+            stroke-width: 3.1;
+        }
+
+        .org-link--dimmed {
+            stroke: rgba(100, 116, 139, 0.42);
+            opacity: 0.55;
+        }
+
+        .org-link--dashed {
+            stroke: rgba(123, 61, 182, 0.78);
+            stroke-dasharray: 7 5;
+        }
+
+        .org-board__foot {
+            display: grid;
+            grid-template-columns: minmax(220px, 0.24fr) minmax(0, 1fr) minmax(220px, 0.24fr);
+            gap: 18px;
+            margin-top: 24px;
+        }
+
+        .org-board__foot-list {
+            margin: 0;
+            padding-left: 18px;
+            display: grid;
+            gap: 6px;
+            color: #2f4d73;
+            font-size: 0.8rem;
+            line-height: 1.5;
+        }
+
+        .org-board__criteria {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .org-board__criterion {
+            display: grid;
+            gap: 6px;
+            padding: 6px 8px;
+        }
+
+        .org-board__criterion strong {
+            color: #163a6d;
+            font-size: 0.82rem;
+        }
+
+        .org-board__criterion span {
+            color: #4c6584;
+            font-size: 0.76rem;
+            line-height: 1.5;
+        }
+
+        .org-horizontal {
+            display: grid;
+            gap: 16px;
+        }
+
+        .org-group-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 12px;
+        }
+
+        .org-group-button,
+        .org-mini-card {
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+            padding: 14px;
+            display: grid;
+            gap: 8px;
+            text-align: left;
+            cursor: pointer;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+        }
+
+        .org-group-button__title,
+        .org-column__title {
+            color: var(--color-heading);
+            font-size: 0.82rem;
+            font-weight: 900;
+        }
+
+        .org-group-button__meta,
+        .org-column__empty {
+            color: var(--color-text-muted);
+            font-size: 0.74rem;
+            line-height: 1.55;
+        }
+
+        .org-breadcrumb {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .org-breadcrumb__item {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(239, 246, 255, 0.94);
+            color: #1f4d82;
+            font-size: 0.72rem;
+            font-weight: 800;
+        }
+
+        .org-columns {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .org-column {
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 22px;
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.98), rgba(255, 255, 255, 1));
+            padding: 16px;
+            display: grid;
+            align-content: start;
+            gap: 12px;
+            min-height: 360px;
+        }
+
+        .org-column__list,
+        .org-detail__children,
+        .org-admin__grid {
+            display: grid;
+            gap: 10px;
+        }
+
+        .org-status--implementada {
+            background: rgba(220, 252, 231, 0.96);
+            color: #167244;
+        }
+
+        .org-status--planejada {
+            background: rgba(207, 250, 254, 0.96);
+            color: #17617a;
+        }
+
+        .org-status--institucional {
+            background: rgba(239, 246, 255, 0.98);
+            color: #1f4d82;
+        }
+
+        .org-detail__content {
+            display: grid;
+            grid-template-columns: minmax(0, 0.86fr) minmax(280px, 0.64fr);
+            gap: 16px;
+        }
+
+        .org-detail__summary,
+        .org-detail__children-box,
+        .org-admin__card {
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.98));
+            padding: 16px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .org-detail__summary {
+            gap: 16px;
+            background: linear-gradient(145deg, #f8fbff 0%, #ffffff 58%, #f2f8ff 100%);
+        }
+
+        .org-detail__identity {
+            display: grid;
+            grid-template-columns: auto minmax(0, 1fr);
+            align-items: center;
+            gap: 12px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid rgba(96, 165, 250, 0.18);
+        }
+
+        .org-detail__icon {
+            width: 46px;
+            height: 46px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 14px;
+            background: linear-gradient(145deg, #1d4ed8, #0ea5e9);
+            color: #fff;
+            box-shadow: 0 10px 22px rgba(29, 78, 216, 0.2);
+        }
+
+        .org-detail__icon i {
+            font-size: 1.05rem;
+        }
+
+        .org-detail__identity-copy {
+            display: grid;
+            gap: 4px;
+            min-width: 0;
+        }
+
+            min-width: 190px;
+            max-width: 190px;
+            min-height: 78px;
+
+        .org-detail__identity-copy .org-detail__title {
+            overflow-wrap: anywhere;
+        }
+
+        .org-detail__metrics {
+            min-height: 2.44em;
+            max-height: 2.44em;
+            overflow: hidden;
+            overflow-wrap: normal;
+            word-break: normal;
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: 2;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 8px;
+        }
+
+        .org-detail__metric {
+            display: grid;
+            gap: 4px;
+            padding: 10px;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            border-radius: 13px;
+            background: rgba(255, 255, 255, 0.82);
+        }
+
+        .org-detail__metric-label {
+            color: #66809f;
+            font-size: 0.62rem;
+            font-weight: 800;
+            line-height: 1.2;
+            text-transform: uppercase;
+        }
+
+        .org-detail__metric-value {
+            color: #123761;
+            font-size: 1.08rem;
+            font-weight: 900;
+        }
+
+        .org-detail__description {
+            display: grid;
+            gap: 7px;
+            padding: 13px 14px;
+            border-left: 3px solid #1d8cf0;
+            border-radius: 0 13px 13px 0;
+            background: rgba(239, 246, 255, 0.72);
+        }
+
+        .org-detail__description-label {
+            color: #2563a9;
+            font-size: 0.64rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .org-detail__context {
+            color: #617997;
+            font-size: 0.72rem;
+            line-height: 1.45;
+        }
+
+        .org-detail__eyebrow {
+            color: #5f7390;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+        }
+
+        .org-detail__title {
+            margin: 0;
+            color: var(--color-heading);
+            font-size: 1.04rem;
+        }
+
+        .org-detail__text {
+            margin: 0;
+            color: var(--color-text-muted);
+            font-size: 0.8rem;
+            line-height: 1.7;
+        }
+
+        .org-detail__chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .org-detail__employees {
+            display: grid;
+            gap: 10px;
+        }
+
+        .org-detail__employee-banner {
+            border: 1px solid rgba(14, 165, 233, 0.18);
+            background: linear-gradient(180deg, rgba(239, 246, 255, 0.98), rgba(248, 250, 252, 0.98));
+            border-radius: 16px;
+            padding: 12px 14px;
+            display: grid;
+            gap: 8px;
+        }
+
+        .org-detail__employee-banner strong {
+            color: #123761;
+            font-size: 0.8rem;
+        }
+
+        .org-detail__employee-banner p {
+            margin: 0;
+            color: #4e6581;
+            font-size: 0.74rem;
+            line-height: 1.5;
+        }
+
+        .org-detail__employee-list {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .org-detail__employee-item {
+            position: relative;
+            display: grid;
+            gap: 6px;
+            width: max-content;
+            max-width: 100%;
+            align-self: flex-start;
+            align-content: start;
+        }
+
+        .org-detail__employee-pill {
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.98);
+            color: #123761;
+            font-size: 0.72rem;
+            font-weight: 700;
+            font-family: inherit;
+            transition: border-color 0.18s ease, background 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .org-detail__employee-pill:hover,
+        .org-detail__employee-pill.is-open {
+            border-color: rgba(14, 165, 233, 0.48);
+            background: #f0f9ff;
+            box-shadow: 0 8px 18px rgba(14, 165, 233, 0.12);
+        }
+
+        .org-detail__employee-popover {
+            min-width: 230px;
+            max-width: 300px;
+            padding: 12px 14px;
+            border: 1px solid rgba(14, 165, 233, 0.24);
+            border-radius: 14px;
+            background: #ffffff;
+            box-shadow: 0 16px 32px rgba(15, 23, 42, 0.14);
+            color: #49637e;
+            font-size: 0.7rem;
+            line-height: 1.5;
+            z-index: 3;
+            width: max-content;
+            max-width: 100%;
+            min-height: 34px;
+            justify-self: start;
+            align-self: start;
+            white-space: normal;
+        }
+
+        .org-detail__employee-popover strong {
+            color: #123761;
+        }
+
+        .org-detail__employee-popover p {
+            margin: 3px 0 0;
+        }
+
+        .org-detail__children-box h3 {
+            margin: 0;
+            color: var(--color-heading);
+            font-size: 0.84rem;
+        }
+
+        .org-detail__children-box {
+            background: linear-gradient(180deg, #ffffff, #f7fbff);
+        }
+
+        .org-detail__related-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .org-detail__related-icon {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 10px;
+            background: #e0f2fe;
+            color: #0369a1;
+        }
+
+        .org-detail__related-icon i {
+            font-size: 0.8rem;
+        }
+
+        .org-detail__children-box p,
+        .org-admin__card p {
+            margin: 0;
+            color: var(--color-text-muted);
+            font-size: 0.74rem;
+            line-height: 1.55;
+        }
+
+        .org-detail__children button {
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.96);
+            padding: 12px 14px;
+            text-align: left;
+            cursor: pointer;
+            color: #19314f;
+            font-size: 0.78rem;
+            font-weight: 800;
+            transition: border-color 0.18s ease, background 0.18s ease, transform 0.18s ease;
+        }
+
+        .org-detail__children button:hover {
+            border-color: rgba(14, 165, 233, 0.42);
+            background: #f0f9ff;
+            transform: translateX(2px);
+        }
+
+        .org-detail__children small {
+            display: block;
+            margin-top: 4px;
+            color: #5b708a;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .org-detail__empty {
+            display: grid;
+            gap: 4px;
+            padding: 16px;
+            border: 1px dashed rgba(96, 165, 250, 0.4);
+            border-radius: 14px;
+            background: rgba(239, 246, 255, 0.58);
+            color: #486783;
+            font-size: 0.74rem;
+            line-height: 1.45;
+        }
+
+        .org-detail__empty strong {
+            color: #1f4d82;
+        }
+
+        .org-detail__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 4px;
+        }
+
+        .org-action-button {
+            border: 1px solid rgba(37, 99, 235, 0.16);
+            border-radius: 14px;
+            background: linear-gradient(180deg, rgba(14, 165, 233, 0.96), rgba(2, 132, 199, 0.96));
+            color: #fff;
+            padding: 10px 14px;
+            font-size: 0.76rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 12px 24px rgba(2, 132, 199, 0.16);
+        }
+
+        .org-action-button--ghost {
+            background: rgba(255, 255, 255, 0.98);
+            color: #1f4d82;
+            border-color: rgba(148, 163, 184, 0.24);
+            box-shadow: none;
+        }
+
+        .org-form-note {
+            margin: 0;
+            color: var(--color-text-muted);
+            font-size: 0.72rem;
+            line-height: 1.55;
+        }
+
+        .org-record-list {
+            display: grid;
+            gap: 10px;
+        }
+
+        .org-record-card {
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 1), rgba(248, 250, 252, 0.98));
+            padding: 14px 16px;
+            display: grid;
+            gap: 6px;
+            box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
+        }
+
+        .org-record-card strong {
+            color: var(--color-heading);
+            font-size: 0.9rem;
+        }
+
+        .org-record-card span {
+            color: var(--color-text-muted);
+            font-size: 0.78rem;
+            line-height: 1.45;
+        }
+
+        .org-record-card__meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .org-record-card__chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(239, 246, 255, 0.98);
+            border: 1px solid rgba(96, 165, 250, 0.18);
+            color: #24507f;
+            font-size: 0.7rem;
+            font-weight: 800;
+        }
+
+        .org-record-card__actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            padding-top: 8px;
+        }
+
+        .org-action-button--danger {
+            border-color: rgba(239, 68, 68, 0.28);
+            color: #b42318;
+            background: rgba(254, 242, 242, 0.96);
+        }
+
+        .org-action-button--danger:hover {
+            background: rgba(254, 226, 226, 1);
+        }
+
+        .org-modal[hidden] {
+            display: none;
+        }
+
+        .org-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 2000;
+            display: grid;
+            place-items: center;
+            padding: 24px;
+            background: rgba(15, 23, 42, 0.44);
+            backdrop-filter: blur(6px);
+        }
+
+        .org-modal__dialog {
+            width: min(1180px, 96vw);
+            max-height: calc(100vh - 28px);
+            overflow: auto;
+            border-radius: 28px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 252, 0.99));
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            box-shadow: 0 32px 80px rgba(15, 23, 42, 0.24);
+        }
+
+        .org-modal__header,
+        .org-modal__footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+            padding: 18px 22px;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        .org-modal__footer {
+            border-bottom: none;
+            border-top: 1px solid rgba(148, 163, 184, 0.16);
+        }
+
+        .org-modal__title {
+            margin: 0;
+            color: var(--color-heading);
+            font-size: 1rem;
+        }
+
+        .org-modal__subtitle {
+            margin: 6px 0 0;
+            color: var(--color-text-muted);
+            font-size: 0.76rem;
+            line-height: 1.55;
+        }
+
+        .org-modal__close {
+            border: none;
+            background: rgba(241, 245, 249, 0.98);
+            color: #334155;
+            width: 38px;
+            height: 38px;
+            border-radius: 999px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: 800;
+        }
+
+        .org-form {
+            display: grid;
+            gap: 16px;
+            padding: 20px 22px 22px;
+        }
+
+        .org-form__grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .org-form__field {
+            display: grid;
+            gap: 7px;
+        }
+
+        .org-form__field--full {
+            grid-column: 1 / -1;
+        }
+
+        .org-form__label {
+            color: #1f4d82;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .org-form__input,
+        .org-form__textarea {
+            width: 100%;
+            border: 1px solid rgba(148, 163, 184, 0.26);
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.98);
+            padding: 12px 14px;
+            color: #0f172a;
+            font-size: 0.84rem;
+        }
+
+        .org-form__textarea {
+            min-height: 110px;
+            resize: vertical;
+        }
+
+        .org-focus-layout {
+            display: grid;
+            gap: 18px;
+            padding: 18px 22px 20px;
+        }
+
+        .org-focus-grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.1fr) minmax(280px, 0.9fr);
+            gap: 16px;
+        }
+
+        .org-focus-box {
+            border-radius: 20px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.98));
+            padding: 16px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .org-focus-box h3 {
+            margin: 0;
+            color: var(--color-heading);
+            font-size: 0.88rem;
+        }
+
+        .org-focus-tree {
+            position: relative;
+            overflow: auto;
+            padding-bottom: 8px;
+        }
+
+        .org-focus-tree svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+            z-index: 0;
+        }
+
+        .org-focus-tree__rows {
+            min-width: 1120px;
+            display: grid;
+            gap: 28px;
+            position: relative;
+            z-index: 1;
+            padding: 6px 4px 16px;
+        }
+
+        .org-focus-level {
+            display: grid;
+            gap: 8px;
+        }
+
+        .org-focus-level__title {
+            color: #1f4d82;
+            font-size: 0.72rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .org-focus-level__cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 10px;
+        }
+
+        .org-focus-card {
+            border-radius: 16px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: rgba(255, 255, 255, 0.98);
+            padding: 12px 14px;
+            display: grid;
+            gap: 6px;
+        }
+
+        .org-focus-card.is-selected {
+            border-color: rgba(37, 99, 235, 0.34);
+            box-shadow: 0 12px 28px rgba(37, 99, 235, 0.12);
+        }
+
+        .org-focus-card strong {
+            color: var(--color-heading);
+            font-size: 0.8rem;
+        }
+
+        .org-focus-card span {
+            color: var(--color-text-muted);
+            font-size: 0.72rem;
+            line-height: 1.45;
+        }
+
+        .org-admin__grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .org-admin__label {
+            color: #1f4d82;
+            font-size: 0.72rem;
+            font-weight: 900;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .org-admin__list {
+            display: grid;
+            gap: 8px;
+            padding-left: 18px;
+            margin: 0;
+            color: #334155;
+            font-size: 0.76rem;
+            line-height: 1.55;
+        }
+
+        @@media (max-width: 1200px) {
+            .org-hero__top,
+            .org-detail__content,
+            .org-focus-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .org-board__hero,
+            .org-board__foot {
+                grid-template-columns: 1fr;
+            }
+
+            .org-board__hero {
+                display: grid;
+                min-height: 0;
+            }
+
+            .org-board__legend-box {
+                position: static;
+                width: auto;
+            }
+
+            .org-columns,
+            .org-board__criteria,
+            .org-admin__grid,
+            .org-stats {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        @@media (max-width: 780px) {
+            .org-board {
+                zoom: 0.68;
+                overflow-x: auto;
+            }
+
+            .org-board__legend-list {
+                grid-template-columns: 1fr;
+            }
+
+            .org-detail__metrics {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+
+            .org-columns,
+            .org-board__criteria,
+            .org-admin__grid,
+            .org-stats,
+            .org-form__grid {
+                grid-template-columns: 1fr;
+            }
+
+            .org-tab {
+                padding: 10px 14px;
+                font-size: 0.78rem;
+            }
+
+            .org-panel,
+            .org-detail,
+            .org-admin,
+            .org-hero {
+                padding: 16px;
+            }
+        }
+
+        @@media (max-width: 420px) {
+            .org-detail__metrics {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .org-board__rows {
+            gap: 82px;
+            padding: 8px 20px 42px;
+        }
+
+        .org-row {
+            gap: 28px;
+        }
+
+        .org-row--trio {
+            max-width: 960px;
+            gap: 36px;
+        }
+
+        .org-row--directors {
+            max-width: 1500px;
+            gap: 45px;
+            align-items: center;
+        }
+
+        .org-row--supports {
+            max-width: 760px;
+            gap: 28px;
+        }
+
+        .org-row--superintendencias {
+            max-width: 860px;
+            gap: 42px;
+        }
+
+        .org-row--gerencias-principais {
+            max-width: 1240px;
+        }
+
+        .org-card {
+            border-radius: 10px;
+            padding: 9px 10px 8px;
+            gap: 5px;
+        }
+
+        .org-card--hero {
+            min-width: 156px;
+            max-width: 156px;
+            min-height: 52px;
+            padding: 10px 12px 9px;
+        }
+
+        .org-card--leader {
+            min-width: 142px;
+            max-width: 142px;
+            min-height: 52px;
+            padding: 10px 11px 9px;
+        }
+
+        .org-card--support {
+            min-width: 88px;
+            max-width: 88px;
+            min-height: 28px;
+            padding: 7px 9px;
+        }
+
+        .org-card--support.org-card--presidencia {
+            min-width: 88px;
+            max-width: 88px;
+            min-height: 28px;
+            padding: 7px 9px;
+        }
+
+        .org-card--regional {
+            flex: 0 0 210px;
+            width: 210px;
+            min-width: 210px;
+            max-width: 210px;
+            min-height: 62px;
+            height: 62px;
+            padding: 7px 10px;
+            overflow: hidden;
+        }
+
+        .org-card--regional .org-card__title {
+            min-height: 2.36em;
+            max-height: 2.36em;
+            overflow: hidden;
+            overflow-wrap: normal;
+            word-break: normal;
+        }
+
+        .org-card--manager {
+            flex: 0 0 140px;
+            width: 140px;
+            min-width: 140px;
+            max-width: 140px;
+            min-height: 78px;
+            padding: 9px 8px 8px;
+        }
+
+        .org-card--manager .org-card__title {
+            font-size: 0.62rem;
+        }
+
+        .org-card--manager .org-card__meta {
+            justify-content: center;
+            gap: 3px;
+            font-size: 0.48rem;
+        }
+
+        .org-card--manager .org-card__hint {
+            display: none;
+        }
+
+        .org-row--gerencias-principais {
+            max-width: 1600px;
+            gap: 22px;
+            flex-wrap: nowrap;
+            width: max-content;
+            min-width: 100%;
+        }
+
+        .org-row--gerencias-planejadas {
+            max-width: 1120px;
+            gap: 26px;
+            flex-wrap: nowrap;
+            width: max-content;
+            min-width: 100%;
+        }
+
+        .org-card__title {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .org-board {
+            zoom: 0.8889;
+        }
+
+        @@media (max-width: 780px) {
+            .org-board {
+                zoom: 0.7556;
+            }
+        }
+    </style>
+}
+
+<div class="org-shell">
+    <section class="org-card-surface org-hero">
+        <div class="org-hero__top">
+            <div>
+                <h1 class="org-hero__title">Organograma institucional interativo</h1>
+                <p class="org-hero__text">
+                    Esta área transforma o organograma em uma leitura viva do sistema. Você pode navegar pela estrutura completa,
+                    destacar blocos estratégicos e entender rapidamente o que já está implantado e o que ainda está previsto na arquitetura institucional.
+                </p>
+            </div>
+
+        </div>
+
+        <div class="org-stats">
+            <article class="org-stat">
+                <span class="org-stat__label">Unidades mapeadas</span>
+                <strong class="org-stat__value" id="orgStatTotal">0</strong>
+                <span class="org-stat__meta">Visão consolidada de toda a estrutura registrada neste módulo.</span>
+            </article>
+            <article class="org-stat">
+                <span class="org-stat__label">Áreas implantadas</span>
+                <strong class="org-stat__value" id="orgStatImplementadas">0</strong>
+                <span class="org-stat__meta">Blocos já tratados como existentes na operação institucional.</span>
+            </article>
+            <article class="org-stat">
+                <span class="org-stat__label">Áreas planejadas</span>
+                <strong class="org-stat__value" id="orgStatPlanejadas">0</strong>
+                <span class="org-stat__meta">Estruturas previstas, mantidas visíveis para orientar a evolução futura.</span>
+            </article>
+            <article class="org-stat">
+                <span class="org-stat__label">Chefias e governança</span>
+                <strong class="org-stat__value" id="orgStatChefias">0</strong>
+                <span class="org-stat__meta">Instâncias centrais de governança, presidência e diretorias.</span>
+            </article>
+        </div>
+
+        <div class="org-legend">
+            <span class="org-legend__item"><span class="org-legend__swatch" style="background:#4f74c4;"></span>Governança superior</span>
+            <span class="org-legend__item"><span class="org-legend__swatch" style="background:#813fb5;"></span>Presidência e assessorias centrais</span>
+            <span class="org-legend__item"><span class="org-legend__swatch" style="background:#ffe600;"></span>Diretorias</span>
+            <span class="org-legend__item"><span class="org-legend__swatch" style="background:#06a652;"></span>Área implementada</span>
+            <span class="org-legend__item"><span class="org-legend__swatch" style="background:#68dce7;"></span>Área planejada</span>
+        </div>
+    </section>
+
+    <section class="org-panel">
+        <div class="org-panel__header org-panel__header--stack">
+            <div>
+                <h2>Leitura do organograma</h2>
+                <p>Mantive a leitura em duas frentes: o organograma completo e o bloco explorável, preservando a mesma lógica de navegação institucional.</p>
+            </div>
+
+            <div class="org-tabs" role="tablist" aria-label="Áreas de navegação do organograma">
+                <button type="button" class="org-tab is-active" data-org-tab="organograma">Organograma</button>
+                <button type="button" class="org-tab" data-org-tab="bloco">Bloco explorável</button>
+            </div>
+        </div>
+
+        <div class="org-view is-active" data-org-view="organograma">
+            <div class="org-panel__header org-panel__header--stack" style="margin-bottom:12px;">
+                <div>
+                    <h2>Organograma completo</h2>
+                    <p>Leitura institucional principal do organograma, mantendo a hierarquia e os vínculos da estrutura.</p>
+                </div>
+            </div>
+
+            <div class="org-board__hero">
+                <aside class="org-board__legend-box">
+                    <h3>Legenda</h3>
+                    <div class="org-board__legend-list">
+                        <div class="org-board__legend-line"><span class="org-legend__swatch" style="background:#0d4aa8;"></span>Instâncias máximas</div>
+                        <div class="org-board__legend-line"><span class="org-legend__swatch" style="background:#6f37a6;"></span>Órgãos de governança e controle</div>
+                        <div class="org-board__legend-line"><span class="org-legend__swatch" style="background:#ffdd36;"></span>Diretorias executivas</div>
+                        <div class="org-board__legend-line"><span class="org-legend__swatch" style="background:#66d6e6;"></span>Unidades de apoio / assessoramento</div>
+                        <div class="org-board__legend-line"><span class="org-legend__swatch" style="background:#0db95d;"></span>Unidades implementadas</div>
+                        <div class="org-board__legend-line"><span class="org-legend__swatch" style="background:#8ee7f2;"></span>Unidades planejadas</div>
+                        <div class="org-board__legend-line"><span class="org-board__legend-stroke"></span>Vinculação administrativa</div>
+                        <div class="org-board__legend-line"><span class="org-board__legend-stroke org-board__legend-stroke--dashed"></span>Vinculação de assessoramento</div>
+                    </div>
+                </aside>
+            </div>
+
+            <div class="org-board" id="orgBoard">
+                <svg class="org-board__svg" id="orgBoardSvg" aria-hidden="true"></svg>
+                <div class="org-board__rows" id="orgBoardRows"></div>
+            </div>
+
+            <div class="org-board__foot">
+                <article class="org-board__foot-card">
+                    <h3>Notas</h3>
+                    <ol class="org-board__foot-list">
+                        <li>Unidades em verde: estruturas implementadas.</li>
+                        <li>Unidades em azul claro: estruturas planejadas.</li>
+                    </ol>
+                </article>
+
+                <article class="org-board__foot-card">
+                    <h3>Critérios de organização</h3>
+                    <div class="org-board__criteria">
+                        <div class="org-board__criterion">
+                            <strong>Hierarquia clara</strong>
+                            <span>Leitura top-down com níveis bem definidos.</span>
+                        </div>
+                        <div class="org-board__criterion">
+                            <strong>Vinculações corretas</strong>
+                            <span>Linhas sólidas para subordinação e vínculos formais.</span>
+                        </div>
+                        <div class="org-board__criterion">
+                            <strong>Agrupamento por afinidade</strong>
+                            <span>Unidades organizadas por diretorias e áreas de atuação.</span>
+                        </div>
+                    </div>
+                </article>
+
+                <article class="org-board__foot-card">
+                    <h3>Princípios</h3>
+                    <ul class="org-board__foot-list">
+                        <li>Transparência</li>
+                        <li>Eficiência</li>
+                        <li>Integração</li>
+                        <li>Foco em resultados</li>
+                    </ul>
+                </article>
+            </div>
+        </div>
+
+        <div class="org-view" data-org-view="bloco">
+            <div class="org-horizontal">
+                <div class="org-group-list" id="orgGroupList"></div>
+
+                <div>
+                    <div class="org-panel__header" style="margin-bottom:12px;">
+                        <div>
+                            <h2 id="orgExplorerTitle">Presidência e estrutura executiva</h2>
+                            <p id="orgExplorerText">Selecione um bloco para abrir a leitura em colunas.</p>
+                        </div>
+                        <div class="org-breadcrumb" id="orgBreadcrumb"></div>
+                    </div>
+
+                    <div class="org-columns" id="orgColumns"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="org-detail">
+        <div class="org-detail__header">
+            <div>
+                <h2>Leitura contextual da unidade</h2>
+                <p>O painel abaixo ajuda a entender o papel prático da unidade escolhida, os vínculos diretos e a profundidade dela dentro da hierarquia.</p>
+            </div>
+        </div>
+
+        <div class="org-detail__content">
+            <div class="org-detail__summary">
+                <div class="org-detail__identity">
+                    <span class="org-detail__icon" id="orgDetailIcon" aria-hidden="true"><i class="fa-solid fa-user-tie"></i></span>
+                    <div class="org-detail__identity-copy">
+                        <span class="org-detail__eyebrow" id="orgDetailEyebrow">Chefia máxima executiva</span>
+                        <h3 class="org-detail__title" id="orgDetailTitle">Presidência</h3>
+                    </div>
+                </div>
+                <div class="org-detail__chips" id="orgDetailChips"></div>
+                <div class="org-detail__metrics" id="orgDetailMetrics"></div>
+                <div class="org-detail__description">
+                    <span class="org-detail__description-label">Sobre esta unidade</span>
+                    <p class="org-detail__text" id="orgDetailText">O sistema exibirá aqui a leitura da unidade selecionada, incluindo seu contexto na governança e o papel prático dentro do organograma.</p>
+                </div>
+                <div class="org-detail__context" id="orgDetailContext">Selecione uma unidade para acompanhar seu posicionamento na estrutura.</div>
+            </div>
+
+            <div class="org-detail__children-box org-detail__employees-panel">
+                <div class="org-detail__related-header">
+                    <span class="org-detail__related-icon" aria-hidden="true"><i class="fa-solid fa-users"></i></span>
+                    <h3>Funcionários vinculados</h3>
+                </div>
+                <p>Selecione um funcionário para consultar seus dados de contato, localização e observações.</p>
+                <div class="org-detail__employees" id="orgDetailEmployees"></div>
+                <div class="org-detail__actions">
+                    <button type="button" class="org-action-button org-action-button--ghost" id="orgViewUnitFlowButton">Visualizar fluxo específico</button>
+                    @if (isAdmin)
+                    {
+                        <button type="button" class="org-action-button" id="orgAddEmployeeButton">Adicionar funcionário neste setor</button>
+                    }
+                </div>
+                @if (isAdmin)
+                {
+                    <p class="org-form-note">O formulário abre já vinculado à unidade selecionada, com campos livres para nome, telefone, cargo, e-mail e local.</p>
+                }
+            </div>
+        </div>
+    </section>
+
+    @if (isAdmin)
+    {
+        <section class="org-admin">
+            <div class="org-admin__header">
+                <div>
+                    <h2>Funcionalidades ADM para próxima fase</h2>
+                    <p>Deixei aqui uma proposta prática do que vale evoluir depois desta entrega, caso você queira transformar o organograma em uma central operacional de pessoas.</p>
+                </div>
+            </div>
+
+            <div class="org-admin__grid">
+                <article class="org-admin__card">
+                    <span class="org-admin__label">Cadastro por área</span>
+                    <p>Ao selecionar uma unidade, o ADM pode abrir um atalho para adicionar ou remover colaboradores vinculados àquela área.</p>
+                    <ul class="org-admin__list">
+                        <li>Nome do colaborador</li>
+                        <li>Cargo</li>
+                        <li>Telefone</li>
+                        <li>E-mail institucional</li>
+                    </ul>
+                </article>
+
+                <article class="org-admin__card">
+                    <span class="org-admin__label">Gestão rápida</span>
+                    <p>Além do cadastro, faz sentido ter ações simples direto no card da área para manter a informação viva e útil no dia a dia.</p>
+                    <ul class="org-admin__list">
+                        <li>Definir responsável da unidade</li>
+                        <li>Marcar colaborador como ativo ou inativo</li>
+                        <li>Registrar substituto interino</li>
+                        <li>Exportar lista de contatos da área</li>
+                    </ul>
+                </article>
+
+                <article class="org-admin__card">
+                    <span class="org-admin__label">Governança e histórico</span>
+                    <p>Se você quiser elevar o nível do módulo, estes controles deixam tudo mais confiável para operação e auditoria interna.</p>
+                    <ul class="org-admin__list">
+                        <li>Histórico de alterações por usuário</li>
+                        <li>Data da última atualização da área</li>
+                        <li>Campo de observações internas</li>
+                        <li>Permissões específicas por perfil</li>
+                    </ul>
+                </article>
+            </div>
+        </section>
+    }
+</div>
+
+    <div class="org-modal" id="orgFocusModal" hidden>
+        <div class="org-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="orgFocusModalTitle">
+            <div class="org-modal__header">
+                <div>
+                    <h2 class="org-modal__title" id="orgFocusModalTitle">Visualização específica da unidade</h2>
+                    <p class="org-modal__subtitle">Este recorte mostra o caminho hierárquico do setor selecionado e seus vínculos diretos.</p>
+                </div>
+                <button type="button" class="org-modal__close" id="orgFocusModalClose" aria-label="Fechar visualização">×</button>
+            </div>
+
+            <div class="org-focus-layout">
+                <section class="org-focus-box">
+                    <h3>Recorte do organograma</h3>
+                    <div class="org-focus-tree" id="orgFocusTree">
+                        <svg id="orgFocusTreeSvg" aria-hidden="true"></svg>
+                        <div class="org-focus-tree__rows" id="orgFocusTreeRows"></div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="org-modal__footer">
+                <button type="button" class="org-action-button org-action-button--ghost" id="orgFocusModalCancel">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+@if (isAdmin)
+{
+    <div class="org-modal" id="orgEmployeeModal" hidden>
+        <div class="org-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="orgEmployeeModalTitle">
+            <div class="org-modal__header">
+                <div>
+                    <h2 class="org-modal__title" id="orgEmployeeModalTitle">Adicionar funcionário ao setor</h2>
+                    <p class="org-modal__subtitle">Preencha os dados livres do colaborador conforme a unidade atualmente selecionada no organograma.</p>
+                </div>
+                <button type="button" class="org-modal__close" id="orgEmployeeModalClose" aria-label="Fechar formulário">×</button>
+            </div>
+
+            <form class="org-form" id="orgEmployeeForm">
+                <div class="org-form__grid">
+                    <div class="org-form__field org-form__field--full">
+                        <label class="org-form__label" for="orgEmployeeSector">Setor selecionado</label>
+                        <input id="orgEmployeeId" name="id" type="hidden" />
+                        <input id="orgEmployeeUnitId" name="unit_id" type="hidden" />
+                        <input class="org-form__input" id="orgEmployeeSector" name="sector" type="text" readonly />
+                    </div>
+
+                    <div class="org-form__field">
+                        <label class="org-form__label" for="orgEmployeeName">Nome</label>
+                        <input class="org-form__input" id="orgEmployeeName" name="name" type="text" placeholder="Nome completo do colaborador" />
+                    </div>
+
+                    <div class="org-form__field">
+                        <label class="org-form__label" for="orgEmployeeRole">Cargo</label>
+                        <input class="org-form__input" id="orgEmployeeRole" name="role" type="text" placeholder="Cargo ou função" />
+                    </div>
+
+                    <div class="org-form__field">
+                        <label class="org-form__label" for="orgEmployeePhone">Telefone</label>
+                        <input class="org-form__input" id="orgEmployeePhone" name="phone" type="text" placeholder="Telefone de contato" />
+                    </div>
+
+                    <div class="org-form__field">
+                        <label class="org-form__label" for="orgEmployeeEmail">E-mail</label>
+                        <input class="org-form__input" id="orgEmployeeEmail" name="email" type="text" placeholder="E-mail institucional ou funcional" />
+                    </div>
+
+                    <div class="org-form__field org-form__field--full">
+                        <label class="org-form__label" for="orgEmployeeLocal">Local</label>
+                        <input class="org-form__input" id="orgEmployeeLocal" name="local" type="text" placeholder="Sala, prédio, base, cidade ou observação de localização" />
+                    </div>
+
+                    <div class="org-form__field org-form__field--full">
+                        <label class="org-form__label" for="orgEmployeeNotes">Observações</label>
+                        <textarea class="org-form__textarea" id="orgEmployeeNotes" name="notes" placeholder="Informações complementares livres sobre o colaborador ou o vínculo com o setor"></textarea>
+                    </div>
+                </div>
+            </form>
+
+            <div class="org-modal__footer">
+                <button type="button" class="org-action-button org-action-button--ghost" id="orgEmployeeModalCancel">Fechar</button>
+                <button type="submit" class="org-action-button" form="orgEmployeeForm">Salvar funcionário</button>
+            </div>
+        </div>
+    </div>
+}
+
+@section Scripts {
+    <script>
+        (() => {
+            const canManageEmployees = @isAdmin.ToString().ToLowerInvariant();
+            const nodes = [
+                { id: 'assembleia', title: 'Assembleia Geral', type: 'governanca', status: 'institucional', role: 'Instância máxima', description: 'Instância superior de deliberação institucional.', summary: 'Ponto máximo da hierarquia institucional.', parent: null },
+                { id: 'conselho-admin', title: 'Conselho de Administração', type: 'governanca', status: 'institucional', role: 'Governança estratégica', description: 'Conduz a governança administrativa da estrutura institucional.', summary: 'Conecta a instância máxima à gestão executiva.', parent: 'assembleia' },
+                { id: 'conselho-fiscal', title: 'Conselho Fiscal', type: 'governanca', status: 'institucional', role: 'Controle fiscal', description: 'Órgão colegiado de acompanhamento e fiscalização.', summary: 'Atua como apoio de controle na estrutura superior.', parent: 'conselho-admin' },
+                { id: 'controladoria', title: 'Controladoria', type: 'presidencia', status: 'institucional', role: 'Controle central', description: 'Unidade vinculada à alta governança com papel de controle e supervisão.', summary: 'Sustenta o monitoramento institucional.', parent: 'conselho-admin' },
+                { id: 'presidencia', title: 'Presidência', type: 'presidencia', status: 'institucional', role: 'Chefia máxima executiva', description: 'Centro executivo do organograma, conectando governança superior, assessorias e diretorias.', summary: 'Articula conselhos, diretorias e operação institucional.', parent: 'conselho-admin' },
+                { id: 'assessoria-presidencia', title: 'Assessoria', type: 'presidencia', status: 'institucional', role: 'Apoio da presidência', description: 'Assessoria direta da presidência para suporte institucional e técnico.', summary: 'Unidade de apoio imediato da presidência.', parent: 'presidencia' },
+
+                { id: 'dir-gestao', title: 'Diretoria de Gestão', type: 'diretoria', status: 'institucional', role: 'Diretoria executiva', description: 'Diretoria responsável pela gestão institucional e pelas superintendências regionais vinculadas.', summary: 'Concentra a coordenação da gestão e das superintendências.', parent: 'presidencia' },
+                { id: 'dir-adm-fin', title: 'Diretoria Administrativo-Financeira', type: 'diretoria', status: 'institucional', role: 'Diretoria executiva', description: 'Diretoria com foco administrativo, financeiro e de suporte operacional.', summary: 'Coordena administração, finanças e rotinas de suporte.', parent: 'presidencia' },
+                { id: 'dir-obras', title: 'Diretoria de Obras, Projetos e Estudos', type: 'diretoria', status: 'institucional', role: 'Diretoria executiva', description: 'Diretoria responsável por obras, projetos técnicos e estudos especializados.', summary: 'Agrupa as frentes técnicas de obras e projetos.', parent: 'presidencia' },
+                { id: 'dir-planejamento', title: 'Diretoria de Planejamento e Ações Estratégicas', type: 'diretoria', status: 'institucional', role: 'Diretoria executiva', description: 'Diretoria dedicada ao planejamento institucional e às ações estratégicas.', summary: 'Lidera planejamento e ações estruturantes.', parent: 'presidencia' },
+
+                { id: 'assessoria-gestao', title: 'Assessoria', type: 'planejada', status: 'planejada', role: 'Apoio da diretoria', description: 'Assessoria prevista para a Diretoria de Gestão.', summary: 'Mantida no desenho como estrutura futura.', parent: 'dir-gestao' },
+                { id: 'assessoria-adm-fin', title: 'Assessoria', type: 'planejada', status: 'planejada', role: 'Apoio da diretoria', description: 'Assessoria prevista para a Diretoria Administrativo-Financeira.', summary: 'Mantida no desenho como estrutura futura.', parent: 'dir-adm-fin' },
+                { id: 'assessoria-obras', title: 'Assessoria', type: 'implementada', status: 'implementada', role: 'Apoio da diretoria', description: 'Assessoria vinculada à Diretoria de Obras, Projetos e Estudos.', summary: 'Apoio técnico direto da diretoria.', parent: 'dir-obras' },
+                { id: 'assessoria-planejamento', title: 'Assessoria', type: 'implementada', status: 'implementada', role: 'Apoio da diretoria', description: 'Assessoria vinculada à Diretoria de Planejamento e Ações Estratégicas.', summary: 'Apoio próximo às ações estratégicas.', parent: 'dir-planejamento' },
+
+                { id: 'super-agevap', title: 'Superintendência Regional AGEVAP', type: 'planejada', status: 'planejada', role: 'Superintendência regional', description: 'Estrutura regional AGEVAP mapeada e mantida visível como unidade ainda não implantada.', summary: 'Superintendência prevista na arquitetura institucional.', parent: 'dir-gestao' },
+                { id: 'super-agedoce', title: 'Superintendência Regional AGEDOCE', type: 'implementada', status: 'implementada', role: 'Superintendência regional', description: 'Superintendência regional AGEDOCE atualmente implantada.', summary: 'Estrutura regional ativa no desenho institucional.', parent: 'dir-gestao' },
+                { id: 'super-agegrande', title: 'Superintendência Regional AGEGRANDE', type: 'implementada', status: 'implementada', role: 'Superintendência regional', description: 'Superintendência regional AGEGRANDE atualmente implantada.', summary: 'Estrutura regional ativa no desenho institucional.', parent: 'dir-gestao' },
+                { id: 'super-agegoias', title: 'Superintendência Regional AGEGOIÁS', type: 'implementada', status: 'implementada', role: 'Superintendência regional', description: 'Superintendência regional AGEGOIÁS atualmente implantada.', summary: 'Estrutura regional ativa no desenho institucional.', parent: 'dir-gestao' },
+
+                { id: 'ger-comunicacao', title: 'Gerência de Comunicação', type: 'implementada', status: 'implementada', role: 'Gerência', description: 'Gerência de comunicação vinculada diretamente à Presidência.', summary: 'Frente institucional de comunicação.', parent: 'presidencia' },
+                { id: 'ger-ceivap', title: 'Gerência CEIVAP', type: 'implementada', status: 'implementada', role: 'Gerência', description: 'Gerência vinculada à estrutura regional AGEVAP.', summary: 'Unidade operacional já implantada.', parent: 'super-agevap' },
+                { id: 'ger-cbhs', title: 'Gerência CBHs', type: 'implementada', status: 'implementada', role: 'Gerência', description: 'Gerência vinculada à estrutura regional AGEVAP.', summary: 'Unidade operacional já implantada.', parent: 'super-agevap' },
+                { id: 'ger-guandu-big', title: 'Gerência Guandu-BIG', type: 'implementada', status: 'implementada', role: 'Gerência', description: 'Gerência vinculada à estrutura regional AGEVAP.', summary: 'Unidade operacional já implantada.', parent: 'super-agevap' },
+                { id: 'ger-bg', title: 'Gerência BG', type: 'implementada', status: 'implementada', role: 'Gerência', description: 'Gerência vinculada à estrutura regional AGEVAP.', summary: 'Unidade operacional já implantada.', parent: 'super-agevap' },
+                { id: 'ger-ps1-ps2', title: 'Gerência PS1/PS2', type: 'planejada', status: 'planejada', role: 'Gerência', description: 'Gerência prevista na estrutura regional AGEVAP.', summary: 'Mantida visível como unidade ainda não implantada.', parent: 'super-agevap' },
+
+                { id: 'ger-comites-agedoce', title: 'Gerência de Atendimento aos Comitês', type: 'implementada', status: 'implementada', role: 'Gerência', description: 'Gerência vinculada à estrutura regional AGEDOCE.', summary: 'Atendimento institucional aos comitês.', parent: 'super-agedoce' },
+                { id: 'ger-comites-agegrande', title: 'Gerência de Atendimento aos Comitês', type: 'planejada', status: 'planejada', role: 'Gerência', description: 'Gerência prevista para a estrutura regional AGEGRANDE.', summary: 'Área mapeada para implantação futura.', parent: 'super-agegrande' },
+                { id: 'ger-fundos-rh', title: 'Gerência de Fundos e Recursos Hídricos', type: 'implementada', status: 'implementada', role: 'Gerência', description: 'Gerência vinculada à estrutura regional AGEGOIÁS.', summary: 'Coordena fundos e recursos hídricos.', parent: 'super-agegoias' },
+                { id: 'ger-fundos-ambientais', title: 'Gerência de Fundos Ambientais', type: 'implementada', status: 'implementada', role: 'Gerência', description: 'Gerência vinculada à estrutura regional AGEGOIÁS.', summary: 'Coordena fundos ambientais.', parent: 'super-agegoias' },
+
+                { id: 'ger-administrativa', title: 'Gerência Administrativa', type: 'implementada', status: 'implementada', role: 'Gerência', description: 'Gerência administrativa vinculada à Diretoria Administrativo-Financeira.', summary: 'Suporte administrativo central.', parent: 'dir-adm-fin' },
+                { id: 'ger-financeira', title: 'Gerência Financeira', type: 'implementada', status: 'implementada', role: 'Gerência', description: 'Gerência financeira vinculada à Diretoria Administrativo-Financeira.', summary: 'Coordena a frente financeira executiva.', parent: 'dir-adm-fin' },
+
+                { id: 'ger-recursos-hidricos', title: 'Gerência de Recursos Hídricos', type: 'planejada', status: 'planejada', role: 'Gerência', description: 'Gerência prevista na Diretoria de Obras, Projetos e Estudos.', summary: 'Unidade ainda não implantada.', parent: 'dir-obras' },
+                { id: 'ger-meio-ambiente', title: 'Gerência de Meio Ambiente', type: 'planejada', status: 'planejada', role: 'Gerência', description: 'Gerência prevista na Diretoria de Obras, Projetos e Estudos.', summary: 'Unidade ainda não implantada.', parent: 'dir-obras' },
+                { id: 'ger-obras', title: 'Gerência de Obras', type: 'implementada', status: 'implementada', role: 'Gerência', description: 'Gerência de obras vinculada à Diretoria de Obras, Projetos e Estudos.', summary: 'Unidade operacional implantada.', parent: 'dir-obras' },
+                { id: 'ger-projetos', title: 'Gerência de Projetos', type: 'planejada', status: 'planejada', role: 'Gerência', description: 'Gerência prevista na Diretoria de Obras, Projetos e Estudos.', summary: 'Unidade ainda não implantada.', parent: 'dir-obras' },
+
+                { id: 'ger-planejamento', title: 'Gerência de Planejamento', type: 'planejada', status: 'planejada', role: 'Gerência', description: 'Gerência prevista na Diretoria de Planejamento e Ações Estratégicas.', summary: 'Unidade ainda não implantada.', parent: 'dir-planejamento' },
+                { id: 'ger-acoes-estrategicas', title: 'Gerência de Ações Estratégicas', type: 'planejada', status: 'planejada', role: 'Gerência', description: 'Gerência prevista na Diretoria de Planejamento e Ações Estratégicas.', summary: 'Unidade ainda não implantada.', parent: 'dir-planejamento' }
+            ];
+
+            const boardRows = [
+                ['assembleia'],
+                ['conselho-admin'],
+                ['conselho-fiscal', 'presidencia', 'assessoria-presidencia', 'controladoria'],
+                ['dir-gestao', 'assessoria-gestao', 'dir-adm-fin', 'assessoria-adm-fin', 'dir-obras', 'assessoria-obras', 'dir-planejamento', 'assessoria-planejamento'],
+                ['super-agevap', 'super-agedoce', 'super-agegrande', 'super-agegoias'],
+                ['ger-comunicacao', 'ger-ceivap', 'ger-cbhs', 'ger-guandu-big', 'ger-bg', 'ger-comites-agedoce', 'ger-comites-agegrande', 'ger-recursos-hidricos', 'ger-ps1-ps2'],
+                ['ger-fundos-rh', 'ger-fundos-ambientais', 'ger-administrativa', 'ger-financeira', 'ger-obras', 'ger-meio-ambiente', 'ger-projetos', 'ger-planejamento', 'ger-acoes-estrategicas']
+            ];
+
+            const groupRoots = [
+                { id: 'presidencia', label: 'Presidência e estrutura executiva', hint: 'Leitura macro da presidência, assessorias e diretorias.' },
+                { id: 'dir-gestao', label: 'Diretoria de Gestão', hint: 'Superintendências regionais e unidades subordinadas.' },
+                { id: 'dir-adm-fin', label: 'Diretoria Administrativo-Financeira', hint: 'Administração, finanças e suporte central.' },
+                { id: 'dir-obras', label: 'Diretoria de Obras, Projetos e Estudos', hint: 'Obras, projetos e frentes técnicas associadas.' },
+                { id: 'dir-planejamento', label: 'Diretoria de Planejamento e Ações Estratégicas', hint: 'Planejamento e ações estratégicas da instituição.' }
+            ];
+
+            const state = {
+                activeTab: 'organograma',
+                selectedNodeId: 'conselho-admin',
+                selectedGroupId: 'presidencia'
+            };
+
+            const nodeMap = new Map(nodes.map((node) => [node.id, node]));
+            const childrenMap = new Map();
+            nodes.forEach((node) => {
+                if (!node.parent) return;
+                const current = childrenMap.get(node.parent) || [];
+                current.push(node.id);
+                childrenMap.set(node.parent, current);
+            });
+
+            const boardEl = document.getElementById('orgBoard');
+            const boardSvgEl = document.getElementById('orgBoardSvg');
+            const boardRowsEl = document.getElementById('orgBoardRows');
+            const groupListEl = document.getElementById('orgGroupList');
+            const explorerTitleEl = document.getElementById('orgExplorerTitle');
+            const explorerTextEl = document.getElementById('orgExplorerText');
+            const breadcrumbEl = document.getElementById('orgBreadcrumb');
+            const columnsEl = document.getElementById('orgColumns');
+            const detailEyebrowEl = document.getElementById('orgDetailEyebrow');
+            const detailTitleEl = document.getElementById('orgDetailTitle');
+            const detailIconEl = document.getElementById('orgDetailIcon');
+            const detailTextEl = document.getElementById('orgDetailText');
+            const detailContextEl = document.getElementById('orgDetailContext');
+            const detailChipsEl = document.getElementById('orgDetailChips');
+            const detailMetricsEl = document.getElementById('orgDetailMetrics');
+            const viewUnitFlowButtonEl = document.getElementById('orgViewUnitFlowButton');
+            const focusModalEl = document.getElementById('orgFocusModal');
+            const focusModalCloseEl = document.getElementById('orgFocusModalClose');
+            const focusModalCancelEl = document.getElementById('orgFocusModalCancel');
+            const focusTreeEl = document.getElementById('orgFocusTree');
+            const focusTreeSvgEl = document.getElementById('orgFocusTreeSvg');
+            const focusTreeRowsEl = document.getElementById('orgFocusTreeRows');
+            const detailEmployeesEl = document.getElementById('orgDetailEmployees');
+            const addEmployeeButtonEl = document.getElementById('orgAddEmployeeButton');
+            const employeeModalEl = document.getElementById('orgEmployeeModal');
+            const employeeModalCloseEl = document.getElementById('orgEmployeeModalClose');
+            const employeeModalCancelEl = document.getElementById('orgEmployeeModalCancel');
+            const employeeSectorEl = document.getElementById('orgEmployeeSector');
+            const employeeIdEl = document.getElementById('orgEmployeeId');
+            const employeeUnitIdEl = document.getElementById('orgEmployeeUnitId');
+            const employeeFormEl = document.getElementById('orgEmployeeForm');
+            const employeeCache = new Map();
+
+            function escapeHtml(value) {
+                return String(value ?? '')
+                    .replace(/&/g, '&amp;')
+                    .replace(/</g, '&lt;')
+                    .replace(/>/g, '&gt;')
+                    .replace(/"/g, '&quot;')
+                    .replace(/'/g, '&#39;');
+            }
+
+            function getNode(nodeId) {
+                return nodeMap.get(nodeId) || null;
+            }
+
+            function getChildren(nodeId) {
+                return (childrenMap.get(nodeId) || []).map((id) => getNode(id)).filter(Boolean);
+            }
+
+            function getAncestors(nodeId) {
+                const path = [];
+                let current = getNode(nodeId);
+                while (current) {
+                    path.unshift(current);
+                    current = current.parent ? getNode(current.parent) : null;
+                }
+                return path;
+            }
+
+            function getDescendants(nodeId) {
+                const result = [];
+                const queue = [...(childrenMap.get(nodeId) || [])];
+                while (queue.length) {
+                    const id = queue.shift();
+                    const node = getNode(id);
+                    if (!node) continue;
+                    result.push(node);
+                    queue.push(...(childrenMap.get(id) || []));
+                }
+                return result;
+            }
+
+            function isOnPath(nodeId, selectedId) {
+                if (!selectedId) return false;
+                const selectedPath = new Set(getAncestors(selectedId).map((node) => node.id));
+                if (selectedPath.has(nodeId)) return true;
+                return getAncestors(nodeId).some((node) => node.id === selectedId);
+            }
+
+            function getStatusLabel(node) {
+                if (node.status === 'implementada') return 'Implementada';
+                if (node.status === 'planejada') return 'Planejada';
+                return 'Institucional';
+            }
+
+            function getXsrfToken() {
+                const match = document.cookie.match(/(?:^|; )XSRF-TOKEN=([^;]+)/);
+                return match ? decodeURIComponent(match[1]) : '';
+            }
+
+            async function requestJson(url, options = {}) {
+                const headers = new Headers(options.headers || {});
+                if (!headers.has('Content-Type') && options.body) {
+                    headers.set('Content-Type', 'application/json; charset=UTF-8');
+                }
+
+                const xsrfToken = getXsrfToken();
+                if (xsrfToken && !headers.has('X-CSRF-TOKEN')) {
+                    headers.set('X-CSRF-TOKEN', xsrfToken);
+                }
+
+                const response = await fetch(url, {
+                    credentials: 'same-origin',
+                    ...options,
+                    headers
+                });
+
+                const data = await response.json().catch(() => ({}));
+                if (!response.ok || data.success === false) {
+                    throw new Error(data.message || 'Não foi possível concluir a operação.');
+                }
+
+                return data;
+            }
+
+            async function getEmployeesForNode(nodeId) {
+                const result = await requestJson(`/api/organograma/funcionarios?unidade_id=${encodeURIComponent(nodeId)}`);
+                return Array.isArray(result.items) ? result.items : [];
+            }
+
+            async function loadEmployees(nodeId, forceRefresh = false) {
+                if (!nodeId) return [];
+                if (!forceRefresh && employeeCache.has(nodeId)) {
+                    return employeeCache.get(nodeId) || [];
+                }
+
+                const employees = await getEmployeesForNode(nodeId);
+                employeeCache.set(nodeId, employees);
+                return employees;
+            }
+
+            function getColorClass(node) {
+                if (node.type === 'governanca') return 'org-card--governanca';
+                if (node.type === 'presidencia') return 'org-card--presidencia';
+                if (node.type === 'diretoria') return 'org-card--diretoria';
+                if (node.status === 'planejada') return 'org-card--planejada';
+                return 'org-card--implementada';
+            }
+
+            function getSizeClass(node) {
+                if (!node) return '';
+                if (node.id === 'assembleia' || node.id === 'conselho-admin') return 'org-card--hero';
+                if (node.id === 'conselho-fiscal' || node.id === 'controladoria' || node.id === 'presidencia') return 'org-card--leader';
+                if (node.id === 'assessoria-presidencia' || String(node.id).startsWith('assessoria-')) return 'org-card--support';
+                if (String(node.id).startsWith('super-')) return 'org-card--regional';
+                if (String(node.id).startsWith('ger-')) return 'org-card--manager';
+                return '';
+            }
+
+            function getIconClass(node) {
+                if (node.id === 'assembleia') return 'fa-solid fa-users';
+                if (node.id.includes('conselho')) return 'fa-solid fa-shield-halved';
+                if (node.id === 'controladoria') return 'fa-solid fa-clipboard-check';
+                if (node.id === 'presidencia') return 'fa-solid fa-user-tie';
+                if (node.id.startsWith('assessoria')) return 'fa-solid fa-comments';
+                if (node.type === 'diretoria') return 'fa-solid fa-building';
+                if (node.id.startsWith('super-')) return 'fa-solid fa-sitemap';
+                if (node.id.includes('finance')) return 'fa-solid fa-circle-dollar-to-slot';
+                if (node.id.includes('recursos') || node.id.includes('ambient')) return 'fa-solid fa-droplet';
+                if (node.id.includes('planejamento') || node.id.includes('acoes')) return 'fa-solid fa-chart-line';
+                if (node.id.includes('obras') || node.id.includes('projetos')) return 'fa-solid fa-helmet-safety';
+                return 'fa-solid fa-gears';
+            }
+
+            function renderBoardCard(nodeId) {
+                const node = getNode(nodeId);
+                if (!node) return '';
+
+                const active = state.selectedNodeId === node.id ? 'is-active' : '';
+                const path = isOnPath(node.id, state.selectedNodeId) ? 'is-path' : '';
+                const dimmed = state.selectedNodeId && !path ? 'is-dimmed' : '';
+
+                return `
+                    <button type="button"
+                        class="org-card ${getColorClass(node)} ${getSizeClass(node)} ${active} ${path} ${dimmed}"
+                        data-org-node-id="${escapeHtml(node.id)}">
+                        <span class="org-card__topline">
+                            <span class="org-card__icon" aria-hidden="true"><i class="${getIconClass(node)}"></i></span>
+                            <span class="org-card__title">${escapeHtml(node.title)}</span>
+                        </span>
+                        <div class="org-card__meta">
+                            <span class="org-pill">${escapeHtml(getStatusLabel(node))}</span>
+                        </div>
+                    </button>
+                `;
+            }
+
+            function bindBoardCards() {
+                boardRowsEl.querySelectorAll('[data-org-node-id]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const nodeId = button.dataset.orgNodeId || '';
+                        state.selectedNodeId = nodeId;
+                        const rootGroup = groupRoots.find((group) => getAncestors(nodeId).some((item) => item.id === group.id));
+                        if (rootGroup) {
+                            state.selectedGroupId = rootGroup.id;
+                        }
+                        renderAll();
+                    });
+                });
+            }
+
+            function drawBoardLinks() {
+                if (!boardEl || !boardSvgEl) return;
+
+                boardSvgEl.innerHTML = '';
+                const boardRect = boardEl.getBoundingClientRect();
+                if (!boardRect.width || !boardRect.height) return;
+                boardSvgEl.setAttribute('viewBox', `0 0 ${boardRect.width} ${boardRect.height}`);
+
+                nodes.forEach((node) => {
+                    if (!node.parent) return;
+
+                    const from = boardEl.querySelector(`[data-org-node-id="${CSS.escape(node.parent)}"]`);
+                    const to = boardEl.querySelector(`[data-org-node-id="${CSS.escape(node.id)}"]`);
+                    if (!from || !to) return;
+
+                    const fromRect = from.getBoundingClientRect();
+                    const toRect = to.getBoundingClientRect();
+                    const sameRow = from.closest('.org-row') === to.closest('.org-row');
+                    const startX = (sameRow && fromRect.left <= toRect.left ? fromRect.right : fromRect.left + (fromRect.width / 2)) - boardRect.left + boardEl.scrollLeft;
+                    const startY = (sameRow ? fromRect.top + (fromRect.height / 2) : fromRect.bottom) - boardRect.top + boardEl.scrollTop;
+                    const endX = (sameRow && fromRect.left <= toRect.left ? toRect.left : toRect.left + (toRect.width / 2)) - boardRect.left + boardEl.scrollLeft;
+                    const endY = (sameRow ? toRect.top + (toRect.height / 2) : toRect.top) - boardRect.top + boardEl.scrollTop;
+                    const highlighted = isOnPath(node.id, state.selectedNodeId) && isOnPath(node.parent, state.selectedNodeId);
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const dashed = node.id.startsWith('assessoria-') || node.id === 'controladoria';
+                    const dimmed = state.selectedNodeId && !highlighted;
+                    path.setAttribute('class', `org-link ${dashed ? 'org-link--dashed' : ''} ${dimmed ? 'org-link--dimmed' : ''} ${highlighted ? 'org-link--highlight' : ''}`);
+                    const midY = startY + ((endY - startY) / 2);
+                    const pathData = sameRow
+                        ? `M ${startX} ${startY} H ${endX}`
+                        : `M ${startX} ${startY} V ${midY} H ${endX} V ${endY}`;
+                    path.setAttribute('d', pathData);
+                    boardSvgEl.appendChild(path);
+                });
+            }
+
+            function renderOverview() {
+                boardRowsEl.innerHTML = boardRows.map((row, index) => {
+                    const rowClass =
+                        index === 0 ? 'org-row org-row--single' :
+                        index === 1 ? 'org-row org-row--duo' :
+                        index === 2 ? 'org-row org-row--trio' :
+                        index === 3 ? 'org-row org-row--directors' :
+                        index === 4 ? 'org-row org-row--superintendencias' :
+                        index === 5 ? 'org-row org-row--gerencias org-row--gerencias-principais' :
+                        'org-row org-row--gerencias org-row--gerencias-planejadas';
+
+                    return `
+                    <div class="${rowClass}">
+                        ${row.map((nodeId) => renderBoardCard(nodeId)).join('')}
+                    </div>
+                `;
+                }).join('');
+
+                bindBoardCards();
+                requestAnimationFrame(drawBoardLinks);
+            }
+
+            function renderGroupButtons(targetEl, buttonAttribute) {
+                if (!targetEl) return;
+
+                targetEl.innerHTML = groupRoots.map((group) => {
+                    const descendants = getDescendants(group.id);
+                    const active = state.selectedGroupId === group.id ? 'is-active' : '';
+                    return `
+                        <button type="button" class="org-group-button ${active}" ${buttonAttribute}="${escapeHtml(group.id)}">
+                            <span class="org-group-button__title">${escapeHtml(group.label)}</span>
+                            <span class="org-group-button__meta">${escapeHtml(group.hint)}</span>
+                            <span class="org-group-button__meta">${escapeHtml(descendants.length + 1)} unidade(s) neste bloco</span>
+                        </button>
+                    `;
+                }).join('');
+
+                targetEl.querySelectorAll(`[${buttonAttribute}]`).forEach((button) => {
+                    button.addEventListener('click', () => {
+                        const groupId = button.getAttribute(buttonAttribute) || '';
+                        state.selectedGroupId = groupId;
+                        state.selectedNodeId = groupId;
+                        renderAll();
+                    });
+                });
+            }
+
+            function renderGroups() {
+                renderGroupButtons(groupListEl, 'data-org-group-id');
+            }
+
+            function buildExplorerColumns(rootId) {
+                const root = getNode(rootId);
+                if (!root) return [];
+
+                const level0 = [root];
+                const level1 = getChildren(root.id);
+                const level2 = level1.flatMap((node) => getChildren(node.id));
+                const level3 = level2.flatMap((node) => getChildren(node.id));
+
+                return [
+                    { title: 'Chefia central', items: level0, empty: 'Selecione um bloco para abrir a chefia principal.' },
+                    { title: 'Apoios e vínculos diretos', items: level1, empty: 'Nenhuma unidade direta mapeada neste bloco.' },
+                    { title: 'Estrutura subordinada', items: level2, empty: 'O próximo nível aparecerá quando houver estrutura vinculada.' },
+                    { title: 'Base operacional', items: level3, empty: 'As áreas operacionais finais aparecerão aqui quando existirem.' }
+                ];
+            }
+
+            function renderMiniCard(node) {
+                const active = state.selectedNodeId === node.id ? 'is-active' : '';
+                return `
+                    <button type="button" class="org-mini-card ${active}" data-org-mini-id="${escapeHtml(node.id)}">
+                        <span class="org-mini-card__title">${escapeHtml(node.title)}</span>
+                        <div class="org-mini-card__meta">
+                            <span class="org-status org-status--${escapeHtml(node.status)}">${escapeHtml(getStatusLabel(node))}</span>
+                            <span>${escapeHtml(node.role)}</span>
+                        </div>
+                    </button>
+                `;
+            }
+
+            function renderExplorer() {
+                const root = getNode(state.selectedGroupId);
+                const groupMeta = groupRoots.find((group) => group.id === state.selectedGroupId);
+                if (!root || !groupMeta) return;
+
+                explorerTitleEl.textContent = groupMeta.label;
+                explorerTextEl.textContent = groupMeta.hint;
+
+                breadcrumbEl.innerHTML = getAncestors(root.id).map((node) => `
+                    <span class="org-breadcrumb__item">${escapeHtml(node.title)}</span>
+                `).join('');
+
+                const columns = buildExplorerColumns(root.id);
+                columnsEl.innerHTML = columns.map((column) => `
+                    <section class="org-column">
+                        <span class="org-column__title">${escapeHtml(column.title)}</span>
+                        ${column.items.length
+                            ? `<div class="org-column__list">${column.items.map((node) => renderMiniCard(node)).join('')}</div>`
+                            : `<div class="org-column__empty">${escapeHtml(column.empty)}</div>`}
+                    </section>
+                `).join('');
+
+                columnsEl.querySelectorAll('[data-org-mini-id]').forEach((button) => {
+                    button.addEventListener('click', () => {
+                        state.selectedNodeId = button.dataset.orgMiniId || '';
+                        renderAll();
+                    });
+                });
+            }
+
+
+            function getNodeTier(node) {
+                if (!node) return 99;
+                if (node.id === 'assembleia') return 0;
+                if (node.id === 'conselho-admin' || node.id === 'conselho-fiscal') return 1;
+                if (node.id === 'presidencia' || node.id === 'controladoria' || node.id === 'assessoria-presidencia') return 2;
+                if (node.type === 'diretoria') return 3;
+                if (String(node.id || '').startsWith('assessoria-')) return 4;
+                if (String(node.id || '').startsWith('super-')) return 5;
+                return 6;
+            }
+
+            function uniqueNodes(items) {
+                const seen = new Set();
+                return items.filter((item) => {
+                    if (!item || seen.has(item.id)) return false;
+                    seen.add(item.id);
+                    return true;
+                });
+            }
+
+            function buildFocusLevels(rootNode) {
+                const path = getAncestors(rootNode.id);
+                const pathIds = new Set(path.map((item) => item.id));
+                const levels = [];
+
+                path.forEach((item) => {
+                    const tier = getNodeTier(item);
+                    const row = item.parent
+                        ? uniqueNodes(getChildren(item.parent).filter((child) => getNodeTier(child) === tier && (pathIds.has(child.id) || child.id === item.id)))
+                        : [item];
+
+                    if (!row.length) return;
+
+                    const signature = row.map((node) => node.id).join('|');
+                    if (!levels.some((existing) => existing.map((node) => node.id).join('|') === signature)) {
+                        levels.push(row);
+                    }
+                });
+
+                const childrenByTier = new Map();
+                getChildren(rootNode.id).forEach((child) => {
+                    const tier = getNodeTier(child);
+                    const items = childrenByTier.get(tier) || [];
+                    items.push(child);
+                    childrenByTier.set(tier, items);
+                });
+
+                Array.from(childrenByTier.keys())
+                    .sort((a, b) => a - b)
+                    .forEach((tier) => {
+                        levels.push(uniqueNodes(childrenByTier.get(tier) || []));
+                    });
+
+                return levels.filter((row) => row.length);
+            }
+
+            function renderFocusCard(node, selectedId) {
+                const active = node.id === selectedId ? 'is-active is-path' : '';
+                return `
+                    <button type="button"
+                        class="org-card ${getColorClass(node)} ${getSizeClass(node)} ${active}"
+                        data-org-focus-node-id="${escapeHtml(node.id)}">
+                        <span class="org-card__topline">
+                            <span class="org-card__icon" aria-hidden="true"><i class="${getIconClass(node)}"></i></span>
+                            <span class="org-card__title">${escapeHtml(node.title)}</span>
+                        </span>
+                        <div class="org-card__meta">
+                            <span class="org-pill">${escapeHtml(getStatusLabel(node))}</span>
+                        </div>
+                    </button>
+                `;
+            }
+
+            function drawFocusLinks() {
+                if (!focusTreeEl || !focusTreeSvgEl) return;
+
+                focusTreeSvgEl.innerHTML = '';
+                const treeRect = focusTreeEl.getBoundingClientRect();
+                if (!treeRect.width || !treeRect.height) return;
+                focusTreeSvgEl.setAttribute('viewBox', `0 0 ${treeRect.width} ${treeRect.height}`);
+
+                const renderedIds = new Set(
+                    Array.from(focusTreeEl.querySelectorAll('[data-org-focus-node-id]'))
+                        .map((element) => element.getAttribute('data-org-focus-node-id'))
+                );
+
+                nodes.forEach((node) => {
+                    if (!node.parent || !renderedIds.has(node.id) || !renderedIds.has(node.parent)) return;
+
+                    const from = focusTreeEl.querySelector(`[data-org-focus-node-id="${CSS.escape(node.parent)}"]`);
+                    const to = focusTreeEl.querySelector(`[data-org-focus-node-id="${CSS.escape(node.id)}"]`);
+                    if (!from || !to) return;
+
+                    const fromRect = from.getBoundingClientRect();
+                    const toRect = to.getBoundingClientRect();
+                    const sameRow = from.closest('.org-row') === to.closest('.org-row');
+                    const startX = (sameRow && fromRect.left <= toRect.left ? fromRect.right : fromRect.left + (fromRect.width / 2)) - treeRect.left + focusTreeEl.scrollLeft;
+                    const startY = (sameRow ? fromRect.top + (fromRect.height / 2) : fromRect.bottom) - treeRect.top + focusTreeEl.scrollTop;
+                    const endX = (sameRow && fromRect.left <= toRect.left ? toRect.left : toRect.left + (toRect.width / 2)) - treeRect.left + focusTreeEl.scrollLeft;
+                    const endY = (sameRow ? toRect.top + (toRect.height / 2) : toRect.top) - treeRect.top + focusTreeEl.scrollTop;
+
+                    const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                    const highlighted = isOnPath(node.id, state.selectedNodeId) && isOnPath(node.parent, state.selectedNodeId);
+                    const dashed = node.id.startsWith('assessoria-') || node.id === 'controladoria';
+                    const dimmed = state.selectedNodeId && !highlighted;
+                    path.setAttribute('class', `org-link ${dashed ? 'org-link--dashed' : ''} ${dimmed ? 'org-link--dimmed' : ''} ${highlighted ? 'org-link--highlight' : ''}`);
+                    const midY = startY + ((endY - startY) / 2);
+                    const pathData = sameRow
+                        ? `M ${startX} ${startY} H ${endX}`
+                        : `M ${startX} ${startY} V ${midY} H ${endX} V ${endY}`;
+                    path.setAttribute('d', pathData);
+                    focusTreeSvgEl.appendChild(path);
+                });
+            }
+
+            async function renderDetail() {
+                const node = getNode(state.selectedNodeId) || getNode('presidencia');
+                if (!node) return;
+
+                const ancestors = getAncestors(node.id);
+                const children = getChildren(node.id);
+                const descendants = getDescendants(node.id);
+                const employees = await loadEmployees(node.id);
+
+                detailEyebrowEl.textContent = node.role;
+                detailTitleEl.textContent = node.title;
+                detailTextEl.textContent = node.description;
+                if (detailIconEl) {
+                    detailIconEl.innerHTML = `<i class="${getIconClass(node)}"></i>`;
+                }
+                if (detailContextEl) {
+                    const parent = node.parent ? getNode(node.parent) : null;
+                    detailContextEl.textContent = parent
+                        ? `Vinculada diretamente a ${parent.title}. A unidade possui ${children.length} vínculo(s) direto(s) e ${descendants.length} área(s) em sua estrutura.`
+                        : 'Unidade no nível superior da estrutura institucional.';
+                }
+
+                detailChipsEl.innerHTML = `
+                    <span class="org-status org-status--${escapeHtml(node.status)}">${escapeHtml(getStatusLabel(node))}</span>
+                    <span class="org-status org-status--institucional">${escapeHtml(ancestors.length)} nível(is) de percurso</span>
+                    <span class="org-status org-status--institucional">${escapeHtml(children.length)} vínculo(s) direto(s)</span>
+                    <span class="org-status org-status--institucional">${escapeHtml(descendants.length)} área(s) abaixo deste ponto</span>
+                `;
+
+                if (detailMetricsEl) {
+                    detailMetricsEl.innerHTML = `
+                        <div class="org-detail__metric">
+                            <span class="org-detail__metric-label">Posição</span>
+                            <strong class="org-detail__metric-value">${escapeHtml(ancestors.length)}º</strong>
+                        </div>
+                        <div class="org-detail__metric">
+                            <span class="org-detail__metric-label">Vínculos diretos</span>
+                            <strong class="org-detail__metric-value">${escapeHtml(children.length)}</strong>
+                        </div>
+                        <div class="org-detail__metric">
+                            <span class="org-detail__metric-label">Estrutura abaixo</span>
+                            <strong class="org-detail__metric-value">${escapeHtml(descendants.length)}</strong>
+                        </div>
+                        <div class="org-detail__metric">
+                            <span class="org-detail__metric-label">Pessoas</span>
+                            <strong class="org-detail__metric-value">${escapeHtml(employees.length)}</strong>
+                        </div>
+                    `;
+                }
+
+                if (detailEmployeesEl) {
+                    detailEmployeesEl.innerHTML = employees.length
+                        ? `
+                            <div class="org-detail__employee-banner">
+                                <strong>${escapeHtml(employees.length)} funcionário(s) vinculado(s) a este setor</strong>
+                                <p>Os nomes abaixo confirmam os colaboradores já cadastrados nesta unidade do organograma.</p>
+                                <div class="org-detail__employee-list">
+                                    ${employees.map((employee, index) => `
+                                        <div class="org-detail__employee-item">
+                                            <button type="button" class="org-detail__employee-pill" data-org-employee-toggle="${index}" aria-expanded="false">
+                                                <i class="fa-solid fa-user" aria-hidden="true"></i>
+                                                ${escapeHtml(employee.nome || 'Sem nome')}
+                                                <small>${escapeHtml(employee.cargo || 'Cargo não informado')}</small>
+                                            </button>
+                                            <div class="org-detail__employee-popover" data-org-employee-popover="${index}" hidden>
+                                                <strong>${escapeHtml(employee.nome || 'Sem nome')}</strong>
+                                                <p><strong>Cargo:</strong> ${escapeHtml(employee.cargo || 'Não informado')}</p>
+                                                <p><strong>Telefone:</strong> ${escapeHtml(employee.telefone || 'Não informado')}</p>
+                                                <p><strong>E-mail:</strong> ${escapeHtml(employee.email || 'Não informado')}</p>
+                                                <p><strong>Local:</strong> ${escapeHtml(employee.local || 'Não informado')}</p>
+                                                ${employee.observacoes ? `<p><strong>Observações:</strong> ${escapeHtml(employee.observacoes)}</p>` : ''}
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        `
+                        : `
+                            <div class="org-detail__employee-banner">
+                                <strong>Nenhum funcionário cadastrado neste setor</strong>
+                                <p>Quando você adicionar um colaborador aqui, ele passará a aparecer nesta leitura contextual e no fluxo específico.</p>
+                            </div>
+                        `;
+
+                    detailEmployeesEl.querySelectorAll('[data-org-employee-toggle]').forEach((button) => {
+                        button.addEventListener('click', () => {
+                            const popover = detailEmployeesEl.querySelector(`[data-org-employee-popover="${CSS.escape(button.dataset.orgEmployeeToggle || '')}"]`);
+                            const isOpen = popover && !popover.hidden;
+
+                            detailEmployeesEl.querySelectorAll('[data-org-employee-popover]').forEach((item) => {
+                                item.hidden = true;
+                            });
+                            detailEmployeesEl.querySelectorAll('[data-org-employee-toggle]').forEach((item) => {
+                                item.classList.remove('is-open');
+                                item.setAttribute('aria-expanded', 'false');
+                            });
+
+                            if (popover && !isOpen) {
+                                popover.hidden = false;
+                                button.classList.add('is-open');
+                                button.setAttribute('aria-expanded', 'true');
+                            }
+                        });
+                    });
+                }
+
+                if (addEmployeeButtonEl) {
+                    addEmployeeButtonEl.disabled = !node;
+                }
+                if (viewUnitFlowButtonEl) {
+                    viewUnitFlowButtonEl.disabled = !node;
+                }
+            }
+
+            function renderStats() {
+                document.getElementById('orgStatTotal').textContent = String(nodes.length);
+                document.getElementById('orgStatImplementadas').textContent = String(nodes.filter((node) => node.status === 'implementada').length);
+                document.getElementById('orgStatPlanejadas').textContent = String(nodes.filter((node) => node.status === 'planejada').length);
+                document.getElementById('orgStatChefias').textContent = String(nodes.filter((node) => ['governanca', 'presidencia', 'diretoria'].includes(node.type)).length);
+            }
+
+            function syncTabs() {
+                document.querySelectorAll('[data-org-tab]').forEach((button) => {
+                    button.classList.toggle('is-active', button.dataset.orgTab === state.activeTab);
+                });
+
+                document.querySelectorAll('[data-org-view]').forEach((view) => {
+                    view.classList.toggle('is-active', view.dataset.orgView === state.activeTab);
+                });
+            }
+
+            async function renderAll() {
+                syncTabs();
+                renderStats();
+                renderOverview();
+                renderGroups();
+                renderExplorer();
+                await renderDetail();
+            }
+
+            document.querySelectorAll('[data-org-tab]').forEach((button) => {
+                button.addEventListener('click', () => {
+                    state.activeTab = button.dataset.orgTab || 'organograma';
+                    syncTabs();
+                    requestAnimationFrame(drawBoardLinks);
+                });
+            });
+
+            function openEmployeeModal(employee = null) {
+                const node = getNode(state.selectedNodeId) || getNode('presidencia');
+                if (!employeeModalEl || !employeeSectorEl || !employeeFormEl || !node) return;
+                employeeFormEl.reset();
+                if (employeeIdEl) {
+                    employeeIdEl.value = employee?.id ? String(employee.id) : '';
+                }
+                if (employeeUnitIdEl) {
+                    employeeUnitIdEl.value = employee?.unidade_id || node.id;
+                }
+                employeeSectorEl.value = employee?.unidade_nome || node.title;
+                employeeFormEl.elements.namedItem('name').value = employee?.nome || '';
+                employeeFormEl.elements.namedItem('role').value = employee?.cargo || '';
+                employeeFormEl.elements.namedItem('phone').value = employee?.telefone || '';
+                employeeFormEl.elements.namedItem('email').value = employee?.email || '';
+                employeeFormEl.elements.namedItem('local').value = employee?.local || '';
+                employeeFormEl.elements.namedItem('notes').value = employee?.observacoes || '';
+                employeeModalEl.hidden = false;
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeEmployeeModal() {
+                if (!employeeModalEl) return;
+                employeeModalEl.hidden = true;
+                document.body.style.overflow = '';
+            }
+
+            async function renderFocusModal() {
+                const node = getNode(state.selectedNodeId) || getNode('presidencia');
+                if (!node || !focusTreeEl) return;
+
+                const levels = buildFocusLevels(node);
+                if (focusTreeRowsEl) {
+                    focusTreeRowsEl.innerHTML = levels.map((levelItems) => `
+                        <div class="org-row">
+                            ${levelItems.map((item) => renderFocusCard(item, node.id)).join('')}
+                        </div>
+                    `).join('');
+
+                    focusTreeRowsEl.querySelectorAll('[data-org-focus-node-id]').forEach((button) => {
+                        button.addEventListener('click', async () => {
+                            state.selectedNodeId = button.dataset.orgFocusNodeId || '';
+                            await renderFocusModal();
+                            await renderAll();
+                        });
+                    });
+                }
+
+                requestAnimationFrame(drawFocusLinks);
+            }
+
+            async function openFocusModal() {
+                if (!focusModalEl) return;
+                await renderFocusModal();
+                focusModalEl.hidden = false;
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeFocusModal() {
+                if (!focusModalEl) return;
+                focusModalEl.hidden = true;
+                document.body.style.overflow = '';
+            }
+
+            addEmployeeButtonEl?.addEventListener('click', openEmployeeModal);
+            viewUnitFlowButtonEl?.addEventListener('click', openFocusModal);
+            employeeModalCloseEl?.addEventListener('click', closeEmployeeModal);
+            employeeModalCancelEl?.addEventListener('click', closeEmployeeModal);
+            employeeModalEl?.addEventListener('click', (event) => {
+                if (event.target === employeeModalEl) {
+                    closeEmployeeModal();
+                }
+            });
+            focusModalCloseEl?.addEventListener('click', closeFocusModal);
+            focusModalCancelEl?.addEventListener('click', closeFocusModal);
+            focusModalEl?.addEventListener('click', (event) => {
+                if (event.target === focusModalEl) {
+                    closeFocusModal();
+                }
+            });
+
+            employeeFormEl?.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                if (!employeeFormEl) return;
+                const formData = new FormData(employeeFormEl);
+                const employeeId = String(formData.get('id') || '');
+                const unidadeId = String(formData.get('unit_id') || '').trim();
+                const unidadeNome = String(formData.get('sector') || '').trim();
+                if (!unidadeId || !unidadeNome) {
+                    window.alert('Selecione um setor válido antes de salvar o funcionário.');
+                    return;
+                }
+                const payload = {
+                    unidadeId,
+                    unidadeNome,
+                    nome: String(formData.get('name') || ''),
+                    cargo: String(formData.get('role') || ''),
+                    telefone: String(formData.get('phone') || ''),
+                    email: String(formData.get('email') || ''),
+                    local: String(formData.get('local') || ''),
+                    observacoes: String(formData.get('notes') || '')
+                };
+
+                try {
+                    if (employeeId) {
+                        await requestJson(`/api/organograma/funcionarios/${encodeURIComponent(employeeId)}`, {
+                            method: 'PUT',
+                            body: JSON.stringify(payload)
+                        });
+                    } else {
+                        await requestJson('/api/organograma/funcionarios', {
+                            method: 'POST',
+                            body: JSON.stringify(payload)
+                        });
+                    }
+
+                    employeeCache.delete(unidadeId);
+
+                    employeeFormEl.reset();
+                    if (employeeSectorEl) {
+                        employeeSectorEl.value = unidadeNome;
+                    }
+                    if (employeeIdEl) {
+                        employeeIdEl.value = '';
+                    }
+                    if (employeeUnitIdEl) {
+                        employeeUnitIdEl.value = unidadeId;
+                    }
+                    closeEmployeeModal();
+                    await renderAll();
+                    if (focusModalEl && !focusModalEl.hidden) {
+                        await renderFocusModal();
+                    }
+                } catch (error) {
+                    window.alert(error.message || 'Não foi possível salvar o funcionário.');
+                }
+            });
+
+            window.addEventListener('resize', () => requestAnimationFrame(drawBoardLinks));
+            boardEl?.addEventListener('scroll', () => requestAnimationFrame(drawBoardLinks));
+
+            renderAll();
+        })();
+    </script>
+}
+

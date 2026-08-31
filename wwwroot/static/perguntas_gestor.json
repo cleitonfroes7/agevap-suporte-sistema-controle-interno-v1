@@ -1,0 +1,20 @@
+{
+    "tipo": "gestor",
+    "nup_format": "xxxxx.xxxxxx/2024",
+    "perguntas": [
+      {"nup": "", "pergunta": "1 - PROTOCOLO DO PROCESSO E FICHA DE ABERTURA F-0253"},
+      {"nup": "", "pergunta": "2 - ORIGEM DA DEMANDA"},
+      {"nup": "", "pergunta": "3 - NORMA INTERNA DE NOMEAÇÃO DO GESTOR DO PROCESSO ADMINISTRATIVO"},
+      {"nup": "", "pergunta": "4 - DOCUMENTO DE FORMALIZAÇÃO DA DEMANDA F-0263"},
+      {"nup": "", "pergunta": "5 - PLANEJAMENTO DO PROCESSO ADMINISTRATIVO F-0248"},
+      {"nup": "", "pergunta": "6 - ESTUDO TÉCNICO PRELIMINAR F-0262"},
+      {"nup": "", "pergunta": "7 - SOLICITAÇÃO DE PARECER DO SETOR DE PATRIMÔNIO SOBRE CLASSIFICAÇÃO DE BEM PERMANENTE"},
+      {"nup": "", "pergunta": "8 - RESPOSTA QUANTO A CLASSIFICAÇÃO DO BEM"},
+      {"nup": "", "pergunta": "9 - AUTORIZAÇÃO DO CONSELHO DE ADMINISTRAÇÃO DA AGEVAP - CA"},
+      {"nup": "", "pergunta": "10 - TERMO DE REFERÊNCIA DO-0100 OU TERMO DE REFERÊNCIA SIMPLIFICADO D-0264"},
+      {"nup": "", "pergunta": "11 - PESQUISA DE PREÇO DE MERCADO / REALIZAÇÃO DE COTAÇÕES / ORÇAMENTOS"},
+      {"nup": "", "pergunta": "12 - PLANILHA ORÇAMENTÁRIA / QUADRO COMPARATIVO PRELIMINAR F-0267"},
+      {"nup": "", "pergunta": "13 - SOLICITAÇÃO DA COMPRA INCLUINDO A JUSTIFICATIVA DE PREÇO F-0265"},
+      {"nup": "", "pergunta": "14 - ATUALIZAÇÃO DO PLANEJAMENTO DO PROCESSO ADMINISTRATIVO F-0248"}
+    ]
+  }

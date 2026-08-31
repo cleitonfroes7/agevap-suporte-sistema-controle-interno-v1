@@ -1,0 +1,110 @@
+{
+  "tipo": "agegoias-selecao-p2",
+  "perguntas": [
+    {
+      "item": "17",
+      "elemento": "17 - CHECKLIST PARTE 1 - RESPOSTA DA ANÁLISE DE CONFORMIDADE",
+      "sub_perguntas": [
+        { "pergunta": "17.1 Os apontamentos da parte 1 foram respondidos?" }
+      ]
+    },
+    {
+      "item": "18",
+      "elemento": "18 - DEVOLUTIVAS AO CONTROLE INTERNO OU ASSESSORIA JURÍDICA",
+      "sub_perguntas": [
+        { "pergunta": "18.1 As devolutivas foram apresentadas nos autos?" }
+      ]
+    },
+    {
+      "item": "19",
+      "elemento": "19 - ANÁLISE DAS DEVOLUTIVAS E CIÊNCIA DO CONTROLE INTERNO OU DA ASSESSORIA JURÍDICA",
+      "sub_perguntas": [
+        { "pergunta": "19.1 Houve ciência e validação das devolutivas?" }
+      ]
+    },
+    {
+      "marco": "Retorno da conformidade - itens 17, 18 e 19",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+    {
+      "item": "20",
+      "elemento": "20 - EDITAL DA RESPECTIVA MODALIDADE DE COMPRA/CONTRATAÇÃO",
+      "sub_perguntas": [
+        { "pergunta": "20.1 O edital definitivo foi numerado, revisado e assinado?" }
+      ]
+    },
+    {
+      "item": "21",
+      "elemento": "21 - PUBLICAÇÃO DO EDITAL DA RESPECTIVA MODALIDADE DE COMPRA/CONTRATAÇÃO NO SITE",
+      "sub_perguntas": [
+        { "pergunta": "21.1 O edital foi publicado no portal institucional correspondente?" }
+      ]
+    },
+    {
+      "item": "22",
+      "elemento": "22 - PROPOSTAS DOS CONCORRENTES (SELEÇÃO DE PROPOSTAS OU CHAMADA DE TRABALHOS)",
+      "sub_perguntas": [
+        { "pergunta": "22.1 As propostas recebidas estão juntadas e identificadas no processo?" },
+        { "pergunta": "22.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "item": "23",
+      "elemento": "23 - DOCUMENTAÇÃO DE HABILITAÇÃO DO VENCEDOR",
+      "sub_perguntas": [
+        { "pergunta": "23.1 A documentação de habilitação do vencedor está completa e válida?" },
+        { "pergunta": "23.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "marco": "Certame e habilitação - itens 20, 21, 22 e 23",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+    {
+      "item": "24",
+      "elemento": "24 - PUBLICAÇÃO DO RESULTADO",
+      "sub_perguntas": [
+        { "pergunta": "24.1 O resultado foi publicado de forma oficial?" }
+      ]
+    },
+    {
+      "item": "25",
+      "elemento": "25 - HOMOLOGAÇÃO",
+      "sub_perguntas": [
+        { "pergunta": "25.1 A homologação foi assinada pela autoridade competente?" }
+      ]
+    },
+    {
+      "item": "26",
+      "elemento": "26 - ATUALIZAÇÃO DA DOTAÇÃO ORÇAMENTÁRIA",
+      "sub_perguntas": [
+        { "pergunta": "26.1 A dotação foi atualizada para refletir o resultado da contratação?" }
+      ]
+    },
+    {
+      "item": "27",
+      "elemento": "27 - ELABORAÇÃO DA VERSÃO FINAL DO CONTRATO E ENVIO AO CI",
+      "sub_perguntas": [
+        { "pergunta": "27.1 A versão final do contrato foi consolidada e enviada ao Controle Interno?" },
+        { "pergunta": "27.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "item": "28",
+      "elemento": "28 - ANÁLISE DO CONTROLE INTERNO E DEVOLUÇÃO AO JURÍDICO",
+      "sub_perguntas": [
+        { "pergunta": "28.1 Houve chancela do Controle Interno com devolução ao jurídico quando necessário?" }
+      ]
+    },
+    {
+      "marco": "Resultado e formalização pré-contratual - itens 24, 25, 26, 27 e 28",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    }
+  ]
+}

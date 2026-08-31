@@ -1,0 +1,2 @@
+ALTER TABLE item
+ADD COLUMN categoria VARCHAR(80) NULL;

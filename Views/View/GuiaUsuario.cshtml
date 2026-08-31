@@ -1,0 +1,836 @@
+@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Guia do Usuário";
+    ViewData["ActiveNav"] = "guia";
+}
+
+@section Head {
+    <style>
+        html { scroll-behavior: smooth; }
+
+        .guide-page {
+            --guide-blue: #0f4c81;
+            --guide-cyan: #0ea5c6;
+            --guide-indigo: #3158c9;
+            --guide-gold: #d9a406;
+            --guide-amber: #f59e0b;
+            --guide-green: #1f9d55;
+            --guide-violet: #7c3aed;
+            --guide-slate: #44556f;
+            --guide-surface: linear-gradient(180deg, rgba(255,255,255,0.99), rgba(247,250,255,0.99));
+            display: grid;
+            gap: 18px;
+        }
+
+        .guide-card,
+        .guide-hero,
+        .guide-nav,
+        .guide-module,
+        .guide-quick-card {
+            background: var(--guide-surface);
+            border: 1px solid var(--color-border);
+            border-radius: 24px;
+            box-shadow: 0 16px 36px rgba(15, 23, 42, 0.06);
+        }
+
+        .guide-hero {
+            overflow: hidden;
+            position: relative;
+        }
+
+        .guide-hero::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at top right, rgba(14, 165, 198, 0.18), transparent 28%),
+                radial-gradient(circle at bottom left, rgba(49, 88, 201, 0.14), transparent 30%),
+                linear-gradient(135deg, rgba(15, 76, 129, 0.06), rgba(14, 165, 198, 0.02));
+            pointer-events: none;
+        }
+
+        .guide-hero__content {
+            position: relative;
+            z-index: 1;
+            display: grid;
+            grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.65fr);
+            gap: 18px;
+            padding: 24px;
+        }
+
+        .guide-hero__title {
+            margin: 0;
+            color: var(--color-heading);
+            font-size: 1.5rem;
+        }
+
+        .guide-hero__text {
+            margin: 10px 0 0;
+            max-width: 76ch;
+            color: var(--color-text-muted);
+            line-height: 1.7;
+        }
+
+        .guide-pill-row,
+        .guide-chip-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 14px;
+        }
+
+        .guide-pill,
+        .guide-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            border: 1px solid transparent;
+        }
+
+        .guide-pill {
+            background: rgba(255, 255, 255, 0.84);
+            color: #17395f;
+            border-color: rgba(15, 76, 129, 0.12);
+        }
+
+        .guide-chip {
+            text-decoration: none;
+            background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(240,246,255,0.98));
+            color: #1a436b;
+            border-color: rgba(49, 88, 201, 0.14);
+            transition: transform 0.18s ease, border-color 0.18s ease, box-shadow 0.18s ease;
+        }
+
+        .guide-chip:hover {
+            transform: translateY(-1px);
+            border-color: rgba(14, 165, 198, 0.34);
+            box-shadow: 0 10px 24px rgba(14, 165, 198, 0.12);
+        }
+
+        .guide-hero__aside {
+            display: grid;
+            gap: 12px;
+            align-content: start;
+        }
+
+        .guide-callout {
+            padding: 16px 18px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(255, 248, 220, 0.92), rgba(255, 255, 255, 0.98));
+            border: 1px solid rgba(217, 164, 6, 0.22);
+        }
+
+        .guide-callout__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+            color: #9a6700;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .guide-callout h2,
+        .guide-callout p {
+            margin: 0;
+        }
+
+        .guide-callout p {
+            margin-top: 8px;
+            color: #72511c;
+            line-height: 1.6;
+        }
+
+        .guide-checklist {
+            display: grid;
+            gap: 8px;
+            margin: 0;
+            padding: 0;
+            list-style: none;
+        }
+
+        .guide-checklist li {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            color: #314a67;
+            line-height: 1.55;
+        }
+
+        .guide-checklist li::before {
+            content: "•";
+            color: var(--guide-cyan);
+            font-weight: 900;
+        }
+
+        .guide-nav {
+            padding: 18px 20px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .guide-nav__title {
+            margin: 0;
+            color: var(--color-heading);
+            font-size: 1rem;
+        }
+
+        .guide-quick-grid {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+            gap: 12px;
+        }
+
+        .guide-quick-card {
+            padding: 16px;
+            position: relative;
+            overflow: hidden;
+            min-height: 132px;
+        }
+
+        .guide-quick-card::before {
+            content: "";
+            position: absolute;
+            inset: auto -20px -28px auto;
+            width: 92px;
+            height: 92px;
+            border-radius: 999px;
+            background: rgba(255,255,255,0.28);
+        }
+
+        .guide-quick-card--blue { background: linear-gradient(135deg, rgba(15,76,129,0.96), rgba(49,88,201,0.92)); color: #fff; }
+        .guide-quick-card--green { background: linear-gradient(135deg, rgba(31,157,85,0.96), rgba(21,128,61,0.92)); color: #fff; }
+        .guide-quick-card--amber { background: linear-gradient(135deg, rgba(245,158,11,0.96), rgba(217,119,6,0.92)); color: #fff; }
+        .guide-quick-card--violet { background: linear-gradient(135deg, rgba(124,58,237,0.96), rgba(91,33,182,0.92)); color: #fff; }
+
+        .guide-quick-card__label {
+            display: block;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            opacity: 0.9;
+        }
+
+        .guide-quick-card__value {
+            display: block;
+            margin-top: 8px;
+            font-size: 1.04rem;
+            font-weight: 900;
+            line-height: 1.3;
+        }
+
+        .guide-quick-card__text {
+            display: block;
+            margin-top: 8px;
+            font-size: 0.82rem;
+            line-height: 1.55;
+            opacity: 0.92;
+        }
+
+        .guide-modules {
+            display: grid;
+            gap: 16px;
+        }
+
+        .guide-module {
+            overflow: hidden;
+        }
+
+        .guide-module__header {
+            padding: 20px 22px 12px;
+            display: flex;
+            justify-content: space-between;
+            gap: 12px;
+            align-items: start;
+            flex-wrap: wrap;
+        }
+
+        .guide-module__title {
+            margin: 6px 0 0;
+            color: var(--color-heading);
+        }
+
+        .guide-module__eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.72rem;
+            font-weight: 900;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+        }
+
+        .guide-module__body {
+            padding: 0 22px 22px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .guide-module__intro {
+            margin: 0;
+            color: var(--color-text-muted);
+            line-height: 1.65;
+        }
+
+        .guide-module__grid {
+            display: grid;
+            grid-template-columns: minmax(0, 1.05fr) minmax(280px, 0.95fr);
+            gap: 14px;
+        }
+
+        .guide-panel {
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(248,250,252,0.98));
+            padding: 16px;
+            display: grid;
+            gap: 10px;
+        }
+
+        .guide-panel h3 {
+            margin: 0;
+            color: var(--color-heading);
+            font-size: 0.94rem;
+        }
+
+        .guide-panel p {
+            margin: 0;
+            color: var(--color-text-muted);
+            line-height: 1.6;
+        }
+
+        .guide-list,
+        .guide-steps {
+            margin: 0;
+            padding-left: 18px;
+            color: #51657d;
+        }
+
+        .guide-list li,
+        .guide-steps li {
+            margin-bottom: 8px;
+            line-height: 1.6;
+        }
+
+        .guide-steps li::marker {
+            color: var(--guide-blue);
+            font-weight: 900;
+        }
+
+        .guide-note {
+            padding: 12px 14px;
+            border-radius: 16px;
+            font-size: 0.86rem;
+            line-height: 1.6;
+            border: 1px solid transparent;
+        }
+
+        .guide-note strong {
+            color: var(--color-heading);
+        }
+
+        .guide-note--info {
+            background: rgba(14, 165, 198, 0.08);
+            border-color: rgba(14, 165, 198, 0.14);
+            color: #28556d;
+        }
+
+        .guide-note--warn {
+            background: rgba(245, 158, 11, 0.08);
+            border-color: rgba(245, 158, 11, 0.18);
+            color: #7a5711;
+        }
+
+        .guide-note--success {
+            background: rgba(31, 157, 85, 0.08);
+            border-color: rgba(31, 157, 85, 0.16);
+            color: #23563b;
+        }
+
+        .guide-module--processos .guide-module__eyebrow,
+        .guide-module--processos details summary::before { color: var(--guide-blue); }
+        .guide-module--checklists .guide-module__eyebrow,
+        .guide-module--checklists details summary::before { color: var(--guide-green); }
+        .guide-module--fluxo .guide-module__eyebrow,
+        .guide-module--fluxo details summary::before { color: var(--guide-violet); }
+        .guide-module--organograma .guide-module__eyebrow,
+        .guide-module--organograma details summary::before { color: var(--guide-amber); }
+        .guide-module--dashconf .guide-module__eyebrow,
+        .guide-module--dashconf details summary::before { color: #d9485f; }
+        .guide-module--dashcrono .guide-module__eyebrow,
+        .guide-module--dashcrono details summary::before { color: var(--guide-indigo); }
+        .guide-module--usuarios .guide-module__eyebrow,
+        .guide-module--usuarios details summary::before { color: #0f766e; }
+        .guide-module--boas .guide-module__eyebrow,
+        .guide-module--boas details summary::before { color: var(--guide-slate); }
+
+        details.guide-accordion {
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.18);
+            background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(248,250,252,0.96));
+            overflow: hidden;
+        }
+
+        details.guide-accordion[open] {
+            box-shadow: inset 0 0 0 1px rgba(59, 130, 246, 0.06);
+        }
+
+        details.guide-accordion summary {
+            list-style: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            font-weight: 800;
+            color: var(--color-heading);
+        }
+
+        details.guide-accordion summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details.guide-accordion summary::before {
+            content: "●";
+            font-size: 0.72rem;
+        }
+
+        .guide-accordion__content {
+            padding: 0 16px 16px;
+            display: grid;
+            gap: 10px;
+            color: var(--color-text-muted);
+        }
+
+        .guide-accordion__content p {
+            margin: 0;
+            line-height: 1.6;
+        }
+
+        .guide-back-top {
+            position: fixed;
+            right: 24px;
+            bottom: 24px;
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #0f4c81, #0ea5c6);
+            color: #fff;
+            box-shadow: 0 18px 34px rgba(14, 165, 198, 0.22);
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.18s ease, opacity 0.18s ease;
+        }
+
+        .guide-back-top:hover {
+            transform: translateY(-2px);
+        }
+
+        @@media (max-width: 1100px) {
+            .guide-hero__content,
+            .guide-module__grid,
+            .guide-quick-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 720px) {
+            .guide-hero__content,
+            .guide-nav,
+            .guide-module__header,
+            .guide-module__body {
+                padding-left: 16px;
+                padding-right: 16px;
+            }
+
+            .guide-module__body {
+                padding-bottom: 16px;
+            }
+        }
+    </style>
+}
+
+<section class="guide-page">
+    <header class="guide-hero">
+        <div class="guide-hero__content">
+            <div>
+                <h1 class="guide-hero__title">Guia do Usuário</h1>
+                <p class="guide-hero__text">
+                    Este guia foi reorganizado para refletir o sistema como ele está hoje. Aqui você encontra o que cada módulo faz,
+                    em que ordem usar, quais pontos exigem mais atenção e como interpretar as leituras visuais do portal.
+                </p>
+                <div class="guide-pill-row">
+                    <span class="guide-pill"><i class="fas fa-compass"></i> Navegação orientada</span>
+                    <span class="guide-pill"><i class="fas fa-list-check"></i> Fluxos de operação</span>
+                    <span class="guide-pill"><i class="fas fa-chart-line"></i> Leitura gerencial</span>
+                    <span class="guide-pill"><i class="fas fa-shield-halved"></i> Boas práticas</span>
+                </div>
+                <div class="guide-chip-row">
+                    <a class="guide-chip" href="#modulo-processos">Processos</a>
+                    <a class="guide-chip" href="#modulo-checklists">Checklists</a>
+                    <a class="guide-chip" href="#modulo-fluxo-arvore">Fluxo Árvore</a>
+                    <a class="guide-chip" href="#modulo-organograma">Organograma</a>
+                    <a class="guide-chip" href="#modulo-dashboard-ci">Dashboard Análise CI</a>
+                    <a class="guide-chip" href="#modulo-dashboard-crono">Dashboard Cronoanálise</a>
+                    <a class="guide-chip" href="#modulo-usuarios">Usuários</a>
+                    <a class="guide-chip" href="#boas-praticas">Boas práticas</a>
+                </div>
+            </div>
+
+            <aside class="guide-hero__aside">
+                <div class="guide-callout">
+                    <div class="guide-callout__eyebrow"><i class="fas fa-route"></i> Ordem recomendada</div>
+                    <h2>Comece pela base</h2>
+                    <p>Use primeiro <strong>Processos</strong>, depois <strong>Checklists</strong> e só então consulte os <strong>Dashboards</strong>. Assim a leitura analítica reflete dados consistentes.</p>
+                </div>
+                <div class="guide-callout">
+                    <div class="guide-callout__eyebrow"><i class="fas fa-lightbulb"></i> Atualizado</div>
+                    <ul class="guide-checklist">
+                        <li>Incluídas orientações sobre <strong>área padronizada</strong> e filtros.</li>
+                        <li>Incluídas leituras de <strong>Fluxo Árvore</strong> e <strong>Organograma</strong>.</li>
+                        <li>Reforçado o uso recomendado entre <strong>Processos</strong>, <strong>Checklists</strong> e <strong>Dashboards</strong>.</li>
+                    </ul>
+                </div>
+            </aside>
+        </div>
+    </header>
+
+    <section class="guide-nav">
+        <h2 class="guide-nav__title">Leitura rápida por objetivo</h2>
+        <div class="guide-quick-grid">
+            <article class="guide-quick-card guide-quick-card--blue">
+                <span class="guide-quick-card__label">Cadastrar e manter</span>
+                <span class="guide-quick-card__value">Processos</span>
+                <span class="guide-quick-card__text">Número, descrição, modalidade, competências, área e gestor formam a base que alimenta os demais módulos.</span>
+            </article>
+            <article class="guide-quick-card guide-quick-card--green">
+                <span class="guide-quick-card__label">Analisar</span>
+                <span class="guide-quick-card__value">Checklists</span>
+                <span class="guide-quick-card__text">É aqui que a avaliação acontece, com respostas, justificativas, categorias e marcos temporais.</span>
+            </article>
+            <article class="guide-quick-card guide-quick-card--amber">
+                <span class="guide-quick-card__label">Entender estrutura</span>
+                <span class="guide-quick-card__value">Organograma e Fluxo Árvore</span>
+                <span class="guide-quick-card__text">Apoiam a leitura institucional e a visão macro das relações, sem substituir o dado operacional.</span>
+            </article>
+            <article class="guide-quick-card guide-quick-card--violet">
+                <span class="guide-quick-card__label">Acompanhar indicadores</span>
+                <span class="guide-quick-card__value">Dashboards</span>
+                <span class="guide-quick-card__text">Mostram tendências, não conformidades, recorrência, prazos, P90 e gargalos por recorte.</span>
+            </article>
+        </div>
+    </section>
+
+    <section class="guide-modules">
+        <article class="guide-module guide-module--processos" id="modulo-processos">
+            <div class="guide-module__header">
+                <div>
+                    <div class="guide-module__eyebrow"><i class="fas fa-folder-tree"></i> Operação</div>
+                    <h2 class="guide-module__title">Módulo de Processos</h2>
+                </div>
+            </div>
+            <div class="guide-module__body">
+                <p class="guide-module__intro">A tela de processos é a base cadastral do sistema. Se um processo estiver incompleto ou com área divergente, isso tende a impactar filtros, dashboards e o vínculo com checklists.</p>
+                <div class="guide-module__grid">
+                    <section class="guide-panel">
+                        <h3>O que você faz aqui</h3>
+                        <ul class="guide-list">
+                            <li>Cadastrar novos processos.</li>
+                            <li>Pesquisar por número, descrição, gestor, modalidade e área.</li>
+                            <li>Usar o filtro <strong>Somente sem área</strong> para localizar cadastros pendentes.</li>
+                            <li>Editar processo já existente pelo menu de ações da linha.</li>
+                            <li>Conferir os detalhes antes de criar ou revisar checklists.</li>
+                        </ul>
+                    </section>
+                    <section class="guide-panel">
+                        <h3>Passo a passo sugerido</h3>
+                        <ol class="guide-steps">
+                            <li>Abra <strong>Processos</strong> no menu lateral.</li>
+                            <li>Clique em <strong>Novo processo</strong>.</li>
+                            <li>Preencha número, descrição, modalidade, competências, área e gestor.</li>
+                            <li>Salve e confirme se a área apareceu corretamente na lista.</li>
+                            <li>Se necessário, use <strong>Alterar</strong> no menu de ações para corrigir o cadastro.</li>
+                        </ol>
+                    </section>
+                </div>
+                <details class="guide-accordion" open>
+                    <summary>Cuidados com área, filtros e saneamento automático</summary>
+                    <div class="guide-accordion__content">
+                        <p>A área é usada nos filtros dos dashboards e em leituras gerenciais. Hoje a aplicação já tenta corrigir automaticamente textos corrompidos e normalizar nomes legados.</p>
+                        <div class="guide-note guide-note--warn"><strong>Atenção:</strong> mesmo com esse tratamento, o ideal é que novos cadastros usem a área correta da lista oficial para evitar ruído analítico.</div>
+                    </div>
+                </details>
+            </div>
+        </article>
+
+        <article class="guide-module guide-module--checklists" id="modulo-checklists">
+            <div class="guide-module__header">
+                <div>
+                    <div class="guide-module__eyebrow"><i class="fas fa-list-check"></i> Operação</div>
+                    <h2 class="guide-module__title">Módulo de Checklists</h2>
+                </div>
+            </div>
+            <div class="guide-module__body">
+                <p class="guide-module__intro">Os checklists concentram a análise propriamente dita. É nesse fluxo que o sistema registra conformidades, não conformidades, categorias, justificativas e marcos da cronoanálise.</p>
+                <div class="guide-module__grid">
+                    <section class="guide-panel">
+                        <h3>O que você consegue registrar</h3>
+                        <ul class="guide-list">
+                            <li>Checklist vinculado a um processo existente.</li>
+                            <li>Respostas por item: <strong>Conforme</strong>, <strong>Não conforme</strong> e <strong>Não se aplica</strong>.</li>
+                            <li>Categoria da não conformidade quando houver desvio.</li>
+                            <li>Apontamentos complementares e observações.</li>
+                            <li>Marcos com data inicial, data final e duração por fase.</li>
+                        </ul>
+                    </section>
+                    <section class="guide-panel">
+                        <h3>Fluxo recomendado</h3>
+                        <ol class="guide-steps">
+                            <li>Abra <strong>Checklists</strong>.</li>
+                            <li>Crie um novo checklist e escolha o processo relacionado.</li>
+                            <li>Preencha os elementos obrigatórios e responda todas as perguntas aplicáveis.</li>
+                            <li>Quando houver não conformidade, informe também a categoria correspondente.</li>
+                            <li>Revise os marcos temporais antes de concluir, pois eles alimentam a cronoanálise.</li>
+                        </ol>
+                    </section>
+                </div>
+                <details class="guide-accordion">
+                    <summary>Como isso aparece nos dashboards</summary>
+                    <div class="guide-accordion__content">
+                        <p>As respostas do checklist formam a base das taxas de conformidade, das categorias críticas, da recorrência e da leitura de gargalos. Um checklist incompleto ou classificado de forma inconsistente distorce o retrato gerencial.</p>
+                        <div class="guide-note guide-note--success"><strong>Dica:</strong> se um resultado parecer estranho no dashboard, valide primeiro o checklist e só depois interprete o indicador.</div>
+                    </div>
+                </details>
+            </div>
+        </article>
+
+        <article class="guide-module guide-module--fluxo" id="modulo-fluxo-arvore">
+            <div class="guide-module__header">
+                <div>
+                    <div class="guide-module__eyebrow"><i class="fas fa-code-branch"></i> Apoio visual</div>
+                    <h2 class="guide-module__title">Fluxo Árvore</h2>
+                </div>
+            </div>
+            <div class="guide-module__body">
+                <p class="guide-module__intro">O Fluxo Árvore ajuda a compreender a estrutura do fluxo por blocos e relações visuais. Ele serve como apoio de leitura, especialmente para entender a lógica geral antes da análise operacional.</p>
+                <div class="guide-module__grid">
+                    <section class="guide-panel">
+                        <h3>Quando usar</h3>
+                        <ul class="guide-list">
+                            <li>Para entender a organização macro do fluxo.</li>
+                            <li>Para orientar leitura institucional e navegar por blocos de decisão.</li>
+                            <li>Para explicar a estrutura a novos usuários do sistema.</li>
+                        </ul>
+                    </section>
+                    <section class="guide-panel">
+                        <h3>O que ele não substitui</h3>
+                        <ul class="guide-list">
+                            <li>Não substitui o cadastro do processo.</li>
+                            <li>Não substitui o preenchimento do checklist.</li>
+                            <li>Não substitui a leitura quantitativa dos dashboards.</li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </article>
+
+        <article class="guide-module guide-module--organograma" id="modulo-organograma">
+            <div class="guide-module__header">
+                <div>
+                    <div class="guide-module__eyebrow"><i class="fas fa-building-columns"></i> Estrutura institucional</div>
+                    <h2 class="guide-module__title">Organograma</h2>
+                </div>
+            </div>
+            <div class="guide-module__body">
+                <p class="guide-module__intro">O organograma mostra a estrutura institucional de forma interativa. A navegação inicial começa pela camada superior de governança, ajudando a leitura correta das relações entre conselhos, presidência, diretorias, superintendências e gerências.</p>
+                <div class="guide-module__grid">
+                    <section class="guide-panel">
+                        <h3>Como interpretar as cores</h3>
+                        <ul class="guide-list">
+                            <li><strong>Azul:</strong> instâncias máximas de governança.</li>
+                            <li><strong>Roxo:</strong> presidência e apoio central.</li>
+                            <li><strong>Amarelo:</strong> diretorias executivas.</li>
+                            <li><strong>Verde:</strong> unidades implementadas.</li>
+                            <li><strong>Ciano:</strong> unidades planejadas ou de apoio.</li>
+                        </ul>
+                    </section>
+                    <section class="guide-panel">
+                        <h3>Recursos úteis</h3>
+                        <ul class="guide-list">
+                            <li>Seleção visual da trilha hierárquica.</li>
+                            <li>Bloco explorável para aprofundar setores.</li>
+                            <li>Leitura contextual da unidade selecionada.</li>
+                            <li>Cadastro e manutenção de colaboradores por área para perfis com permissão.</li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </article>
+
+        <article class="guide-module guide-module--dashconf" id="modulo-dashboard-ci">
+            <div class="guide-module__header">
+                <div>
+                    <div class="guide-module__eyebrow"><i class="fas fa-chart-line"></i> Análise</div>
+                    <h2 class="guide-module__title">Dashboard Análise CI</h2>
+                </div>
+            </div>
+            <div class="guide-module__body">
+                <p class="guide-module__intro">Este dashboard foi desenhado para leitura executiva e diagnóstica das não conformidades. Ele cruza área, modalidade e período para mostrar volume, taxa, recorrência e prioridades do momento.</p>
+                <div class="guide-module__grid">
+                    <section class="guide-panel">
+                        <h3>Resumo Executivo</h3>
+                        <ul class="guide-list">
+                            <li>Total de checklists e itens avaliados.</li>
+                            <li>Total de não conformidades.</li>
+                            <li>Taxa de conformidade.</li>
+                            <li>Leitura do recorte com base no período e nos filtros ativos.</li>
+                        </ul>
+                    </section>
+                    <section class="guide-panel">
+                        <h3>Diagnóstico e Ações</h3>
+                        <ul class="guide-list">
+                            <li>Categoria crítica do período.</li>
+                            <li>Recorrência das principais causas.</li>
+                            <li>Prioridades com faixas visuais por severidade.</li>
+                            <li>Indicadores sintéticos de ações abertas, concluídas e eficácia estimada.</li>
+                        </ul>
+                    </section>
+                </div>
+                <details class="guide-accordion">
+                    <summary>Como ler setas, cores e prioridades</summary>
+                    <div class="guide-accordion__content">
+                        <p>Na lista de prioridades, a seta indica intensidade relativa do percentual: <strong>↑</strong> para peso alto, <strong>→</strong> para faixa intermediária e <strong>↓</strong> para menor participação. As cores ajudam a diferenciar criticidade.</p>
+                        <div class="guide-note guide-note--info"><strong>Leitura correta:</strong> o dashboard aponta concentração e tendência. Ele não substitui a investigação do processo ou checklist de origem.</div>
+                    </div>
+                </details>
+            </div>
+        </article>
+
+        <article class="guide-module guide-module--dashcrono" id="modulo-dashboard-crono">
+            <div class="guide-module__header">
+                <div>
+                    <div class="guide-module__eyebrow"><i class="fas fa-chart-column"></i> Análise temporal</div>
+                    <h2 class="guide-module__title">Dashboard Cronoanálise</h2>
+                </div>
+            </div>
+            <div class="guide-module__body">
+                <p class="guide-module__intro">O foco aqui é prazo e distribuição temporal. O painel mostra média, P90, maior tempo registrado e fase gargalo, ajudando a diferenciar problema disseminado de concentração em poucos casos extremos.</p>
+                <div class="guide-module__grid">
+                    <section class="guide-panel">
+                        <h3>O que observar primeiro</h3>
+                        <ol class="guide-steps">
+                            <li>Quantidade de processos analisados no recorte.</li>
+                            <li>Lead time médio.</li>
+                            <li>P90 de tempo.</li>
+                            <li>Fase gargalo e maior tempo registrado.</li>
+                        </ol>
+                    </section>
+                    <section class="guide-panel">
+                        <h3>Leitura prática</h3>
+                        <ul class="guide-list">
+                            <li>Se a média cai e o P90 sobe, poucos casos estão puxando o atraso.</li>
+                            <li>Se média e P90 sobem juntos, o problema tende a ser mais espalhado.</li>
+                            <li>O recorte por área ajuda a localizar concentração operacional.</li>
+                        </ul>
+                    </section>
+                </div>
+            </div>
+        </article>
+
+        <article class="guide-module guide-module--usuarios" id="modulo-usuarios">
+            <div class="guide-module__header">
+                <div>
+                    <div class="guide-module__eyebrow"><i class="fas fa-user-shield"></i> Administração</div>
+                    <h2 class="guide-module__title">Gestão de Usuários</h2>
+                </div>
+            </div>
+            <div class="guide-module__body">
+                <p class="guide-module__intro">Disponível para perfis administradores, este módulo concentra o ciclo de acesso ao sistema e define quem pode operar, analisar ou administrar funcionalidades mais sensíveis.</p>
+                <div class="guide-module__grid">
+                    <section class="guide-panel">
+                        <h3>Ações disponíveis</h3>
+                        <ul class="guide-list">
+                            <li>Cadastrar novo usuário.</li>
+                            <li>Editar dados cadastrais.</li>
+                            <li>Controlar perfil de acesso.</li>
+                            <li>Desativar ou excluir quando necessário.</li>
+                        </ul>
+                    </section>
+                    <section class="guide-panel">
+                        <h3>Ponto de atenção</h3>
+                        <div class="guide-note guide-note--warn"><strong>Importante:</strong> mudanças de perfil afetam acesso a telas de operação, leitura de dashboards e recursos administrativos, incluindo manutenção do organograma.</div>
+                    </section>
+                </div>
+            </div>
+        </article>
+
+        <article class="guide-module guide-module--boas" id="boas-praticas">
+            <div class="guide-module__header">
+                <div>
+                    <div class="guide-module__eyebrow"><i class="fas fa-shield-heart"></i> Boas práticas</div>
+                    <h2 class="guide-module__title">Recomendações de uso</h2>
+                </div>
+            </div>
+            <div class="guide-module__body">
+                <div class="guide-module__grid">
+                    <section class="guide-panel">
+                        <h3>Rotina recomendada</h3>
+                        <ul class="guide-list">
+                            <li>Cadastre ou revise o processo antes de abrir checklist.</li>
+                            <li>Preencha a área corretamente para manter os filtros consistentes.</li>
+                            <li>Revise categorias de não conformidade antes de concluir análises.</li>
+                            <li>Use dashboards como leitura gerencial, não como fonte primária de verdade.</li>
+                        </ul>
+                    </section>
+                    <section class="guide-panel">
+                        <h3>Quando algo parecer errado</h3>
+                        <ol class="guide-steps">
+                            <li>Confira o cadastro do processo.</li>
+                            <li>Revise o checklist relacionado.</li>
+                            <li>Valide a área e o período usados no filtro.</li>
+                            <li>Recarregue o dashboard e compare com a origem.</li>
+                        </ol>
+                    </section>
+                </div>
+                <details class="guide-accordion">
+                    <summary>Como manter a operação enxuta e confiável</summary>
+                    <div class="guide-accordion__content">
+                        <p>Priorize sempre o fluxo principal da aplicação: <strong>Processos</strong> para base cadastral, <strong>Checklists</strong> para análise e <strong>Dashboards</strong> para leitura gerencial.</p>
+                        <p>Os módulos de apoio visual, como <strong>Fluxo Árvore</strong> e <strong>Organograma</strong>, complementam a interpretação, mas não substituem o registro operacional.</p>
+                    </div>
+                </details>
+            </div>
+        </article>
+    </section>
+</section>
+
+<button id="voltarTopo" class="guide-back-top" type="button" title="Voltar ao topo">↑</button>
+
+@section Scripts {
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const button = document.getElementById('voltarTopo');
+            if (button) {
+                button.addEventListener('click', function () {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                const toggleVisibility = function () {
+                    button.style.opacity = window.scrollY > 280 ? '1' : '0.78';
+                };
+
+                toggleVisibility();
+                window.addEventListener('scroll', toggleVisibility, { passive: true });
+            }
+        });
+    </script>
+}

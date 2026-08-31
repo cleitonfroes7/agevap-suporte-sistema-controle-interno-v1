@@ -1,0 +1,186 @@
+{
+    "tipo": "pedido-cot-dispensa-p2",
+    "perguntas": [
+    {
+        "item": "23",
+        "elemento": "23 - CHECKLIST PARTE 1 - RESPOSTA DO CONTROLE INTERNO",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "23.1 Com os devidos ajustes, se houver"}
+        ]
+    },
+    {
+        "item": "24",
+        "elemento": "24 - DEVOLUTIVAS AO CONTROLE INTERNO",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "24.1 Houve alguma revisão e complementação?"}
+        ]
+    },
+    {
+        "item": "25",
+        "elemento": "25 - ANÁLISE DAS DEVOLUTIVAS E CIÊNCIA DO C.I.",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "25.1 O setor deu ciência às revisões e complementações?"}
+        ]
+    },
+
+
+    {
+        "marco": "Controle Interno - Checklist 1 - itens 23, 24 e 25",
+        "data_inicio": "",
+        "data_fim": "",
+        "tempo_dias": ""
+      },
+
+    {
+        "item": "26",
+        "elemento": "26 - EDITAL PEDIDO DE COTAÇÃO / DISPENSA F-0271",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "26.1 O edital foi numerado e assinado?"}
+        ]
+    },
+    {
+        "item": "27",
+        "elemento": "27 - PUBLICAÇÃO DO PEDIDO DE COTAÇÃO NO SITE",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "27.1 Foi publicado?"}
+        ]
+    },
+    {
+        "item": "28",
+        "elemento": "28 - RECEBIMENTO DE PROPOSTAS",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "28.1 Existem pelo menos três preços? Caso não, possui justificativa?"},
+            {"pergunta": "28.2 Outros apontamentos:"}
+        ]
+    },
+    {
+        "item": "29",
+        "elemento": "29 - QUADRO COMPARATIVO DE PREÇOS F-0191",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "29.1 O documento inclui as validades das certidões?"},
+            {"pergunta": "29.2 Outros apontamentos:"}
+        ]
+    },
+    {
+        "item": "30",
+        "elemento": "30 - DOCUMENTOS DA EMPRESA E SÓCIOS /CERTIDÕES /DECLARAÇÕES",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "30.1 Cartão CNPJ (compatível?)"},
+            {"pergunta": "30.2 Contrato Social (dados correspondentes?)"},
+            {"pergunta": "30.3 Identificação do representante (RG/CPF/CNH válida?)"},
+            {"pergunta": "30.4 Certidão Federal (válida?)"},
+            {"pergunta": "30.5 Certidão Estadual (válida?)"},
+            {"pergunta": "30.6 Certidão Municipal (válida?)"},
+            {"pergunta": "30.7 FGTS (válida?)"},
+            {"pergunta": "30.8 Trabalhista (válida?)"},
+            {"pergunta": "30.9 Contribuinte estadual ou municipal (válida?)"},
+            {"pergunta": "30.10 Não emprega menor de 18 anos"},
+            {"pergunta": "30.11 CAFIMP (Somente IGAM)"}
+        ]
+    },
+   
+    {
+        "item": "31",
+        "elemento": "31 - MINUTA DA SELEÇÃO DE FORNECEDORES",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "31.1 Apontamentos:"}
+        ]
+    },
+
+    {
+        "marco": "Ato Convocatório ou pedido de cotação - itens 26, 27, 28, 29, 30 e 31",
+        "data_inicio": "",
+        "data_fim": "",
+        "tempo_dias": ""
+      },
+
+    {
+        "item": "32",
+        "elemento": "32 - ANÁLISE JURÍDICA",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "32.1 Há apontamentos no parecer jurídico?"}
+        ]
+    },
+    {
+        "item": "33",
+        "elemento": "33 - INSTRUMENTO JURÍDICO (CONTRATO F-0200 / ORDEM DE SERVIÇO F-0155 OU FORNECIMENTO F-0272)",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "33.1 A versão do modelo do contrato está correta?"},
+            {"pergunta": "33.2 Os dados do contratado estão corretos?"},
+            {"pergunta": "33.3 Os dados do contratante estão corretos?"},
+            {"pergunta": "33.4 A vigência contratual está correta?"},
+            {"pergunta": "33.5 O valor corresponde?"},
+            {"pergunta": "33.6 A rubrica orçamentária está de acordo com a dotação?"}
+        ]
+    },
+
+    {
+        "marco": "Análise Jurídica do certame ou pedido de cotação- itens  32 e 33",
+        "data_inicio": "",
+        "data_fim": "",
+        "tempo_dias": ""
+      },
+      
+    {
+        "item": "34",
+        "elemento": "34 - ATUALIZAÇÃO BIMESTRAL DO PLANEJAMENTO DO PROCESSO ADMINISTRATIVO F-0248",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "34.1 Está atualizado no prazo correto?"},
+            {"pergunta": "34.2 As etapas foram cumpridas no prazo? Caso não, possui justificativa e plano de ação?"},
+            {"pergunta": "34.3 Está assinado?"}
+        ]
+    },
+    {
+        "item": "35",
+        "elemento": "35 - ENVIO PARA O CONTROLE INTERNO",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+            {"pergunta": "35.1 Revisão do instrumento contratual e checklist 2"}
+        ]
+    }
+
+
+    ]
+}
+
+
+
+

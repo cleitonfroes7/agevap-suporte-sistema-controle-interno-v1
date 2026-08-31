@@ -1,0 +1,150 @@
+{
+  "tipo": "agegoias-selecao-p3",
+  "perguntas": [
+    {
+      "item": "29",
+      "elemento": "29 - ASSINATURA DO INSTRUMENTO JURÍDICO (CONTRATO / ORDEM DE SERVIÇO / FORNECIMENTO / OUTRO)",
+      "sub_perguntas": [
+        { "pergunta": "29.1 O instrumento jurídico foi assinado pelas partes competentes?" }
+      ]
+    },
+    {
+      "item": "30",
+      "elemento": "30 - PUBLICAÇÃO DA ÍNTEGRA DO INSTRUMENTO JURÍDICO",
+      "sub_perguntas": [
+        { "pergunta": "30.1 A íntegra foi publicada observando a LGPD?" }
+      ]
+    },
+    {
+      "item": "31",
+      "elemento": "31 - NOMEAÇÃO DO GESTOR/FISCAL DO CONTRATO",
+      "sub_perguntas": [
+        { "pergunta": "31.1 O gestor ou fiscal do contrato foi formalmente designado?" }
+      ]
+    },
+    {
+      "marco": "Assinatura e governança - itens 29, 30 e 31",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+    {
+      "item": "32",
+      "elemento": "32 - NOTA TÉCNICA DE APROVAÇÃO F-0120 / ACOMPANHAMENTO DO OBJETO",
+      "sub_perguntas": [
+        { "pergunta": "32.1 A nota técnica de aprovação ou acompanhamento foi emitida quando exigida?" }
+      ]
+    },
+    {
+      "item": "33",
+      "elemento": "33 - FICHA DO BEM",
+      "sub_perguntas": [
+        { "pergunta": "33.1 A ficha do bem foi juntada nos casos patrimoniais?" }
+      ]
+    },
+    {
+      "item": "34",
+      "elemento": "34 - TERMO DE RESPONSABILIDADE F-0137",
+      "sub_perguntas": [
+        { "pergunta": "34.1 O termo de responsabilidade foi formalizado quando aplicável?" }
+      ]
+    },
+    {
+      "item": "35",
+      "elemento": "35 - FORMULÁRIO(S) DE ATESTE(S) DE SOLICITAÇÃO DE PAGAMENTO F-0255",
+      "sub_perguntas": [
+        { "pergunta": "35.1 Os atestes para pagamento estão completos e assinados?" }
+      ]
+    },
+    {
+      "item": "36",
+      "elemento": "36 - ATESTE(S) DO DOCUMENTO FISCAL PARA PAGAMENTO",
+      "sub_perguntas": [
+        { "pergunta": "36.1 O documento fiscal foi corretamente atestado?" }
+      ]
+    },
+    {
+      "item": "37",
+      "elemento": "37 - COMPROVAÇÃO DA REGULARIDADE FISCAL DO CONTRATADO",
+      "sub_perguntas": [
+        { "pergunta": "37.1 As certidões fiscais e trabalhistas do contratado estão válidas?" },
+        { "pergunta": "37.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "item": "38",
+      "elemento": "38 - AUTORIZAÇÃO DO PAGAMENTO",
+      "sub_perguntas": [
+        { "pergunta": "38.1 O pagamento foi formalmente autorizado?" }
+      ]
+    },
+    {
+      "item": "39",
+      "elemento": "39 - COMPROVANTES DE TODOS OS PAGAMENTOS ANTES DO ARQUIVAMENTO",
+      "sub_perguntas": [
+        { "pergunta": "39.1 Os comprovantes dos pagamentos realizados constam no processo?" }
+      ]
+    },
+    {
+      "marco": "Execução contratual - itens 32, 33, 34, 35, 36, 37, 38 e 39",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+    {
+      "item": "40",
+      "elemento": "40 - FICHA DO SIGA ATUALIZADA OU RESUMO DE ENTREGAS E PAGAMENTOS",
+      "sub_perguntas": [
+        { "pergunta": "40.1 O controle final de entregas e pagamentos foi atualizado?" }
+      ]
+    },
+    {
+      "item": "41",
+      "elemento": "41 - CUMPRIMENTO DO PROCEDIMENTO DE TERMO ADITIVO",
+      "sub_perguntas": [
+        { "pergunta": "41.1 Se houve aditivo, o procedimento foi cumprido adequadamente?" }
+      ]
+    },
+    {
+      "item": "42",
+      "elemento": "42 - CUMPRIMENTO DO PROCEDIMENTO DE NOTIFICAÇÃO AO TOMADOR",
+      "sub_perguntas": [
+        { "pergunta": "42.1 Se aplicável, a notificação ao tomador foi formalizada?" }
+      ]
+    },
+    {
+      "item": "43",
+      "elemento": "43 - TERMO DE RECEBIMENTO DO OBJETO CONTRATADO F-0245",
+      "sub_perguntas": [
+        { "pergunta": "43.1 O termo de recebimento do objeto foi juntado ao processo?" }
+      ]
+    },
+    {
+      "item": "44",
+      "elemento": "44 - BAIXA DE SALDO ANTES DO ARQUIVAMENTO",
+      "sub_perguntas": [
+        { "pergunta": "44.1 A baixa de saldo foi registrada quando cabível?" }
+      ]
+    },
+    {
+      "item": "45",
+      "elemento": "45 - ENVIO DO PROCESSO PARA O CONTROLE INTERNO",
+      "sub_perguntas": [
+        { "pergunta": "45.1 O processo foi encaminhado ao Controle Interno para encerramento?" }
+      ]
+    },
+    {
+      "item": "46",
+      "elemento": "46 - TERMO DE ENCERRAMENTO PARA ARQUIVAMENTO",
+      "sub_perguntas": [
+        { "pergunta": "46.1 O termo de encerramento para arquivamento foi incluído?" }
+      ]
+    },
+    {
+      "marco": "Encerramento do processo - itens 40, 41, 42, 43, 44, 45 e 46",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    }
+  ]
+}

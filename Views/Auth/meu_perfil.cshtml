@@ -1,0 +1,472 @@
+@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Meu Perfil";
+    ViewData["PageDescription"] = "Consulte seus dados de acesso e atualize sua senha com segurança.";
+    ViewData["ActiveNav"] = "perfil";
+}
+
+@section Head {
+    <style>
+        .profile-page {
+            display: grid;
+            gap: 24px;
+        }
+
+        .profile-hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.25fr) minmax(240px, 0.75fr);
+            gap: 18px;
+            padding: 24px 26px;
+            border-radius: 28px;
+            background: var(--color-surface, #ffffff);
+            border: 1px solid var(--color-border, #d6e3f1);
+            color: var(--color-heading, #112a46);
+            box-shadow: var(--shadow-sm, 0 18px 40px rgba(17, 42, 70, 0.08));
+        }
+
+        .profile-hero__eyebrow {
+            display: inline-flex;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #eef6fc;
+            border: 1px solid #d6e8f5;
+            color: #315b7d;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .profile-hero h2 {
+            margin: 14px 0 10px;
+            font-size: 1.85rem;
+            line-height: 1.1;
+        }
+
+        .profile-hero p {
+            margin: 0;
+            color: var(--color-text-muted, #60758c);
+            max-width: 54ch;
+        }
+
+        .profile-hero__stats {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 12px;
+            align-self: end;
+        }
+
+        .profile-stat {
+            padding: 16px 14px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #f8fafc, #ffffff);
+            border: 1px solid #e1e8f0;
+        }
+
+        .profile-stat strong {
+            display: block;
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+            color: var(--color-heading, #112a46);
+        }
+
+        .profile-stat span {
+            color: var(--color-text-muted, #60758c);
+            font-size: 0.82rem;
+        }
+
+        .profile-grid {
+            display: grid;
+            grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.1fr);
+            gap: 22px;
+            align-items: start;
+        }
+
+        .profile-card {
+            background: #ffffff;
+            border: 1px solid #d6e3f1;
+            border-radius: 26px;
+            padding: 24px;
+            box-shadow: 0 18px 40px rgba(17, 42, 70, 0.08);
+        }
+
+        .profile-card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .profile-card__header h3 {
+            margin: 0 0 6px;
+            font-size: 1.18rem;
+            color: #112a46;
+        }
+
+        .profile-card__header p {
+            margin: 0;
+            color: #60758c;
+            line-height: 1.5;
+        }
+
+        .profile-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 42px;
+            height: 42px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: rgba(0, 153, 204, 0.12);
+            color: #005ca0;
+            font-weight: 800;
+            font-size: 0.76rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .profile-alert {
+            display: none;
+            border-radius: 16px;
+            padding: 13px 15px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            white-space: pre-line;
+        }
+
+        .profile-alert--success {
+            display: block;
+            background: #ecfdf3;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .profile-alert--error {
+            display: block;
+            background: #fff1f2;
+            color: #b42318;
+            border: 1px solid #fecdd3;
+        }
+
+        .profile-fields,
+        .profile-form {
+            display: grid;
+            gap: 14px;
+        }
+
+        .profile-fields__grid,
+        .profile-form__grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .profile-field--full {
+            grid-column: 1 / -1;
+        }
+
+        .profile-field label {
+            display: block;
+            margin-bottom: 6px;
+            color: #112a46;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .profile-field input {
+            width: 100%;
+            border: 1px solid #c9d8ea;
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: #fbfdff;
+            color: #112a46;
+        }
+
+        .profile-field input[readonly] {
+            background: linear-gradient(180deg, #f7fbff 0%, #f2f7fc 100%);
+            color: #48627f;
+        }
+
+        .profile-field small {
+            display: block;
+            margin-top: 6px;
+            color: #6c8299;
+            line-height: 1.45;
+        }
+
+        .profile-summary {
+            display: grid;
+            gap: 12px;
+        }
+
+        .profile-summary__item {
+            padding: 16px 18px;
+            border-radius: 18px;
+            border: 1px solid #dbe6f2;
+            background: linear-gradient(180deg, #ffffff 0%, #f9fbfe 100%);
+        }
+
+        .profile-summary__item strong {
+            display: block;
+            margin-bottom: 6px;
+            color: #112a46;
+            font-size: 0.86rem;
+            letter-spacing: 0.03em;
+            text-transform: uppercase;
+        }
+
+        .profile-summary__item span {
+            color: #48627f;
+            line-height: 1.5;
+        }
+
+        .profile-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .profile-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .profile-btn--primary {
+            background: linear-gradient(135deg, #0099cc, #005ca0);
+            color: #fff;
+            box-shadow: 0 14px 28px rgba(0, 92, 160, 0.18);
+        }
+
+        .profile-btn--ghost {
+            background: #f2f7fc;
+            color: #112a46;
+            border: 1px solid #d6e3f1;
+        }
+
+        @@media (max-width: 1180px) {
+            .profile-hero,
+            .profile-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 760px) {
+            .profile-hero__stats,
+            .profile-fields__grid,
+            .profile-form__grid {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-card,
+            .profile-hero {
+                padding: 20px;
+                border-radius: 22px;
+            }
+        }
+    </style>
+}
+
+<section class="profile-page">
+    <section class="profile-hero">
+        <div>
+            <span class="profile-hero__eyebrow">Área do usuário</span>
+            <h2>Gerencie sua conta com mais clareza e segurança</h2>
+            <p>Consulte seus dados cadastrados, confira seu perfil de acesso e atualize sua senha sempre que necessário, sem depender de telas confusas.</p>
+        </div>
+        <div class="profile-hero__stats">
+            <div class="profile-stat">
+                <strong>1</strong>
+                <span>Conta vinculada ao usuário atual</span>
+            </div>
+            <div class="profile-stat">
+                <strong>100%</strong>
+                <span>Troca de senha realizada nesta área</span>
+            </div>
+        </div>
+    </section>
+
+    <section class="profile-grid">
+        <article class="profile-card">
+            <div class="profile-card__header">
+                <div>
+                    <h3>Dados da conta</h3>
+                    <p>Essas informações identificam seu acesso no portal e ajudam a validar seu perfil atual.</p>
+                </div>
+                <span class="profile-pill">Conta</span>
+            </div>
+
+            <div class="profile-fields">
+                <div class="profile-fields__grid">
+                    <div class="profile-field profile-field--full">
+                        <label for="profileName">Nome</label>
+                        <input type="text" id="profileName" readonly>
+                    </div>
+                    <div class="profile-field">
+                        <label for="profileLogin">Login</label>
+                        <input type="text" id="profileLogin" readonly>
+                    </div>
+                    <div class="profile-field">
+                        <label for="profilePerfil">Perfil</label>
+                        <input type="text" id="profilePerfil" readonly>
+                    </div>
+                    <div class="profile-field">
+                        <label for="profileEmpresa">Empresa</label>
+                        <input type="text" id="profileEmpresa" readonly>
+                    </div>
+                    <div class="profile-field profile-field--full">
+                        <label for="profileEmail">E-mail</label>
+                        <input type="text" id="profileEmail" readonly>
+                    </div>
+                </div>
+            </div>
+
+            <div class="profile-summary" style="margin-top: 18px;">
+                <div class="profile-summary__item">
+                    <strong>Boas práticas</strong>
+                    <span>Use uma senha forte, não compartilhe credenciais e troque a senha temporária recebida do administrador assim que entrar no sistema.</span>
+                </div>
+                <div class="profile-summary__item">
+                    <strong>Quando pedir ajuda</strong>
+                    <span>Se esquecer a senha ou perder o acesso, o administrador poderá redefinir uma nova senha temporária para você.</span>
+                </div>
+            </div>
+        </article>
+
+        <article class="profile-card">
+            <div class="profile-card__header">
+                <div>
+                    <h3>Atualizar senha</h3>
+                    <p>Defina uma nova senha pessoal para continuar utilizando o portal com segurança.</p>
+                </div>
+                <span class="profile-pill">Senha</span>
+            </div>
+
+            <div id="profileAlert" class="profile-alert"></div>
+
+            <form id="profileForm" class="profile-form">
+                <div class="profile-form__grid">
+                    <div class="profile-field profile-field--full">
+                        <label for="profileSenha">Nova senha</label>
+                        <input type="password" id="profileSenha" required>
+                        <small>Escolha uma senha de fácil memorização para você, mas difícil para terceiros.</small>
+                    </div>
+                    <div class="profile-field profile-field--full">
+                        <label for="profileSenhaConfirmacao">Confirmar nova senha</label>
+                        <input type="password" id="profileSenhaConfirmacao" required>
+                    </div>
+                </div>
+
+                <div class="profile-actions">
+                    <button type="submit" class="profile-btn profile-btn--primary">Salvar nova senha</button>
+                    <button type="button" class="profile-btn profile-btn--ghost" id="profileGeneratePassword">Gerar sugestão</button>
+                </div>
+            </form>
+        </article>
+    </section>
+</section>
+
+@section Scripts {
+    <script>
+        const profileForm = document.getElementById('profileForm');
+        const profileAlert = document.getElementById('profileAlert');
+
+        function setAlert(message, type) {
+            profileAlert.textContent = message;
+            profileAlert.className = `profile-alert profile-alert--${type}`;
+        }
+
+        function limparAlert() {
+            profileAlert.textContent = '';
+            profileAlert.className = 'profile-alert';
+        }
+
+        function gerarSenhaTemporaria(tamanho = 12) {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@@#$%&*';
+            const bytes = new Uint32Array(tamanho);
+            window.crypto.getRandomValues(bytes);
+            return Array.from(bytes, value => chars[value % chars.length]).join('');
+        }
+
+        function mapearPerfil(perfil) {
+            if (perfil === 'USER_ADM') return 'Administrador';
+            if (perfil === 'USER_PADRAO') return 'Usuário padrão';
+            return 'Controle Interno';
+        }
+
+        function mapearEmpresa(empresa) {
+            const valor = String(empresa || '').trim().toUpperCase();
+            if (valor === 'AGEDOCE') return 'AGEDOCE';
+            if (valor === 'AGEGRANDE') return 'AGEGRANDE';
+            if (valor === 'AGEGOIAS') return 'AGEGOIÁS';
+            return 'AGEVAP';
+        }
+
+        async function carregarPerfil() {
+            const response = await fetch('/api/usuario-atual', {
+                headers: { 'Accept': 'application/json' },
+                credentials: 'same-origin'
+            });
+            const data = await response.json();
+            if (!response.ok || !data.success) {
+                throw new Error(data.message || 'Não foi possível carregar o perfil.');
+            }
+
+            const usuario = data.usuario;
+            document.getElementById('profileName').value = usuario.name || '';
+            document.getElementById('profileLogin').value = usuario.login || '';
+            document.getElementById('profileEmail').value = usuario.email || '';
+            document.getElementById('profilePerfil').value = mapearPerfil(usuario.perfil);
+            document.getElementById('profileEmpresa').value = mapearEmpresa(usuario.empresa);
+            profileForm.dataset.userId = usuario.id || '';
+        }
+
+        document.getElementById('profileGeneratePassword').addEventListener('click', function () {
+            const senha = gerarSenhaTemporaria();
+            document.getElementById('profileSenha').value = senha;
+            document.getElementById('profileSenhaConfirmacao').value = senha;
+            limparAlert();
+        });
+
+        profileForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            limparAlert();
+
+            const userId = profileForm.dataset.userId;
+            const senha = document.getElementById('profileSenha').value.trim();
+            const confirmar = document.getElementById('profileSenhaConfirmacao').value.trim();
+
+            if (!senha) {
+                setAlert('Informe a nova senha.', 'error');
+                return;
+            }
+
+            if (senha !== confirmar) {
+                setAlert('As senhas não conferem.', 'error');
+                return;
+            }
+
+            const response = await fetch(`/api/usuarios/${userId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                credentials: 'same-origin',
+                body: JSON.stringify({ senha })
+            });
+            const data = await response.json();
+
+            if (!response.ok || !data.success) {
+                setAlert(data.message || 'Não foi possível atualizar a senha.', 'error');
+                return;
+            }
+
+            profileForm.reset();
+            setAlert('Senha atualizada com sucesso.', 'success');
+            await carregarPerfil();
+        });
+
+        carregarPerfil().catch(error => setAlert(error.message || 'Erro ao carregar perfil.', 'error'));
+    </script>
+}

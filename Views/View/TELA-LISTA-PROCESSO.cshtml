@@ -1,0 +1,287 @@
+﻿@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Gerenciamento de Processos";
+    ViewData["ActiveNav"] = "processos";
+}
+
+@section Head {
+    <link rel="stylesheet" href="/static/style_lista_processo.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+}
+
+<header class="page-header"></header>
+
+<section class="content-card">
+    <div class="content-card__header">
+        <div>
+            <h2 class="content-card__title">Lista de processos</h2>
+            <p class="content-card__subtitle">Use os filtros para localizar processos rapidamente.</p>
+        </div>
+        <div class="page-actions">
+            <button type="button" class="btn btn-primary" onclick="abrirModal()">
+                <i class="fas fa-plus"></i>
+                Novo processo
+            </button>
+        </div>
+    </div>
+    <div class="content-card__body">
+        <div class="table-toolbar">
+            <div class="table-toolbar__filters">
+                <input type="text" id="filtroPesquisa" placeholder="Pesquisar por número, descrição ou gestor">
+                <select id="filtroArea" aria-label="Filtrar por área">
+                    <option value="">Todas as áreas</option>
+                    <option value="__SEM_AREA__">Sem área</option>
+                    <option value="Diretoria de Gestão">Diretoria de Gestão</option>
+                    <option value="Diretoria Administrativo-Financeira">Diretoria Administrativo-Financeira</option>
+                    <option value="Diretoria de Obras, Projetos e Estudos">Diretoria de Obras, Projetos e Estudos</option>
+                    <option value="Diretoria de Planejamento e Ações Estratégicas">Diretoria de Planejamento e Ações Estratégicas</option>
+                    <option value="Superintendência Regional AGEVAP">Superintendência Regional AGEVAP</option>
+                    <option value="Superintendência Regional AGEDOCE">Superintendência Regional AGEDOCE</option>
+                    <option value="Superintendência Regional AGEGRANDE">Superintendência Regional AGEGRANDE</option>
+                    <option value="Superintendência Regional AGEGOIÁS">Superintendência Regional AGEGOIÁS</option>
+                    <option value="Gerência Administrativa">Gerência Administrativa</option>
+                    <option value="Gerência Financeira">Gerência Financeira</option>
+                    <option value="Gerência de Comunicação">Gerência de Comunicação</option>
+                    <option value="Gerência CEIVAP">Gerência CEIVAP</option>
+                    <option value="Gerência CBHs">Gerência CBHs</option>
+                    <option value="Gerência Guandu-BIG">Gerência Guandu-BIG</option>
+                    <option value="Gerência BG">Gerência BG</option>
+                    <option value="Gerência PS1/PS2">Gerência PS1/PS2</option>
+                    <option value="Gerência de Atendimento aos Comitês">Gerência de Atendimento aos Comitês</option>
+                    <option value="Gerência de Fundos e Recursos Hídricos">Gerência de Fundos e Recursos Hídricos</option>
+                    <option value="Gerência de Fundos Ambientais">Gerência de Fundos Ambientais</option>
+                    <option value="Gerência de Recursos Hídricos">Gerência de Recursos Hídricos</option>
+                    <option value="Gerência de Meio Ambiente">Gerência de Meio Ambiente</option>
+                    <option value="Gerência de Obras">Gerência de Obras</option>
+                    <option value="Gerência de Projetos">Gerência de Projetos</option>
+                    <option value="Gerência de Planejamento">Gerência de Planejamento</option>
+                    <option value="Gerência de Ações Estratégicas">Gerência de Ações Estratégicas</option>
+                </select>
+                <button class="btn btn-secondary" type="button" onclick="aplicarFiltros(true)">
+                    <i class="fas fa-search"></i>
+                    Pesquisar
+                </button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="tabelaProcessos" class="content-table">
+                <thead>
+                    <tr>
+                        <th>Processo</th>
+                        <th>Descrição</th>
+                        <th>Modalidade</th>
+                        <th>Data</th>
+                        <th>Competências</th>
+                        <th>Área</th>
+                        <th>Gestor</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="table-footer">
+            <div class="table-footer__info">
+                <span>Mostrar</span>
+                <select id="itensPorPagina">
+                    <option value="15" selected>15</option>
+                </select>
+                <span>registros</span>
+                <span id="infoPaginacao"></span>
+            </div>
+            <div class="pagination">
+                <button id="btnAnterior" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div id="numerosPagina"></div>
+                <button id="btnProximo" disabled>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div id="modalNovoProcesso" class="modal">
+    <div class="modal-content modal-content--processo">
+        <div class="process-modal__header">
+            <div>
+                <span class="process-modal__eyebrow">Cadastro orientado</span>
+                <h2>Novo processo</h2>
+                <p>Preencha os dados do processo e selecione as competências relacionadas.</p>
+            </div>
+            <button type="button" class="process-modal__close" onclick="fecharModal()" aria-label="Fechar modal">&times;</button>
+        </div>
+        <form id="formNovoProcesso" class="modal-form">
+            <div class="process-modal__grid">
+            <div class="form-group">
+                <label for="numeroProcesso">Número do processo</label>
+                <input type="text" id="numeroProcesso" name="numeroProcesso" required>
+            </div>
+            <div class="form-group">
+                <label for="descricao">Descrição</label>
+                <input type="text" id="descricao" name="descricao" required>
+            </div>
+            <div class="form-group">
+                <label for="modalidade">Modalidade</label>
+                <select id="modalidade" name="modalidade" required>
+                    <option value="">Selecione a modalidade</option>
+                    <option value="ato-convocatorio">Ato convocatório</option>
+                    <option value="pedido-cotacao">Pedido de cotação</option>
+                    <option value="dispensa">Dispensa</option>
+                    <option value="inexigibilidade">Inexigibilidade</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="dataInicial">Data</label>
+                <input type="date" id="dataInicial" name="dataInicial" required>
+            </div>
+            <div class="form-group">
+                <label for="area">Área</label>
+                <select id="area" name="area" required>
+                    <option value="">Selecione a área</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="gestor">Gestor</label>
+                <input type="text" id="gestor" name="gestor">
+            </div>
+            <div class="form-group competencia-selector process-modal__field--full">
+                <label>Competências</label>
+                <input type="text" id="competencia" name="competencia" style="display:none;" required>
+                <div class="competencia-grid" id="competenciaList">
+                    <label class="competencia-item ANA_036_25"><input type="checkbox" value="ANA_036_25"> ANA 036/25</label>
+                    <label class="competencia-item INEA_069_22"><input type="checkbox" value="INEA_069_22"> INEA 069/22</label>
+                    <label class="competencia-item INEA_069_22_TRANSP"><input type="checkbox" value="INEA_069_22_TRANSP"> INEA 069/22-TRANSP</label>
+                    <label class="competencia-item INEA_068_22"><input type="checkbox" value="INEA_068_22"> INEA 068/22</label>
+                    <label class="competencia-item INEA_067_22"><input type="checkbox" value="INEA_067_22"> INEA 067/22</label>
+                    <label class="competencia-item IGAM_PS1_007_24"><input type="checkbox" value="IGAM_PS1_007_24"> IGAM PS1 007/24</label>
+                    <label class="competencia-item IGAM_PS2_008_24"><input type="checkbox" value="IGAM_PS2_008_24"> IGAM PS2 008/24</label>
+                    <label class="competencia-item ANA_035_25"><input type="checkbox" value="ANA_035_25"> ANA 035/25</label>
+                    <label class="competencia-item IGAM_002_25"><input type="checkbox" value="IGAM_002_25"> IGAM 002/25</label>
+                    <label class="competencia-item ANA_008_25"><input type="checkbox" value="ANA_008_25"> ANA 008/25</label>
+                    <label class="competencia-item IGAM_005_24"><input type="checkbox" value="IGAM_005_24"> IGAM 005/24</label>
+                    <label class="competencia-item ACT_003_25"><input type="checkbox" value="ACT_003_25"> ACT 003/25</label>
+                    <label class="competencia-item OUTRAS_FONTES"><input type="checkbox" value="OUTRAS_FONTES"> Outras fontes</label>
+                </div>
+            </div>
+            </div>
+        </form>
+        <div class="process-modal__footer">
+            <button type="button" class="btn btn-secondary" onclick="fecharModal()">
+                <i class="fas fa-arrow-left"></i>
+                Cancelar
+            </button>
+            <button type="button" class="btn btn-primary" onclick="salvarNovoProcesso()">
+                <i class="fas fa-save"></i>
+                Salvar processo
+            </button>
+        </div>
+    </div>
+</div>
+
+<div id="modalVisualizarProcesso" class="modal">
+    <div class="modal-content">
+        <button class="close" onclick="fecharModalVisualizar()">&times;</button>
+        <div class="guia-card">
+            <h2 id="modalTitulo">Detalhes do processo</h2>
+            <p id="modalDescricao"></p>
+            <div class="detail-grid">
+                <div class="detail-grid__item">
+                    <span class="detail-grid__label">Modalidade</span>
+                    <span class="detail-grid__value" id="modalModalidade">-</span>
+                </div>
+                <div class="detail-grid__item">
+                    <span class="detail-grid__label">Data</span>
+                    <span class="detail-grid__value" id="modalDataInicio">-</span>
+                </div>
+                <div class="detail-grid__item">
+                    <span class="detail-grid__label">Área</span>
+                    <span class="detail-grid__value" id="modalArea">-</span>
+                </div>
+                <div class="detail-grid__item">
+                    <span class="detail-grid__label">Gestor</span>
+                    <span class="detail-grid__value" id="modalGestor">-</span>
+                </div>
+                <div class="detail-grid__item" style="grid-column: 1 / -1;">
+                    <span class="detail-grid__label">Competências</span>
+                    <span class="detail-grid__value" id="modalCompetencia">-</span>
+                </div>
+            </div>
+            <h3 class="content-card__title" style="font-size:1rem;">Checklists vinculados</h3>
+            <div id="detalhesProcesso"></div>
+        </div>
+    </div>
+</div>
+
+<div id="modalEditarProcesso" class="modal">
+    <div class="modal-content">
+        <button class="close" onclick="fecharModalEditar()">&times;</button>
+        <h2>Editar processo</h2>
+        <form id="formEditarProcesso" class="modal-form">
+            <input type="hidden" id="editarProcessoId">
+            <div class="form-group">
+                <label for="editarNumeroProcesso">Número do processo</label>
+                <input type="text" id="editarNumeroProcesso" name="editarNumeroProcesso" required>
+            </div>
+            <div class="form-group">
+                <label for="editarDescricao">Descrição</label>
+                <input type="text" id="editarDescricao" name="editarDescricao" required>
+            </div>
+            <div class="form-group">
+                <label for="editarModalidade">Modalidade</label>
+                <select id="editarModalidade" name="editarModalidade" required>
+                    <option value="">Selecione a modalidade</option>
+                    <option value="ato-convocatorio">Ato convocatório</option>
+                    <option value="pedido-cotacao">Pedido de cotação</option>
+                    <option value="dispensa">Dispensa</option>
+                    <option value="inexigibilidade">Inexigibilidade</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editarDataInicio">Data</label>
+                <input type="date" id="editarDataInicio" name="editarDataInicio" required>
+            </div>
+            <div class="form-group">
+                <label for="editarArea">Área</label>
+                <select id="editarArea" name="editarArea" required>
+                    <option value="">Selecione a área</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="editarGestor">Gestor</label>
+                <input type="text" id="editarGestor" name="editarGestor">
+            </div>
+            <div class="form-group competencia-selector">
+                <label>Competências</label>
+                <input type="text" id="editarCompetencia" name="editarCompetencia" style="display:none;" required>
+                <div class="competencia-grid" id="editarCompetenciaList">
+                    <label class="competencia-item ANA_036_25"><input type="checkbox" value="ANA_036_25"> ANA 036/25</label>
+                    <label class="competencia-item INEA_069_22"><input type="checkbox" value="INEA_069_22"> INEA 069/22</label>
+                    <label class="competencia-item INEA_069_22_TRANSP"><input type="checkbox" value="INEA_069_22_TRANSP"> INEA 069/22-TRANSP</label>
+                    <label class="competencia-item INEA_068_22"><input type="checkbox" value="INEA_068_22"> INEA 068/22</label>
+                    <label class="competencia-item INEA_067_22"><input type="checkbox" value="INEA_067_22"> INEA 067/22</label>
+                    <label class="competencia-item IGAM_PS1_007_24"><input type="checkbox" value="IGAM_PS1_007_24"> IGAM PS1 007/24</label>
+                    <label class="competencia-item IGAM_PS2_008_24"><input type="checkbox" value="IGAM_PS2_008_24"> IGAM PS2 008/24</label>
+                    <label class="competencia-item ANA_035_25"><input type="checkbox" value="ANA_035_25"> ANA 035/25</label>
+                    <label class="competencia-item IGAM_002_25"><input type="checkbox" value="IGAM_002_25"> IGAM 002/25</label>
+                    <label class="competencia-item ANA_008_25"><input type="checkbox" value="ANA_008_25"> ANA 008/25</label>
+                    <label class="competencia-item IGAM_005_24"><input type="checkbox" value="IGAM_005_24"> IGAM 005/24</label>
+                    <label class="competencia-item ACT_003_25"><input type="checkbox" value="ACT_003_25"> ACT 003/25</label>
+                    <label class="competencia-item OUTRAS_FONTES"><input type="checkbox" value="OUTRAS_FONTES"> Outras fontes</label>
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" onclick="salvarEdicaoProcesso()">
+                <i class="fas fa-save"></i>
+                Salvar alterações
+            </button>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="/static/script_lista_processo.js" charset="utf-8"></script>
+}
+

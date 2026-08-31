@@ -1,0 +1,44 @@
+services:
+  db:
+    image: mysql:8.4
+    container_name: app_ci_v2_db
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-admin}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-app5p}
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_app_ci_data:/var/lib/mysql
+      - ./db/init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
+      - ./db/001_add_item_categoria.sql:/docker-entrypoint-initdb.d/002_add_item_categoria.sql:ro
+      - ./db/002_fill_item_categoria.sql:/docker-entrypoint-initdb.d/003_fill_item_categoria.sql:ro
+      - ./db/003_create_app_user.sh:/docker-entrypoint-initdb.d/004_create_app_user.sh:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -p\"$$MYSQL_ROOT_PASSWORD\""]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 30s
+
+  web:
+    build: .
+    container_name: app_ci_v2_web
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
+      ConnectionStrings__DefaultConnection: "Server=${DB_HOST:-db};Port=${DB_PORT:-3306};Database=${DB_NAME:-app5p};User Id=${DB_USER:-root};Password=${DB_PASSWORD:-admin};"
+      DataProtection__KeysPath: ${DATA_PROTECTION_KEYS_PATH:-/root/.aspnet/DataProtection-Keys}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "${APP_HTTP_PORT:-5015}:5014"
+    volumes:
+      - app_ci_v2_keys:/root/.aspnet/DataProtection-Keys
+      - app_ci_v2_logs:/app/Logs
+
+volumes:
+  mysql_app_ci_data:
+  app_ci_v2_keys:
+  app_ci_v2_logs:

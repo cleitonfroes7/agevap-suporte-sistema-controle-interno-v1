@@ -1,0 +1,174 @@
+{
+    "tipo": "ato_parte_2",
+    "perguntas": [
+      {
+        "item": "24",
+        "elemento": "24- CHECKLIST PARTE 1 - RESPOSTA DO CONTROLE INTERNO",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "24.1 Com os devidos ajustes, se houver"}
+        ]
+      },
+      {
+        "item": "25",
+        "elemento": "25- DEVOLUTIVAS AO CONTROLE INTERNO",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "25.1 Houve alguma revisão e complementação?"}
+        ]
+      },
+      {
+        "item": "26",
+        "elemento": "26- ANÁLISE DAS DEVOLUTIVAS E CIÊNCIA DO C.I.",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "26.1 O setor deu ciência às revisões e complementações?"}
+        ]
+      },
+
+      {
+        "marco": "Resposta do Controle Interno - itens 24, 25 e 26",
+        "data_inicio": "",
+        "data_fim": "",
+        "tempo_dias": ""
+      },
+
+      {
+        "item": "27",
+        "elemento": "27- EDITAL DO ATO CONVOCATÓRIO",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "27.1 O edital foi numerado e assinado?"}
+        ]
+      },
+
+      {
+        "marco": "Ato Convocatório - item 27",
+        "data_inicio": "",
+        "data_fim": "",
+        "tempo_dias": ""
+      },
+
+      {
+        "item": "28",
+        "elemento": "28- AVISO DE SELEÇÃO DE PROPOSTAS F-0060",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "28.1 Apontamentos:"}
+        ]
+      },
+      {
+        "item": "29",
+        "elemento": "29- PUBLICAÇÃO DO ATO NOS JORNAIS",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "29.1 Foi publicado?"}
+        ]
+      },
+      {
+        "item": "30",
+        "elemento": "30- PUBLICAÇÃO DO ATO NO SITE",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "30.1 Foi publicado?"}
+        ]
+      },
+      {
+        "item": "31",
+        "elemento": "31- PUBLICAÇÃO DO ATO NO DIÁRIO OFICIAL",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "31.1 Foi publicado?"}
+        ]
+      },
+
+      {
+        "marco": "Aviso de Seleção de Propostas - itens 28, 29, 30 e 31",
+        "data_inicio": "",
+        "data_fim": "",
+        "tempo_dias": ""
+      },
+
+      
+      {
+        "item": "32",
+        "elemento": "32- DOCUMENTAÇÃO DO CERTAME",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "32.1 Os documentos foram rubricados?"},
+          {"pergunta": "32.2 Toda documentação do ato convocatório está no processo?"},
+          {"pergunta": "32.3 Outros apontamentos:"}
+        ]
+      },
+
+      {
+        "marco": "Documentação do Certame - item 32",
+        "data_inicio": "",
+        "data_fim": "",
+        "tempo_dias": ""
+      },
+
+      {
+        "item": "33",
+        "elemento": "33- PUBLICAÇÃO DO RESULTADO",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "33.1 Foi publicado no site da AGEVAP?"}
+        ]
+      },
+      {
+        "item": "34",
+        "elemento": "34- EVIDÊNCIAS DA ATUALIZAÇÃO DO PLANEJAMENTO DO PROCESSO ADMINISTRATIVO F-0248",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "34.1 Está atualizado no prazo correto?"},
+          {"pergunta": "34.2 As etapas foram cumpridas no prazo? Caso não, possui justificativa e plano de ação?"},
+          {"pergunta": "34.3 Está assinado?"},
+          {"pergunta": "34.4 Outros apontamentos:"}
+        ]
+      },
+      {
+        "item": "35",
+        "elemento": "35- ANÁLISE JURÍDICA",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "35.1 Há apontamentos no parecer jurídico?"}
+        ]
+      },
+      {
+        "item": "36",
+        "elemento": "36- ENVIO PARA O CONTROLE INTERNO",
+        "nup": "",
+        "análise": "",
+        "descricao": "",
+        "sub_perguntas": [
+          {"pergunta": "36.1 Folha de Informação."}
+        ]
+      }
+    ]
+  }
+  

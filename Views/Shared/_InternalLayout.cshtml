@@ -1,0 +1,116 @@
+@{
+    string MapearPerfil(string? perfil) => perfil switch
+    {
+        "USER_ADM" => "Administrador",
+        "USER_PADRAO" => "Usuário padrão",
+        "USER_CI" => "Controle Interno",
+        _ => "Usuário"
+    };
+
+    var pageTitle = ViewData["Title"] as string ?? "Portal de Controle Interno";
+    var pageDescription = ViewData["PageDescription"] as string ?? "Ambiente interno para gestão de processos, checklists e indicadores.";
+    var currentUserName = User?.Identity?.Name ?? "Usuário";
+    var currentUserPerfil = MapearPerfil(User?.FindFirst("perfil")?.Value ?? User?.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value);
+    var nameParts = currentUserName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+    var userInitials = string.Concat(nameParts.Take(2).Select(part => char.ToUpperInvariant(part[0])));
+    if (string.IsNullOrWhiteSpace(userInitials))
+    {
+        userInitials = "U";
+    }
+}
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@pageTitle</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style_novo_checklist.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/static/csrf.js"></script>
+    @RenderSection("Head", required: false)
+</head>
+<body>
+    <div class="app-layout">
+        @await Html.PartialAsync("_InternalSidebar")
+        <main class="main-content">
+            <div class="workspace-topbar">
+                <div class="workspace-topbar__left">
+                    <div class="workspace-topbar__title-group">
+                        <strong>@pageTitle</strong>
+                        <span>@pageDescription</span>
+                    </div>
+                </div>
+                <div class="workspace-topbar__right">
+                    <div class="workspace-topbar__profile">
+                        <div class="workspace-topbar__avatar">@userInitials</div>
+                        <div class="workspace-topbar__profile-copy">
+                            <span>@currentUserName</span>
+                            <small>@currentUserPerfil</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @RenderBody()
+            <footer class="workspace-footer">
+                <div>
+                    <strong>@pageTitle</strong>
+                    <span>@pageDescription</span>
+                </div>
+                <div class="workspace-footer__meta">
+                    <span>Padrão visual unificado</span>
+                    <span>Interface corporativa</span>
+                </div>
+            </footer>
+        </main>
+    </div>
+
+    <script>
+        (function () {
+            const sidebarStorageKey = 'portal-sidebar-collapsed';
+            const root = document.documentElement;
+            const layout = document.querySelector('.app-layout');
+            const sidebarToggle = document.getElementById('sidebarToggle');
+
+            function applySidebarState(collapsed) {
+                if (!layout) {
+                    return;
+                }
+
+                layout.classList.toggle('app-layout--sidebar-collapsed', collapsed);
+
+                if (sidebarToggle) {
+                    sidebarToggle.setAttribute('aria-expanded', collapsed ? 'false' : 'true');
+                    sidebarToggle.setAttribute('title', collapsed ? 'Expandir menu' : 'Recolher menu');
+                }
+            }
+
+            const savedSidebarState = localStorage.getItem(sidebarStorageKey) === 'true';
+
+            root.setAttribute('data-theme', 'light');
+            applySidebarState(savedSidebarState);
+
+            if (sidebarToggle) {
+                sidebarToggle.addEventListener('click', function () {
+                    const nextCollapsed = !layout.classList.contains('app-layout--sidebar-collapsed');
+                    localStorage.setItem(sidebarStorageKey, String(nextCollapsed));
+                    applySidebarState(nextCollapsed);
+                });
+            }
+
+            const logoutLink = document.getElementById('sidebarLogoutLink');
+            const logoutForm = document.getElementById('sidebarLogoutForm');
+            if (logoutLink && logoutForm) {
+                logoutLink.addEventListener('click', function (event) {
+                    event.preventDefault();
+                    logoutForm.submit();
+                });
+            }
+        })();
+    </script>
+
+    @RenderSection("Scripts", required: false)
+</body>
+</html>

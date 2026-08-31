@@ -1,0 +1,106 @@
+{
+  "tipo": "gestor-unico",
+  "perguntas": [
+    {
+      "item": "1",
+      "elemento": "1 - PROTOCOLO DO PROCESSO E FICHA DE ABERTURA F-0253",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "2",
+      "elemento": "2 - ORIGEM DA DEMANDA",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "3",
+      "elemento": "3 - NORMA INTERNA DE NOMEAÇÃO DO GESTOR DO PROCESSO ADMINISTRATIVO",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "4",
+      "elemento": "4 - DOCUMENTO DE FORMALIZAÇÃO DA DEMANDA F-0263",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "5",
+      "elemento": "5 - PLANEJAMENTO DO PROCESSO ADMINISTRATIVO F-0248",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "6",
+      "elemento": "6 - ESTUDO TÉCNICO PRELIMINAR F-0262",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "7",
+      "elemento": "7 - SOLICITAÇÃO DE PARECER DO SETOR DE PATRIMÔNIO SOBRE CLASSIFICAÇÃO DE BEM PERMANENTE",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "8",
+      "elemento": "8 - RESPOSTA QUANTO A CLASSIFICAÇÃO DO BEM",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "9",
+      "elemento": "9 - AUTORIZAÇÃO DO CONSELHO DE ADMINISTRAÇÃO DA AGEVAP - CA",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "10",
+      "elemento": "10 - TERMO DE REFERÊNCIA DO-0100 OU TERMO DE REFERÊNCIA SIMPLIFICADO D-0264",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "11",
+      "elemento": "11 - PESQUISA DE PREÇO DE MERCADO / REALIZAÇÃO DE COTAÇÕES / ORÇAMENTOS",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "12",
+      "elemento": "12 - PLANILHA ORÇAMENTÁRIA / QUADRO COMPARATIVO PRELIMINAR F-0267",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "13",
+      "elemento": "13 - SOLICITAÇÃO DA COMPRA INCLUINDO A JUSTIFICATIVA DE PREÇO F-0265",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    },
+    {
+      "item": "14",
+      "elemento": "14 - ATUALIZAÇÃO DO PLANEJAMENTO DO PROCESSO ADMINISTRATIVO F-0248",
+      "sub_perguntas": [
+        {"pergunta": ""}
+      ]
+    }
+  ]
+}

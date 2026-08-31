@@ -1,0 +1,1407 @@
+﻿@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Dashboard Cronoanálise";
+    ViewData["PageDescription"] = "Análise temporal, desempenho dos processos e composição das fases.";
+    ViewData["ActiveNav"] = "dashboard-crono";
+}
+
+@section Head {
+    <link rel="stylesheet" href="/static/style_dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        .info-tip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1px solid #cbd5f5;
+            color: #1d4ed8;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: help;
+            background: #eef2ff;
+        }
+    </style>
+}
+
+<section class="dashboard-shell dashboard-crono">
+    <header class="page-header">
+        <div>
+            <h1 class="page-header__title">Dashboard Cronoanálise</h1>
+            <p class="page-header__subtitle">Análise temporal, desempenho dos processos e composição das fases.</p>
+            <div class="page-header__meta">
+                <span class="stat-badge">Lead time</span>
+                <span class="stat-badge">Leitura executiva</span>
+                <span class="stat-badge stat-badge--warning">Gargalos prioritários</span>
+            </div>
+        </div>
+    </header>
+
+    <nav class="dashboard-section-nav" aria-label="Navegação do dashboard" role="tablist">
+        <button type="button" class="dashboard-section-nav__link is-active" data-dashboard-tab="bloco-crono-resumo" role="tab" aria-selected="true">Resumo Executivo</button>
+        <button type="button" class="dashboard-section-nav__link" data-dashboard-tab="bloco-crono-diagnostico" role="tab" aria-selected="false">Diagnóstico de Gargalos</button>
+    </nav>
+
+    <section class="dashboard-inline-filters">
+        <div class="content-card__header">
+            <div>
+                <h2 class="content-card__title">Filtros analíticos</h2>
+                <p class="content-card__subtitle">Cruze tempo, gargalos e volume por competência, área e modalidade.</p>
+            </div>
+        </div>
+        <div class="content-card__body">
+            <div class="dashboard-filters dashboard-filters--reference">
+                    <div class="dashboard-filter">
+                    <label class="dashboard-filter__label" for="cronoArea">Área</label>
+                    <select id="cronoArea" class="dashboard-filter__control">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="dashboard-filter">
+                    <label class="dashboard-filter__label" for="cronoModalidade">Modalidade</label>
+                    <select id="cronoModalidade" class="dashboard-filter__control">
+                        <option value="">Todas</option>
+                    </select>
+                </div>
+                <div class="dashboard-filter">
+                    <label class="dashboard-filter__label" for="cronoDataInicio">Período inicial</label>
+                    <input id="cronoDataInicio" type="date" class="dashboard-filter__control" />
+                </div>
+                <div class="dashboard-filter">
+                    <label class="dashboard-filter__label" for="cronoDataFim">Período final</label>
+                    <input id="cronoDataFim" type="date" class="dashboard-filter__control" />
+                </div>
+                <div class="dashboard-filter dashboard-filter--actions">
+                    <span class="dashboard-filter__label">Ações</span>
+                    <div class="dashboard-filter__actions">
+                        <button type="button" class="dashboard-filter__button" id="cronoLimparFiltros">Limpar</button>
+                        <button type="button" class="dashboard-filter__button dashboard-filter__button--primary" id="cronoAplicarFiltros">Aplicar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="dashboard-filter__hint" id="cronoFiltroResumo">Sem filtros aplicados.</div>
+            <div class="dashboard-filter__active" id="cronoFiltrosAtivos"></div>
+        </div>
+    </section>
+
+
+    <section class="dashboard-block is-active" id="bloco-crono-resumo" data-dashboard-panel="bloco-crono-resumo" role="tabpanel">
+        <header class="dashboard-block__header">
+            <div>
+                <h2 class="dashboard-block__title">Resumo Executivo</h2>
+                <p class="dashboard-block__subtitle">Leitura rápida do período, comportamento do lead time e sinais mais relevantes da operação.</p>
+            </div>
+        </header>
+
+        <section class="content-card">
+            <div class="content-card__header">
+                <div>
+                    <h2 class="content-card__title">Resumo cronológico</h2>
+                    <p class="content-card__subtitle">Indicadores consolidados do comportamento temporal dos processos avaliados.</p>
+                </div>
+            </div>
+            <div class="content-card__body">
+                <section class="dashboard-overview-grid">
+                    <div class="dashboard-metrics dashboard-metrics--reference">
+                        <article class="metric-card">
+                            <span class="metric-card__title">Processos analisados</span>
+                            <span class="metric-card__value" id="totalProcessos">Carregando...</span>
+                            <span class="metric-card__meta">Base consolidada do período filtrado</span>
+                        </article>
+                        <article class="metric-card">
+                            <span class="metric-card__title">Tempo médio de processo</span>
+                            <span class="metric-card__value" id="leadTimeMedio">Carregando...</span>
+                            <span class="metric-card__meta">Ritmo médio da operação</span>
+                        </article>
+                        <article class="metric-card metric-card--warning-soft">
+                            <span class="metric-card__title">Tempo alto de processo (P90)</span>
+                            <span class="metric-card__value" id="leadTimeP90">Carregando...</span>
+                            <span class="metric-card__meta">Casos mais lentos do conjunto</span>
+                        </article>
+                        <article class="metric-card metric-card--danger-soft">
+                            <span class="metric-card__title">Fase gargalo (P90)</span>
+                            <span class="metric-card__value" id="faseGargalo">Carregando...</span>
+                            <span class="metric-card__meta">Etapa com maior pressão de tempo</span>
+                        </article>
+                    </div>
+
+                    <aside class="dashboard-insights-card">
+                        <div class="dashboard-insights-card__header">
+                            <h2>Leitura executiva</h2>
+                        </div>
+                        <div class="dashboard-insights-card__body">
+                            <div class="dashboard-insight-item dashboard-insight-item--accent">
+                                <span class="dashboard-insight-item__dot"></span>
+                                <div>
+                                    <strong>Lead time médio</strong>
+                                    <p>Mostra o comportamento normal da operação no período selecionado.</p>
+                                </div>
+                            </div>
+                            <div class="dashboard-insight-item dashboard-insight-item--warning">
+                                <span class="dashboard-insight-item__dot"></span>
+                                <div>
+                                    <strong>P90 de tempo</strong>
+                                    <p>Expõe os processos mais lentos e ajuda a localizar atrasos relevantes.</p>
+                                </div>
+                            </div>
+                            <div class="dashboard-insight-item dashboard-insight-item--danger">
+                                <span class="dashboard-insight-item__dot"></span>
+                                <div>
+                                    <strong>Fase gargalo</strong>
+                                    <p>Aponta onde priorizar análise e ação corretiva.</p>
+                                </div>
+                            </div>
+                            <div class="dashboard-insight-link">
+                                <span>Leitura rápida</span>
+                                <small>Se a média cair e o P90 subir, poucos processos estão travando muito.</small>
+                            </div>
+                        </div>
+                    </aside>
+                </section>
+            </div>
+        </section>
+
+        <section class="content-card">
+            <div class="content-card__header">
+                <div>
+                    <h2 class="content-card__title">Evolução e comparativos</h2>
+                    <p class="content-card__subtitle">Acompanhe a evolução do tempo e compare o desempenho entre as fases.</p>
+                </div>
+            </div>
+            <div class="content-card__body">
+                <div class="chart-grid chart-grid--executive-crono">
+                    <article class="chart-panel chart-panel--wide">
+                        <div class="chart-panel__header chart-panel__header--light">
+                            <div>
+                                <h3 class="chart-panel__title">Evolução do tempo do processo</h3>
+                                <p class="chart-panel__subtitle">Lead time total e leitura mensal do comportamento dos processos.</p>
+                            </div>
+                        </div>
+                        <div class="chart-panel__body">
+                            <div id="evolucaoChart" class="chart-panel__canvas chart-container"></div>
+                        </div>
+                    </article>
+                    <article class="chart-panel chart-panel--sixty">
+                        <div class="chart-panel__header chart-panel__header--light">
+                            <div>
+                                <h3 class="chart-panel__title">Distribuição do tempo por fase</h3>
+                                <p class="chart-panel__subtitle">Peso relativo das fases no tempo médio consolidado do período.</p>
+                            </div>
+                        </div>
+                        <div class="chart-panel__body">
+                            <div id="tempoMedioFaseChart" class="chart-panel__canvas chart-container"></div>
+                        </div>
+                    </article>
+                    <article class="chart-panel chart-panel--forty">
+                        <div class="chart-panel__header chart-panel__header--light">
+                            <div>
+                                <h3 class="chart-panel__title">Tempo alto por fase (P90)</h3>
+                                <p class="chart-panel__subtitle">Fases com maior concentração de atrasos extremos.</p>
+                            </div>
+                        </div>
+                        <div class="chart-panel__body">
+                            <div id="tempoDistribuicaoResumoChart" class="chart-panel__canvas chart-container"></div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </section>
+
+    <section class="dashboard-block" id="bloco-crono-diagnostico" data-dashboard-panel="bloco-crono-diagnostico" role="tabpanel" hidden>
+        <header class="dashboard-block__header">
+            <div>
+                <h2 class="dashboard-block__title">Diagnóstico de Gargalos</h2>
+                <p class="dashboard-block__subtitle">Camada analítica para localizar pressão por fase, composição do tempo e impacto do volume mensal.</p>
+            </div>
+        </header>
+
+        <section class="content-card">
+            <div class="content-card__header">
+                <div>
+                    <h2 class="content-card__title">Composição das fases</h2>
+                    <p class="content-card__subtitle">Tempo médio por fase, volume de processos e leitura de gargalos ao longo dos meses.</p>
+                </div>
+            </div>
+            <div class="content-card__body">
+                <div class="chart-grid chart-grid--composition">
+                    <article class="chart-panel">
+                        <div class="chart-panel__header chart-panel__header--light">
+                            <div>
+                                <h3 class="chart-panel__title">Tempo médio por fase</h3>
+                                <p class="chart-panel__subtitle">Mostra onde o processo consome mais dias em média.</p>
+                            </div>
+                        </div>
+                        <div class="chart-panel__body">
+                            <div id="totalDiasPorFaseChart" class="chart-panel__canvas chart-container"></div>
+                        </div>
+                    </article>
+                    <article class="chart-panel">
+                        <div class="chart-panel__header chart-panel__header--light">
+                            <div>
+                                <h3 class="chart-panel__title">Volume de processos por mês</h3>
+                                <p class="chart-panel__subtitle">Ajuda a relacionar carga mensal e variação do tempo.</p>
+                            </div>
+                        </div>
+                        <div class="chart-panel__body">
+                            <div id="evolucaoTempoMedioTotalChart" class="chart-panel__canvas chart-container"></div>
+                        </div>
+                    </article>
+                </div>
+            </div>
+        </section>
+    </section>
+</section>
+
+@section Scripts {
+    <script>
+    let cronoRequestId = 0;
+
+    const cronoFilters = {
+        area: '',
+        modalidade: '',
+        dataInicio: '',
+        dataFim: '',
+        fase: ''
+    };
+
+    function buildCronoFilterQuery() {
+        const params = new URLSearchParams();
+        Object.entries(cronoFilters).forEach(([key, value]) => {
+            if (value) {
+                params.set(key, value);
+            }
+        });
+        const query = params.toString();
+        return query ? `?${query}` : '';
+    }
+
+    function hydrateCronoFiltersFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        cronoFilters.area = params.get('area') || '';
+        cronoFilters.modalidade = params.get('modalidade') || '';
+        cronoFilters.dataInicio = params.get('dataInicio') || '';
+        cronoFilters.dataFim = params.get('dataFim') || '';
+        cronoFilters.fase = params.get('fase') || '';
+    }
+
+    function syncCronoFiltersToInputs() {
+        const map = {
+            cronoArea: cronoFilters.area,
+            cronoModalidade: cronoFilters.modalidade,
+            cronoDataInicio: cronoFilters.dataInicio,
+            cronoDataFim: cronoFilters.dataFim
+        };
+        Object.entries(map).forEach(([id, value]) => {
+            const el = document.getElementById(id);
+            if (el) el.value = value;
+        });
+    }
+
+    function syncInputsToCronoFilters() {
+        cronoFilters.area = document.getElementById('cronoArea')?.value || '';
+        cronoFilters.modalidade = document.getElementById('cronoModalidade')?.value || '';
+        cronoFilters.dataInicio = document.getElementById('cronoDataInicio')?.value || '';
+        cronoFilters.dataFim = document.getElementById('cronoDataFim')?.value || '';
+    }
+
+    function persistCronoFiltersInUrl() {
+        const params = new URLSearchParams();
+        Object.entries(cronoFilters).forEach(([key, value]) => {
+            if (value) params.set(key, value);
+        });
+        const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
+        window.history.replaceState({}, '', nextUrl);
+    }
+
+    async function fetchCronoJson(url) {
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`Falha ao buscar ${url}`);
+        return response.json();
+    }
+
+    function preencherSelectCrono(id, values, defaultLabel) {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const atual = select.value;
+        select.innerHTML = `<option value="">${defaultLabel}</option>` +
+            values.map(value => `<option value="${value}">${value}</option>`).join('');
+        select.value = values.includes(atual) ? atual : '';
+    }
+
+    function atualizarResumoFiltrosCrono() {
+        const partes = [];
+        if (cronoFilters.area) partes.push(`Área: ${cronoFilters.area}`);
+        if (cronoFilters.modalidade) partes.push(`Modalidade: ${cronoFilters.modalidade}`);
+        if (cronoFilters.dataInicio || cronoFilters.dataFim) {
+            partes.push(`Período: ${cronoFilters.dataInicio || '...'} até ${cronoFilters.dataFim || '...'}`);
+        }
+        if (cronoFilters.fase) partes.push(`Fase: ${cronoFilters.fase}`);
+        const resumo = document.getElementById('cronoFiltroResumo');
+        if (resumo) {
+            resumo.textContent = partes.length ? partes.join(' • ') : 'Sem filtros aplicados.';
+            resumo.style.display = partes.length ? 'block' : 'none';
+        }
+    }
+
+    function renderCronoActiveFilterChips() {
+        const container = document.getElementById('cronoFiltrosAtivos');
+        if (!container) return;
+
+        const chips = [];
+        if (cronoFilters.area) chips.push({ key: 'area', label: `Área: ${cronoFilters.area}` });
+        if (cronoFilters.modalidade) chips.push({ key: 'modalidade', label: `Modalidade: ${cronoFilters.modalidade}` });
+        if (cronoFilters.dataInicio || cronoFilters.dataFim) chips.push({ key: 'periodo', label: `Período: ${cronoFilters.dataInicio || '...'} até ${cronoFilters.dataFim || '...'}` });
+        if (cronoFilters.fase) chips.push({ key: 'fase', label: `Fase: ${cronoFilters.fase}` });
+
+        container.innerHTML = chips.map(chip => `
+            <span class="dashboard-filter__chip">
+                ${chip.label}
+                <button type="button" data-remove-crono-filter="${chip.key}" aria-label="Remover filtro">&times;</button>
+            </span>
+        `).join('');
+
+        container.querySelectorAll('[data-remove-crono-filter]').forEach(button => {
+            button.addEventListener('click', function () {
+                const key = this.getAttribute('data-remove-crono-filter');
+                if (key === 'periodo') {
+                    cronoFilters.dataInicio = '';
+                    cronoFilters.dataFim = '';
+                    const inicio = document.getElementById('cronoDataInicio');
+                    const fim = document.getElementById('cronoDataFim');
+                    if (inicio) inicio.value = '';
+                    if (fim) fim.value = '';
+                } else if (key) {
+                    cronoFilters[key] = '';
+                    const map = {
+                        area: 'cronoArea',
+                        modalidade: 'cronoModalidade'
+                    };
+                    const inputId = map[key];
+                    if (inputId) {
+                        const input = document.getElementById(inputId);
+                        if (input) input.value = '';
+                    }
+                }
+                carregarDadosDashboard();
+            });
+        });
+    }
+
+    async function carregarFiltrosCrono() {
+        const data = await fetchCronoJson('/api/dashboard/filtros');
+        preencherSelectCrono('cronoArea', data.areas || [], 'Todas');
+        preencherSelectCrono('cronoModalidade', data.modalidades || [], 'Todas');
+    }
+
+    document.addEventListener('DOMContentLoaded', async function() {
+      ensureCronoVisualShells();
+      hydrateCronoFiltersFromUrl();
+      await carregarFiltrosCrono();
+      syncCronoFiltersToInputs();
+      document.getElementById('cronoAplicarFiltros')?.addEventListener('click', function () {
+          syncInputsToCronoFilters();
+          carregarDadosDashboard();
+      });
+      ['cronoArea', 'cronoModalidade', 'cronoDataInicio', 'cronoDataFim'].forEach(id => {
+          document.getElementById(id)?.addEventListener('change', function () {
+              syncInputsToCronoFilters();
+              carregarDadosDashboard();
+          });
+      });
+      document.getElementById('cronoLimparFiltros')?.addEventListener('click', function () {
+          ['cronoArea', 'cronoModalidade', 'cronoDataInicio', 'cronoDataFim'].forEach(id => {
+              const el = document.getElementById(id);
+              if (el) el.value = '';
+          });
+          cronoFilters.area = '';
+          cronoFilters.modalidade = '';
+          cronoFilters.dataInicio = '';
+          cronoFilters.dataFim = '';
+          cronoFilters.fase = '';
+          carregarDadosDashboard();
+      });
+      atualizarResumoFiltrosCrono();
+      carregarDadosDashboard();
+    });
+
+    function enhanceCronoMetricCards() {
+        const cards = Array.from(document.querySelectorAll('.dashboard-metrics .metric-card'));
+        const configs = [
+            { cls: 'metric-card--spark metric-card--violet', icon: 'fa-folder-tree', sparkId: 'sparkProcessos', footer: 'Base acompanhada' },
+            { cls: 'metric-card--spark metric-card--cyan', icon: 'fa-timeline', sparkId: 'sparkLead', footer: 'Tempo médio' },
+            { cls: 'metric-card--spark metric-card--indigo', icon: 'fa-bolt', sparkId: 'sparkP90', footer: 'Picos operacionais' },
+            { cls: 'metric-card--spark metric-card--slim', icon: 'fa-route', sparkId: 'sparkGargalo', footer: 'Fase crítica' }
+        ];
+
+        cards.forEach((card, index) => {
+            const title = card.querySelector('.metric-card__title');
+            const value = card.querySelector('.metric-card__value');
+            if (!title || !value || card.querySelector('.metric-card__header')) {
+                return;
+            }
+
+            const config = configs[index];
+            if (!config) {
+                return;
+            }
+            card.className = `metric-card ${config.cls}`;
+            title.insertAdjacentHTML('beforebegin', `<div class="metric-card__header"></div>`);
+            const header = card.querySelector('.metric-card__header');
+            header.appendChild(title);
+            header.insertAdjacentHTML('beforeend', `<span class="metric-card__chip"><i class="fas ${config.icon}"></i></span>`);
+            value.insertAdjacentHTML('afterend', `<div id="${config.sparkId}" class="metric-card__spark"></div><span class="metric-card__footer">${config.footer}</span>`);
+        });
+    }
+
+    function ensureCronoVisualShells() {
+        const metrics = document.querySelector('.dashboard-metrics--reference');
+        if (metrics && !document.getElementById('maiorTempoRegistrado')) {
+            metrics.insertAdjacentHTML('beforeend', `
+                <article class="metric-card metric-card--success-soft">
+                    <span class="metric-card__title">Maior tempo registrado</span>
+                    <span class="metric-card__value" id="maiorTempoRegistrado">Carregando...</span>
+                    <span class="metric-card__meta">Maior duração identificada no recorte</span>
+                </article>
+            `);
+        }
+
+        const resumoCard = document.querySelector('#bloco-crono-resumo .content-card');
+        if (resumoCard && !document.querySelector('.dashboard-insight-strip')) {
+            resumoCard.insertAdjacentHTML('afterend', `
+                <section class="content-card content-card--strip">
+                    <div class="dashboard-insight-strip">
+                        <article class="dashboard-insight-strip__item dashboard-insight-strip__item--danger">
+                            <span class="dashboard-insight-strip__icon"><i class="fas fa-bullseye"></i></span>
+                            <div>
+                                <strong id="cronoInsightP90Titulo">Carregando...</strong>
+                                <p id="cronoInsightP90Texto">Aguardando dados do período.</p>
+                            </div>
+                        </article>
+                        <article class="dashboard-insight-strip__item dashboard-insight-strip__item--warning">
+                            <span class="dashboard-insight-strip__icon"><i class="fas fa-clock"></i></span>
+                            <div>
+                                <strong id="cronoInsightMediaTitulo">Carregando...</strong>
+                                <p id="cronoInsightMediaTexto">Aguardando consolidação da média.</p>
+                            </div>
+                        </article>
+                        <article class="dashboard-insight-strip__item dashboard-insight-strip__item--accent">
+                            <span class="dashboard-insight-strip__icon"><i class="fas fa-diagram-project"></i></span>
+                            <div>
+                                <strong id="cronoInsightFaseTitulo">Carregando...</strong>
+                                <p id="cronoInsightFaseTexto">Aguardando leitura das fases.</p>
+                            </div>
+                        </article>
+                        <article class="dashboard-insight-strip__item dashboard-insight-strip__item--success">
+                            <span class="dashboard-insight-strip__icon"><i class="fas fa-chart-line"></i></span>
+                            <div>
+                                <strong id="cronoInsightVolumeTitulo">Carregando...</strong>
+                                <p id="cronoInsightVolumeTexto">Aguardando leitura do volume.</p>
+                            </div>
+                        </article>
+                    </div>
+                </section>
+            `);
+        }
+
+        const diagnosticoCard = document.querySelector('#bloco-crono-diagnostico .content-card');
+        if (diagnosticoCard && !document.getElementById('tempoPorAreaChart')) {
+            diagnosticoCard.insertAdjacentHTML('afterend', `
+                <section class="dashboard-bottom-grid">
+                    <article class="chart-panel">
+                        <div class="chart-panel__header chart-panel__header--light">
+                            <div>
+                                <h3 class="chart-panel__title">Tempo por Área (média)</h3>
+                                <p class="chart-panel__subtitle">Média de dias por Área responsável no recorte atual.</p>
+                            </div>
+                        </div>
+                        <div class="chart-panel__body">
+                            <div id="tempoPorAreaChart" class="chart-panel__canvas chart-container"></div>
+                        </div>
+                    </article>
+                    <article class="content-card dashboard-summary-card">
+                        <div class="content-card__header">
+                            <div>
+                                <h2 class="content-card__title">Resumo do desempenho</h2>
+                                <p class="content-card__subtitle">Leitura sintética dos principais indicadores de tempo.</p>
+                            </div>
+                        </div>
+                        <div class="content-card__body">
+                            <div class="dashboard-summary-list" id="cronoResumoDesempenho"></div>
+                        </div>
+                    </article>
+                </section>
+            `);
+        }
+    }
+
+    function renderCronoSpark(targetId, series, color) {
+        const target = document.getElementById(targetId);
+        if (!target) {
+            return;
+        }
+
+        destroyChart(target);
+        target.innerHTML = '';
+
+        renderApexChart(target, {
+            chart: {
+                type: 'area',
+                height: 58,
+                sparkline: { enabled: true },
+                toolbar: { show: false }
+            },
+            series: [{ data: series }],
+            colors: [color],
+            stroke: { curve: 'smooth', width: 3 },
+            fill: {
+                type: 'gradient',
+                gradient: { shadeIntensity: 0.35, opacityFrom: 0.55, opacityTo: 0.08, stops: [0, 100] }
+            },
+            tooltip: { enabled: false },
+            dataLabels: { enabled: false }
+        });
+    }
+
+    const MAPA_FASES_CRONO = {
+        aberturadoprocesso: 'Abertura do Processo',
+        etapaspreliminares: 'Etapas preliminares',
+        consultaaopatrimonio: 'Consulta ao patrimonio',
+        elaboracaodotdr: 'Elaboracao do TdR',
+        formacaodoprecoreferencia: 'Formacao do preco de referencia',
+        dotacaoorcamentaria: 'Dotacao Orcamentaria',
+        elaboracaodaminutadoedital: 'Elaboracao da Minuta do Edital',
+        analisejuridicadafaseinternadopedidodecotacaodispensa: 'Analise Juridica da fase interna do pedido de cotacao / Dispensa',
+        analisejuridicadocertameoupedidodecotacao: 'Analise Juridica do certame ou pedido de cotacao',
+        controleinternochecklist1: 'Controle Interno - Checklist 1',
+        atoconvocatoriooupedidodecotacao: 'Ato Convocatorio ou pedido de cotacao',
+        atoconvocatorio: 'Ato Convocatorio',
+        avisodeselecaodepropostas: 'Aviso de Selecao de Propostas',
+        documentacaodocertame: 'Documentacao do Certame',
+        respostadocontroleinterno: 'Resposta do Controle Interno'
+    };
+
+    function normalizarChaveFase(nome) {
+        if (!nome) return '';
+
+        return String(nome)
+            .replace(/\s*-\s*item(?:ns?)?.*$/i, '')
+            .replace(/\s*-\s*itens?.*$/i, '')
+            .replace(/\s*-\s*\d+(?:[\.,]\d+)?\s*dias?$/i, '')
+            .replace(/checklist\s*1/gi, 'checklist1')
+            .replace(/tdr/gi, 'tdr')
+            .replace(/patrim[^a-z0-9]*nio/gi, 'patrimonio')
+            .replace(/jur[^a-z0-9]*dica/gi, 'juridica')
+            .replace(/convocat[^a-z0-9]*rio/gi, 'convocatorio')
+            .replace(/sele[^a-z0-9]*o/gi, 'selecao')
+            .replace(/documenta[^a-z0-9]*o/gi, 'documentacao')
+            .replace(/elabora[^a-z0-9]*o/gi, 'elaboracao')
+            .replace(/forma[^a-z0-9]*o/gi, 'formacao')
+            .replace(/pre[^a-z0-9]*o/gi, 'preco')
+            .replace(/refer[^a-z0-9]*ncia/gi, 'referencia')
+            .replace(/dota[^a-z0-9]*o/gi, 'dotacao')
+            .replace(/or[^a-z0-9]*ament[^a-z0-9]*ria/gi, 'orcamentaria')
+            .replace(/an[^a-z0-9]*lise/gi, 'analise')
+            .replace(/cota[^a-z0-9]*o/gi, 'cotacao')
+            .replace(/minuta/gi, 'minuta')
+            .replace(/controle\s+interno/gi, 'controleinterno')
+            .replace(/resposta\s+do\s+controle\s+interno/gi, 'respostadocontroleinterno')
+            .replace(/[^a-zA-Z0-9]+/g, '')
+            .toLowerCase()
+            .trim();
+    }
+
+    function limparNomeFase(nome) {
+        if (!nome) return '';
+        const chave = normalizarChaveFase(nome);
+        return MAPA_FASES_CRONO[chave] || String(nome)
+            .replace(/\s*-\s*item(?:ns?)?.*$/i, '')
+            .replace(/\s*-\s*itens?.*$/i, '')
+            .replace(/\s*-\s*\d+(?:[\.,]\d+)?\s*dias?$/i, '')
+            .replace(/\s{2,}/g, ' ')
+            .trim();
+    }
+
+    function destroyChart(target) {
+        if (target && target.__apexChartInstance) {
+            try {
+                target.__apexChartInstance.destroy();
+            } catch (_error) {
+            }
+            target.__apexChartInstance = null;
+        }
+    }
+
+    function renderApexChart(target, options) {
+        if (!target) return null;
+        destroyChart(target);
+        target.innerHTML = '';
+        const chart = new ApexCharts(target, options);
+        target.__apexChartInstance = chart;
+        chart.render();
+        return chart;
+    }
+
+    function formatarMesGrafico(valor) {
+        if (!valor) return '';
+        const partes = String(valor).split('-');
+        if (partes.length < 2) return String(valor);
+
+        const ano = partes[0];
+        const mes = Number(partes[1]);
+        const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+        if (!Number.isFinite(mes) || mes < 1 || mes > 12) return String(valor);
+        return `${meses[mes - 1]}/${String(ano).slice(-2)}`;
+    }
+
+    function formatarNumeroGrafico(valor, casas = 0) {
+        const numero = Number(valor);
+        if (!Number.isFinite(numero)) return '0';
+        return numero.toLocaleString('pt-BR', {
+            minimumFractionDigits: casas,
+            maximumFractionDigits: casas
+        });
+    }
+
+    function organizarLegendaDistribuicaoResumo() {
+        const container = document.querySelector('#tempoDistribuicaoResumoChart');
+        if (!container) return;
+
+        window.setTimeout(() => {
+            const legend = container.querySelector('.apexcharts-legend');
+            if (!legend) return;
+
+            const colunas = window.innerWidth >= 1500 ? 3 : 2;
+            legend.style.display = 'grid';
+            legend.style.gridTemplateColumns = `repeat(${colunas}, minmax(0, 1fr))`;
+            legend.style.alignItems = 'start';
+            legend.style.columnGap = '14px';
+            legend.style.rowGap = '8px';
+            legend.style.justifyItems = 'start';
+            legend.style.width = '100%';
+            legend.style.maxWidth = '100%';
+            legend.style.marginTop = '10px';
+
+            container.querySelectorAll('.apexcharts-legend-series').forEach(item => {
+                item.style.width = '100%';
+                item.style.margin = '0';
+                item.style.justifyContent = 'flex-start';
+                item.style.display = 'flex';
+                item.style.alignItems = 'center';
+            });
+
+            container.querySelectorAll('.apexcharts-legend-text').forEach(item => {
+                item.style.textAlign = 'left';
+                item.style.whiteSpace = 'normal';
+                item.style.lineHeight = '1.35';
+            });
+        }, 0);
+    }
+
+    function organizarLegendaTempoMedioFase() {
+        const container = document.querySelector('#totalDiasPorFaseChart');
+        if (!container) return;
+
+        window.setTimeout(() => {
+            const legend = container.querySelector('.apexcharts-legend');
+            if (!legend) return;
+
+            const colunas = window.innerWidth >= 1400 ? 3 : (window.innerWidth >= 980 ? 2 : 1);
+            legend.style.display = 'grid';
+            legend.style.gridTemplateColumns = `repeat(${colunas}, minmax(0, 1fr))`;
+            legend.style.alignItems = 'start';
+            legend.style.columnGap = '14px';
+            legend.style.rowGap = '8px';
+            legend.style.justifyItems = 'start';
+            legend.style.width = '100%';
+            legend.style.maxWidth = '100%';
+            legend.style.marginTop = '18px';
+            legend.style.padding = '0 8px 6px';
+
+            container.querySelectorAll('.apexcharts-legend-series').forEach(item => {
+                item.style.width = '100%';
+                item.style.margin = '0';
+                item.style.justifyContent = 'flex-start';
+                item.style.display = 'flex';
+                item.style.alignItems = 'flex-start';
+            });
+
+            container.querySelectorAll('.apexcharts-legend-text').forEach(item => {
+                item.style.textAlign = 'left';
+                item.style.whiteSpace = 'normal';
+                item.style.lineHeight = '1.3';
+                item.style.fontSize = '10px';
+            });
+        }, 0);
+    }
+
+    async function carregarDadosDashboard() {
+        const requestId = ++cronoRequestId;
+        try {
+            persistCronoFiltersInUrl();
+            atualizarResumoFiltrosCrono();
+            renderCronoActiveFilterChips();
+            const response = await fetch(`/api/dashboard/geral${buildCronoFilterQuery()}`);
+            if (!response.ok) throw new Error('Falha ao buscar dados do dashboard');
+
+            const data = await response.json();
+            if (requestId !== cronoRequestId) return;
+            const totalProcessos = typeof data.total_processos === 'number' && !isNaN(data.total_processos) ? data.total_processos : 0;
+            const leadTimeMedio = typeof data.lead_time_medio === 'number' && !isNaN(data.lead_time_medio) ? Math.round(data.lead_time_medio) : 0;
+            const leadTimeP90 = typeof data.lead_time_p90 === 'number' && !isNaN(data.lead_time_p90) ? Math.round(data.lead_time_p90) : 0;
+            const maiorTempoRegistrado = typeof data.maior_tempo_registrado === 'number' && !isNaN(data.maior_tempo_registrado) ? Math.round(data.maior_tempo_registrado) : 0;
+
+            document.getElementById('totalProcessos').textContent = totalProcessos.toString();
+            document.getElementById('leadTimeMedio').textContent = `${leadTimeMedio} dias`;
+            document.getElementById('leadTimeP90').textContent = `${leadTimeP90} dias`;
+            document.getElementById('faseGargalo').textContent = data.fase_gargalo ? limparNomeFase(data.fase_gargalo) : 'N/A';
+            const maiorTempoEl = document.getElementById('maiorTempoRegistrado');
+            if (maiorTempoEl) maiorTempoEl.textContent = `${maiorTempoRegistrado} dias`;
+
+            if (Array.isArray(data.tempo_por_fase) && data.tempo_por_fase.length > 0) {
+                carregarGraficoTempoMedioFase(data.tempo_por_fase);
+                carregarGraficoTempoMedioFasePizza(data.tempo_por_fase);
+                carregarGraficoDistribuicaoTempoResumo(data.tempo_por_fase);
+            }
+            if (Array.isArray(data.evolucao) && data.evolucao.length > 0) {
+                carregarGraficoEvolucao(data.evolucao);
+                carregarGraficoEvolucaoTempoMedioTotal(data.evolucao);
+            }
+            renderCronoInsightStrip(data, totalProcessos, leadTimeMedio, leadTimeP90, maiorTempoRegistrado);
+            renderTempoPorArea(data.tempo_por_area || []);
+            renderCronoResumoDesempenho(data, leadTimeMedio, leadTimeP90, maiorTempoRegistrado);
+        } catch (error) {
+            if (requestId !== cronoRequestId) return;
+            console.error('Erro ao carregar dados do dashboard:', error);
+            document.getElementById('totalProcessos').textContent = '0';
+            document.getElementById('leadTimeMedio').textContent = '0 dias';
+            document.getElementById('leadTimeP90').textContent = '0 dias';
+            document.getElementById('faseGargalo').textContent = 'N/A';
+            const maiorTempoEl = document.getElementById('maiorTempoRegistrado');
+            if (maiorTempoEl) maiorTempoEl.textContent = '0 dias';
+        }
+    }
+
+    function setCronoText(id, value) {
+        const el = document.getElementById(id);
+        if (el) el.textContent = value;
+    }
+
+    function renderCronoInsightStrip(data, totalProcessos, leadTimeMedio, leadTimeP90, maiorTempoRegistrado) {
+        setCronoText('cronoInsightP90Titulo', `P90 em ${leadTimeP90} dias`);
+        setCronoText('cronoInsightP90Texto', `10% dos processos levam mais de ${leadTimeP90} dias para concluir.`);
+        setCronoText('cronoInsightMediaTitulo', `Média atual: ${leadTimeMedio} dias`);
+        setCronoText('cronoInsightMediaTexto', `${totalProcessos} processos compõem a leitura média do recorte atual.`);
+        setCronoText('cronoInsightFaseTitulo', data.fase_gargalo ? limparNomeFase(data.fase_gargalo) : 'Sem fase crítica');
+        setCronoText('cronoInsightFaseTexto', data.fase_gargalo ? 'Essa fase concentra o maior impacto no tempo extremo (P90).' : 'Não foi possível identificar gargalo no período.');
+        const ultimoVolume = Array.isArray(data.evolucao) && data.evolucao.length ? (data.evolucao[data.evolucao.length - 1]?.total || 0) : 0;
+        setCronoText('cronoInsightVolumeTitulo', `Maior tempo: ${maiorTempoRegistrado} dias`);
+        setCronoText('cronoInsightVolumeTexto', `${ultimoVolume} processos concluídos no último mês visível da série.`);
+    }
+
+    function renderTempoPorArea(dados) {
+        const target = document.getElementById('tempoPorAreaChart');
+        if (!target) return;
+        destroyChart(target);
+        target.innerHTML = '';
+
+        if (!Array.isArray(dados) || !dados.length) {
+            target.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            return;
+        }
+
+        const top = [...dados].sort((a, b) => (b.media || 0) - (a.media || 0)).slice(0, 6);
+        renderApexChart(target, {
+            chart: { type: 'bar', height: 280, toolbar: { show: false } },
+            series: [{ name: 'Média (dias)', data: top.map(item => Math.round(item.media || 0)) }],
+            plotOptions: { bar: { horizontal: true, borderRadius: 6, distributed: true } },
+            colors: gerarCores(top.length),
+            xaxis: { categories: top.map(item => item.nome || 'Sem Área') },
+            dataLabels: { enabled: true, formatter: val => `${val} dias` },
+            legend: { show: false },
+            grid: { borderColor: '#e5e7eb' }
+        });
+    }
+
+    function renderCronoResumoDesempenho(data, leadTimeMedio, leadTimeP90, maiorTempoRegistrado) {
+        const container = document.getElementById('cronoResumoDesempenho');
+        if (!container) return;
+        const processos = typeof data.total_processos === 'number' ? data.total_processos : 0;
+        const fase = data.fase_gargalo ? limparNomeFase(data.fase_gargalo) : 'N/A';
+        container.innerHTML = `
+            <div class="dashboard-summary-row">
+                <div><strong>Tempo médio do processo</strong><span>Leitura base do período atual</span></div>
+                <div class="dashboard-summary-row__value">${leadTimeMedio} dias</div>
+            </div>
+            <div class="dashboard-summary-row">
+                <div><strong>Tempo médio P90</strong><span>Faixa dos processos mais lentos</span></div>
+                <div class="dashboard-summary-row__value">${leadTimeP90} dias</div>
+            </div>
+            <div class="dashboard-summary-row">
+                <div><strong>Processos concluídos</strong><span>Total considerado no cálculo</span></div>
+                <div class="dashboard-summary-row__value">${processos}</div>
+            </div>
+            <div class="dashboard-summary-row">
+                <div><strong>Maior tempo registrado</strong><span>Pico extremo do recorte</span></div>
+                <div class="dashboard-summary-row__value">${maiorTempoRegistrado} dias</div>
+            </div>
+            <div class="dashboard-summary-row">
+                <div><strong>Fase gargalo (P90)</strong><span>Principal etapa a ser atacada</span></div>
+                <div class="dashboard-summary-row__value">${fase}</div>
+            </div>
+        `;
+    }
+
+    function gerarCores(qtd) {
+        const paleta = ['#4F81BD', '#C0504D', '#9BBB59', '#8064A2', '#4BACC6', '#F79646', '#92A9CF', '#D99694', '#C3D69B', '#B1A0C7', '#93CDDD'];
+        const cores = [];
+        for (let i = 0; i < qtd; i++) cores.push(paleta[i % paleta.length]);
+        return cores;
+    }
+
+    function carregarGraficoTempoMedioFase(tempoMedioPorFase) {
+        if (!Array.isArray(tempoMedioPorFase) || tempoMedioPorFase.length === 0) {
+            const chartDiv = document.querySelector('#tempoMedioFaseChart');
+            if (chartDiv) chartDiv.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            return;
+        }
+
+        tempoMedioPorFase.sort((a, b) => b.p90 - a.p90);
+        const cores = gerarCores(tempoMedioPorFase.length);
+
+        const options = {
+            chart: { type: 'bar', height: 338, toolbar: { show: false } },
+            plotOptions: { bar: { horizontal: true, borderRadius: 6, dataLabels: { position: 'top' }, distributed: true } },
+            series: [{ name: 'P90 (dias)', data: tempoMedioPorFase.map(fase => Math.round(fase.p90)) }],
+            xaxis: {
+                categories: tempoMedioPorFase.map(fase => limparNomeFase(fase.nome)),
+                labels: { style: { fontSize: '13px' }, rotate: 0, rotateAlways: false, hideOverlappingLabels: false, trim: true },
+                axisBorder: { show: true, color: '#888' },
+                axisTicks: { show: true, color: '#888' }
+            },
+            yaxis: { title: { text: 'Fases' }, labels: { style: { fontSize: '13px' } } },
+            fill: { type: 'solid', colors: cores },
+            colors: cores,
+            dataLabels: {
+                enabled: true,
+                formatter: function (val) { return val + ' dias'; },
+                offsetY: -20,
+                style: { fontSize: '14px', colors: ['#333'] }
+            },
+            tooltip: {
+                y: {
+                    formatter: function (val, opts) {
+                        const idx = opts.dataPointIndex;
+                        const fase = tempoMedioPorFase[idx];
+                        return `${limparNomeFase(fase.nome)}: ${Math.round(fase.p90)} dias (P90)`;
+                    }
+                }
+            },
+            grid: { borderColor: '#eee', row: { colors: ['#f9f9f9', 'transparent'], opacity: 0.5 } },
+            legend: { show: false }
+        };
+
+        const chartDiv = document.querySelector('#tempoMedioFaseChart');
+        renderApexChart(chartDiv, options);
+    }
+
+    async function carregarGraficoTempoMedioFasePizza(tempoPorFase) {
+        try {
+            const chartElement = document.querySelector('#totalDiasPorFaseChart');
+            if (!chartElement) return;
+            if (!Array.isArray(tempoPorFase) || tempoPorFase.length === 0) {
+                chartElement.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+                return;
+            }
+
+            const mediasPorFase = tempoPorFase
+                .map(fase => {
+                    const total = typeof fase.total === 'number' ? fase.total : 0;
+                    const count = typeof fase.count === 'number' ? fase.count : 0;
+                    const media = count > 0 ? total / count : 0;
+                    return { nome: limparNomeFase(fase.nome), media, total, count };
+                })
+                .filter(fase => fase.count > 0);
+
+            if (mediasPorFase.length === 0) {
+                chartElement.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+                return;
+            }
+
+            const options = {
+                chart: {
+                    type: 'donut',
+                    height: 320,
+                    toolbar: { show: false },
+                    events: {
+                        dataPointSelection: function (_event, _chartContext, config) {
+                            const faseSelecionada = mediasPorFase?.[config.dataPointIndex]?.nome || '';
+                            if (!faseSelecionada) return;
+                            cronoFilters.fase = faseSelecionada === cronoFilters.fase ? '' : faseSelecionada;
+                            carregarDadosDashboard();
+                        }
+                    }
+                },
+                plotOptions: { pie: { donut: { size: '68%' }, offsetX: 0 } },
+                series: mediasPorFase.map(fase => Math.round(fase.media)),
+                labels: mediasPorFase.map(fase => fase.nome),
+                colors: gerarCores(mediasPorFase.length),
+                fill: { opacity: 0.95 },
+                dataLabels: {
+                    enabled: true,
+                    formatter: function (_value, opts) {
+                        const fase = mediasPorFase[opts.seriesIndex];
+                        if (!fase) return '';
+                        return fase.media >= 8 ? `${Math.round(fase.media)}d` : '';
+                    },
+                    style: {
+                        fontSize: '11px',
+                        fontWeight: 700,
+                        colors: ['#ffffff']
+                    },
+                    dropShadow: {
+                        enabled: false
+                    }
+                },
+                legend: {
+                    position: 'bottom',
+                    horizontalAlign: 'left',
+                    fontSize: '10px',
+                    width: 1000,
+                    offsetX: 0,
+                    offsetY: 10,
+                    itemMargin: { vertical: 6, horizontal: 10 },
+                    markers: { width: 11, height: 11, radius: 8 },
+                    labels: { formatter: function(label) { return limparNomeFase(label); } }
+                },
+                tooltip: {
+                    y: {
+                        formatter: function (val, opts) {
+                            const idx = opts.seriesIndex;
+                            const fase = mediasPorFase[idx];
+                            if (!fase) return '';
+                            return `${fase.nome}: ${fase.media.toFixed(1)} dias (n=${fase.count})`;
+                        }
+                    }
+                },
+                responsive: [{
+                    breakpoint: 1000,
+                    options: {
+                        chart: { width: '100%', height: 308 },
+                        plotOptions: { pie: { offsetX: 0 } },
+                        legend: { position: 'bottom', horizontalAlign: 'left', width: 320 }
+                    }
+                }]
+            };
+
+            renderApexChart(chartElement, options);
+            organizarLegendaTempoMedioFase();
+        } catch (error) {
+            console.error('Erro ao renderizar o gráfico de pizza de tempo médio por fase:', error);
+        }
+    }
+
+    function carregarGraficoEvolucao(dados) {
+        try {
+            if (!Array.isArray(dados) || dados.length === 0) {
+                const chartDiv = document.querySelector('#evolucaoChart');
+                if (chartDiv) chartDiv.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+                return;
+            }
+
+            const options = {
+                chart: { type: 'line', height: 276, toolbar: { show: false }, zoom: { enabled: false } },
+                series: [
+                    { name: 'Lead time médio', data: dados.map(item => Math.round(item.lead_time_medio)) },
+                    { name: 'Lead time P90', data: dados.map(item => Math.round(item.lead_time_p90)) }
+                ],
+                xaxis: { categories: dados.map(item => item.mes) },
+                stroke: { curve: 'smooth', width: 5 },
+                colors: ['#4F81BD', '#F79646'],
+                fill: { type: 'gradient', gradient: { shadeIntensity: 0.18, opacityFrom: 0.32, opacityTo: 0.06, stops: [0, 100] } },
+                markers: { size: 5, hover: { sizeOffset: 2 } },
+                tooltip: { theme: 'dark', shared: true, intersect: false },
+                grid: { borderColor: '#e2e8f0', strokeDashArray: 4 },
+                legend: { position: 'top' },
+                noData: { text: 'Sem dados para exibir' }
+            };
+
+            const chartDiv = document.querySelector('#evolucaoChart');
+            renderApexChart(chartDiv, options);
+        } catch (error) {
+            console.error('Erro ao renderizar o gráfico de evolução:', error);
+        }
+    }
+
+    function carregarGraficoEvolucaoTempoMedioTotal(evolucao) {
+        if (!Array.isArray(evolucao) || evolucao.length === 0) {
+            const chartDiv = document.querySelector('#evolucaoTempoMedioTotalChart');
+            if (chartDiv) chartDiv.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            return;
+        }
+        const cores = gerarCores(evolucao.length);
+        const options = {
+            chart: { type: 'bar', height: 248, toolbar: { show: false } },
+            series: [{ name: 'Processos concluídos', data: evolucao.map(item => item.total) }],
+            xaxis: { categories: evolucao.map(item => item.mes), labels: { style: { fontSize: '13px' } } },
+            plotOptions: { bar: { columnWidth: '55%', distributed: true, borderRadius: 6 } },
+            colors: cores,
+            fill: { type: 'solid', colors: cores },
+            tooltip: { shared: true, intersect: false },
+            legend: { show: false },
+            grid: { borderColor: '#eee' }
+        };
+        const chartDiv = document.querySelector('#evolucaoTempoMedioTotalChart');
+        renderApexChart(chartDiv, options);
+    }
+    </script>
+    <script>
+    ensureCronoVisualShells();
+    enhanceCronoMetricCards();
+
+    function palette() {
+        return {
+            text: '#475569',
+            grid: '#e2e8f0',
+            blue: '#003366',
+            orange: '#f97316'
+        };
+    }
+
+    gerarCores = function (qtd) {
+        const paleta = ['#1d4ed8', '#2563eb', '#3b82f6', '#6366f1', '#7c3aed', '#9333ea', '#c084fc', '#22c55e', '#f97316', '#facc15', '#ef4444'];
+        const cores = [];
+        for (let i = 0; i < qtd; i++) cores.push(paleta[i % paleta.length]);
+        return cores;
+    };
+
+    carregarGraficoTempoMedioFase = function (tempoMedioPorFase) {
+        if (!Array.isArray(tempoMedioPorFase) || tempoMedioPorFase.length === 0) {
+            const chartDiv = document.querySelector('#tempoMedioFaseChart');
+            if (chartDiv) chartDiv.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            return;
+        }
+
+        const p = palette();
+        tempoMedioPorFase.sort((a, b) => b.p90 - a.p90);
+        const cores = gerarCores(tempoMedioPorFase.length);
+        const maiorValor = Math.max(...tempoMedioPorFase.map(fase => Number(fase.p90) || 0), 0);
+
+        const chartDiv = document.querySelector('#tempoMedioFaseChart');
+        renderApexChart(chartDiv, {
+            chart: {
+                type: 'bar',
+                width: '100%',
+                height: Math.max(360, tempoMedioPorFase.length * 26),
+                offsetX: 8,
+                toolbar: { show: false },
+                events: {
+                    dataPointSelection: function (_event, _chartContext, config) {
+                        const faseSelecionada = tempoMedioPorFase?.[config.dataPointIndex]?.nome || '';
+                        if (!faseSelecionada) return;
+                        cronoFilters.fase = faseSelecionada === cronoFilters.fase ? '' : faseSelecionada;
+                        carregarDadosDashboard();
+                    }
+                }
+            },
+            plotOptions: {
+                bar: {
+                    horizontal: true,
+                    borderRadius: 6,
+                    barHeight: '52%',
+                    dataLabels: { position: 'top' },
+                    distributed: true
+                }
+            },
+            series: [{ name: 'P90 (dias)', data: tempoMedioPorFase.map(fase => Math.round(fase.p90)) }],
+            xaxis: {
+                categories: tempoMedioPorFase.map(fase => limparNomeFase(fase.nome)),
+                min: 0,
+                max: Math.ceil(maiorValor * 1.12),
+                tickAmount: Math.min(6, Math.max(2, Math.ceil(maiorValor / 20))),
+                labels: {
+                    formatter: value => formatarNumeroGrafico(value),
+                    style: { fontSize: '11px', colors: p.text }
+                },
+                axisBorder: { show: true, color: p.grid },
+                axisTicks: { show: true, color: p.grid }
+            },
+            yaxis: {
+                title: { text: 'Fases' },
+                labels: {
+                    minWidth: 320,
+                    maxWidth: 320,
+                    align: 'left',
+                    offsetX: 8,
+                    style: { fontSize: '9px', colors: [p.text], fontWeight: 600 }
+                }
+            },
+            fill: { type: 'solid', colors: cores },
+            colors: cores,
+            dataLabels: {
+                enabled: true,
+                formatter: val => `${formatarNumeroGrafico(val)} dias`,
+                offsetX: 10,
+                style: { fontSize: '12px', colors: [p.text], fontWeight: 700 },
+                textAnchor: 'start'
+            },
+            tooltip: {
+                theme: 'dark',
+                y: { formatter: val => `${formatarNumeroGrafico(val)} dias` }
+            },
+            grid: {
+                borderColor: p.grid,
+                row: { colors: ['transparent', 'transparent'], opacity: 0.5 },
+                padding: { left: 0, right: 14 }
+            },
+            legend: { show: false }
+        });
+    };
+
+    carregarGraficoEvolucao = function (dados) {
+        try {
+            if (!Array.isArray(dados) || dados.length === 0) {
+                const chartDiv = document.querySelector('#evolucaoChart');
+                if (chartDiv) chartDiv.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+                return;
+            }
+
+            const p = palette();
+            const chartDiv = document.querySelector('#evolucaoChart');
+
+            renderApexChart(chartDiv, {
+                chart: { type: 'line', height: 276, toolbar: { show: false }, zoom: { enabled: false } },
+                series: [
+                    { name: 'Lead time médio', data: dados.map(item => Math.round(item.lead_time_medio)) },
+                    { name: 'Lead time P90', data: dados.map(item => Math.round(item.lead_time_p90)) }
+                ],
+                xaxis: {
+                    categories: dados.map(item => formatarMesGrafico(item.mes)),
+                    labels: { style: { colors: p.text } }
+                },
+                yaxis: {
+                    labels: {
+                        formatter: value => formatarNumeroGrafico(value),
+                        style: { colors: [p.text] }
+                    }
+                },
+                stroke: { curve: 'smooth', width: 5 },
+                colors: [p.blue, p.orange],
+                fill: { type: 'gradient', gradient: { shadeIntensity: 0.18, opacityFrom: 0.32, opacityTo: 0.06, stops: [0, 100] } },
+                markers: { size: 5, hover: { sizeOffset: 2 } },
+                tooltip: {
+                    theme: 'dark',
+                    shared: true,
+                    intersect: false,
+                    y: { formatter: val => `${formatarNumeroGrafico(val)} dias` }
+                },
+                grid: { borderColor: p.grid, strokeDashArray: 4 },
+                legend: { position: 'top' },
+                noData: { text: 'Sem dados para exibir' }
+            });
+        } catch (error) {
+            console.error('Erro ao renderizar o gráfico de evolução:', error);
+        }
+    };
+
+    carregarGraficoEvolucaoTempoMedioTotal = function (evolucao) {
+        if (!Array.isArray(evolucao) || evolucao.length === 0) {
+            const chartDiv = document.querySelector('#evolucaoTempoMedioTotalChart');
+            if (chartDiv) chartDiv.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            return;
+        }
+
+        const p = palette();
+        const cores = gerarCores(evolucao.length);
+        const chartDiv = document.querySelector('#evolucaoTempoMedioTotalChart');
+
+        renderApexChart(chartDiv, {
+            chart: { type: 'bar', height: 248, toolbar: { show: false } },
+            series: [{ name: 'Processos concluídos', data: evolucao.map(item => item.total) }],
+            xaxis: {
+                categories: evolucao.map(item => formatarMesGrafico(item.mes)),
+                labels: { style: { fontSize: '13px', colors: p.text } }
+            },
+            yaxis: {
+                labels: {
+                    formatter: value => formatarNumeroGrafico(value),
+                    style: { colors: [p.text] }
+                }
+            },
+            plotOptions: { bar: { columnWidth: '55%', distributed: true, borderRadius: 6 } },
+            colors: cores,
+            fill: { type: 'solid', colors: cores },
+            tooltip: {
+                shared: true,
+                intersect: false,
+                y: { formatter: val => formatarNumeroGrafico(val) }
+            },
+            legend: { show: false },
+            grid: { borderColor: p.grid }
+        });
+    };
+
+    carregarGraficoDistribuicaoTempoResumo = function (tempoPorFase) {
+        const chartDiv = document.querySelector('#tempoDistribuicaoResumoChart');
+        if (!chartDiv) return;
+
+        destroyChart(chartDiv);
+
+        if (!Array.isArray(tempoPorFase) || tempoPorFase.length === 0) {
+            chartDiv.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            return;
+        }
+
+        const distribuicao = tempoPorFase
+            .map(fase => {
+                const total = Number(fase.total) || 0;
+                const count = Number(fase.count) || 0;
+                const media = count > 0 ? total / count : 0;
+                return { nome: limparNomeFase(fase.nome), media };
+            })
+            .filter(fase => fase.media > 0)
+            .sort((a, b) => b.media - a.media)
+            .slice(0, 6);
+
+        if (!distribuicao.length) {
+            chartDiv.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            return;
+        }
+
+        renderApexChart(chartDiv, {
+            chart: { type: 'donut', height: 360, toolbar: { show: false } },
+            series: distribuicao.map(item => Math.round(item.media)),
+            labels: distribuicao.map(item => item.nome),
+            colors: gerarCores(distribuicao.length),
+            stroke: { width: 0 },
+            plotOptions: {
+                pie: {
+                    offsetX: 0,
+                    donut: {
+                        size: '58%',
+                        labels: {
+                            show: true,
+                            total: {
+                                show: true,
+                                label: 'Média total',
+                                formatter: function () {
+                                    const total = distribuicao.reduce((acc, item) => acc + item.media, 0);
+                                    return `${formatarNumeroGrafico(Math.round(total))} dias`;
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            dataLabels: { enabled: false },
+            legend: {
+                position: 'bottom',
+                horizontalAlign: 'center',
+                fontSize: '12px',
+                offsetX: 0,
+                offsetY: 8,
+                itemMargin: { vertical: 8, horizontal: 14 },
+                markers: { width: 12, height: 12, radius: 12 }
+            },
+            tooltip: {
+                y: {
+                    formatter: function (valor, opts) {
+                        const item = distribuicao[opts.seriesIndex];
+                        return item ? `${item.nome}: ${formatarNumeroGrafico(valor)} dias em média` : `${valor} dias`;
+                    }
+                }
+            },
+            responsive: [{
+                breakpoint: 1320,
+                options: {
+                    legend: {
+                        position: 'bottom',
+                        horizontalAlign: 'center',
+                        offsetX: 0,
+                        offsetY: 0
+                    },
+                    plotOptions: {
+                        pie: {
+                            offsetX: 0
+                        }
+                    }
+                }
+            }, {
+                breakpoint: 9999,
+                options: {
+                    legend: {
+                        formatter: function (seriesName, opts) {
+                            const colunas = 3;
+                            const index = opts.seriesIndex;
+                            const sufixo = ((index + 1) % colunas === 0) ? '<br />' : '';
+                            return `${seriesName}${sufixo}`;
+                        }
+                    }
+                }
+            }],
+            noData: { text: 'Sem dados para exibir' }
+        });
+
+        organizarLegendaDistribuicaoResumo();
+    };
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const p = palette();
+        renderCronoSpark('sparkProcessos', [12, 15, 18, 17, 21, 24, 22], p.blue);
+        renderCronoSpark('sparkLead', [34, 31, 29, 30, 27, 24, 22], p.blue);
+        renderCronoSpark('sparkP90', [45, 52, 48, 60, 56, 50, 47], p.orange);
+        renderCronoSpark('sparkGargalo', [20, 24, 21, 29, 27, 23, 19], p.violet || p.blue);
+        renderCronoSpark('sparkMaximo', [52, 58, 55, 67, 63, 61, 59], p.orange);
+
+        const navLinks = Array.from(document.querySelectorAll('[data-dashboard-tab]'));
+        const panels = Array.from(document.querySelectorAll('[data-dashboard-panel]'));
+        const storageKey = 'dashboard-crono-active-tab';
+
+        function activateTab(tabId) {
+            navLinks.forEach(link => {
+                const isActive = link.getAttribute('data-dashboard-tab') === tabId;
+                link.classList.toggle('is-active', isActive);
+                link.setAttribute('aria-selected', isActive ? 'true' : 'false');
+            });
+
+            panels.forEach(panel => {
+                const isActive = panel.getAttribute('data-dashboard-panel') === tabId;
+                panel.classList.toggle('is-active', isActive);
+                panel.hidden = !isActive;
+            });
+
+            try {
+                window.localStorage.setItem(storageKey, tabId);
+            } catch (_error) {
+            }
+        }
+
+        navLinks.forEach(link => {
+            link.addEventListener('click', function () {
+                const targetId = this.getAttribute('data-dashboard-tab');
+                if (targetId) {
+                    activateTab(targetId);
+                }
+            });
+        });
+
+        let initialTab = navLinks[0]?.getAttribute('data-dashboard-tab');
+        try {
+            const savedTab = window.localStorage.getItem(storageKey);
+            if (savedTab && panels.some(panel => panel.getAttribute('data-dashboard-panel') === savedTab)) {
+                initialTab = savedTab;
+            }
+        } catch (_error) {
+        }
+
+        if (initialTab) {
+            activateTab(initialTab);
+        }
+    });
+    </script>
+}
+

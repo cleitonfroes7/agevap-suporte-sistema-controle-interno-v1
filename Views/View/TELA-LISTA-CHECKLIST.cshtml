@@ -1,0 +1,145 @@
+@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Gerenciamento de Checklists";
+    ViewData["ActiveNav"] = "checklists";
+}
+
+@section Head {
+    <link rel="stylesheet" href="/static/style_lista_checklist.css">
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+}
+
+<header class="page-header"></header>
+
+<section class="content-card">
+    <div class="content-card__header">
+        <div>
+            <h2 class="content-card__title">Listagem de checklists</h2>
+            <p class="content-card__subtitle">Utilize os filtros para localizar processos específicos ou exportar relatórios.</p>
+        </div>
+        <div class="page-actions">
+            <a href="/novo-checklist" class="btn btn-primary">
+                <i class="fas fa-plus"></i>
+                Novo checklist
+            </a>
+        </div>
+    </div>
+    <div class="content-card__body">
+        <div class="table-toolbar">
+            <div class="table-toolbar__filters">
+                <input type="text" id="filtroPesquisa" placeholder="Pesquisar por número do processo">
+                <button class="btn btn-secondary" type="button" onclick="aplicarFiltros()">
+                    <i class="fas fa-search"></i>
+                    Pesquisar
+                </button>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table id="tabelaChecklists" class="content-table">
+                <thead>
+                    <tr>
+                        <th>Processo</th>
+                        <th>Tipo de checklist</th>
+                        <th>Modalidade</th>
+                        <th>Status</th>
+                        <th>Resultado</th>
+                        <th>Data</th>
+                        <th>Competências</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+
+        <div class="table-footer">
+            <div class="table-footer__info">
+                <span>Mostrar</span>
+                <select id="itensPorPagina">
+                    <option value="15" selected>15</option>
+                </select>
+                <span>registros</span>
+                <span id="infoPaginacao"></span>
+            </div>
+            <div class="pagination">
+                <button id="btnAnterior" disabled>
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <div id="numerosPagina"></div>
+                <button id="btnProximo" disabled>
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div id="modalNovoChecklist" class="modal">
+    <div class="modal-content modal-content--checklist">
+        <div class="modal-shell">
+            <div class="modal-shell__header">
+                <div class="modal-shell__title-group">
+                    <span class="modal-shell__eyebrow">Cadastro orientado</span>
+                    <h2>Novo checklist</h2>
+                    <p>Defina processo, tipo e contexto operacional antes de iniciar o preenchimento.</p>
+                </div>
+                <button class="modal-close" type="button" onclick="fecharModal()" aria-label="Fechar modal">&times;</button>
+            </div>
+        <form id="formNovoChecklist" class="modal-form">
+            <div class="modal-form__grid">
+                <div class="form-group">
+                    <label for="processo">Processo</label>
+                    <select id="processo" name="processo" required>
+                        <option value="">Selecione o processo</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="tipoChecklist">Tipo de checklist</label>
+                    <select id="tipoChecklist" name="tipoChecklist" required>
+                        <option value="">Selecione o tipo</option>
+                        <option value="preliminar">Preliminar</option>
+                        <option value="final">Final</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="modalidade">Modalidade</label>
+                    <select id="modalidade" name="modalidade" required>
+                        <option value="">Selecione a modalidade</option>
+                        <option value="ato-convocatorio">Ato convocatório</option>
+                        <option value="pedido-cotacao">Pedido de cotação</option>
+                        <option value="dispensa">Dispensa</option>
+                        <option value="inexigibilidade">Inexigibilidade</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="data">Data</label>
+                    <input type="date" id="data" name="data" required>
+                </div>
+                <div class="form-group modal-form__grid-full">
+                    <label for="competencias">Competências</label>
+                    <input type="text" id="competencias" name="competencias" required>
+                </div>
+            </div>
+            <div class="modal-shell__footer">
+                <button type="button" class="btn btn-secondary" onclick="fecharModal()">
+                    <i class="fas fa-arrow-left"></i>
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn-primary" onclick="salvarNovoChecklist()">
+                    <i class="fas fa-save"></i>
+                    Salvar checklist
+                </button>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
+
+<div id="modalVisualizarChecklist" class="modal">
+    <div class="modal-content"></div>
+</div>
+
+@section Scripts {
+    <script src="/static/script_lista_checklist.js" charset="utf-8"></script>
+}

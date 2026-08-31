@@ -1,0 +1,185 @@
+{
+  "tipo": "agegoias-consulta-p2",
+  "perguntas": [
+    {
+      "item": "15",
+      "elemento": "15 - CHECKLIST PARTE 1 - RESPOSTA DA ANÁLISE DE CONFORMIDADE",
+      "sub_perguntas": [
+        { "pergunta": "15.1 Os apontamentos da análise de conformidade foram respondidos?" }
+      ]
+    },
+    {
+      "item": "16",
+      "elemento": "16 - DEVOLUTIVAS AO CONTROLE INTERNO OU À ASSESSORIA JURÍDICA",
+      "sub_perguntas": [
+        { "pergunta": "16.1 As devolutivas foram apresentadas e documentadas no processo?" }
+      ]
+    },
+    {
+      "item": "17",
+      "elemento": "17 - ANÁLISE DAS DEVOLUTIVAS E CIÊNCIA DO CONTROLE INTERNO OU DA ASSESSORIA JURÍDICA",
+      "sub_perguntas": [
+        { "pergunta": "17.1 Houve ciência formal sobre as correções e complementações?" }
+      ]
+    },
+    {
+      "marco": "Retorno da conformidade - itens 15, 16 e 17",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+    {
+      "item": "18",
+      "elemento": "18 - PUBLICAÇÃO DO EXTRATO DA COMPRA/CONTRATAÇÃO NO SITE DA AGEVAP OU DA AGEGOIÁS",
+      "sub_perguntas": [
+        { "pergunta": "18.1 O extrato foi publicado no portal institucional aplicável?" }
+      ]
+    },
+    {
+      "item": "19",
+      "elemento": "19 - CONTRATO / ORDEM DE SERVIÇO F-0155 / AUTORIZAÇÃO DE FORNECIMENTO F-0272",
+      "sub_perguntas": [
+        { "pergunta": "19.1 O instrumento jurídico adequado foi emitido e assinado, quando cabível?" },
+        { "pergunta": "19.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "item": "20",
+      "elemento": "20 - PUBLICAÇÃO DA ÍNTEGRA DO INSTRUMENTO JURÍDICO",
+      "sub_perguntas": [
+        { "pergunta": "20.1 A íntegra do instrumento foi publicada com observância à LGPD?" }
+      ]
+    },
+    {
+      "item": "21",
+      "elemento": "21 - NOMEAÇÃO DO GESTOR/FISCAL DO CONTRATO",
+      "sub_perguntas": [
+        { "pergunta": "21.1 O gestor ou fiscal do contrato foi formalmente designado?" }
+      ]
+    },
+    {
+      "marco": "Formalização contratual - itens 18, 19, 20 e 21",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+    {
+      "item": "22",
+      "elemento": "22 - NOTA TÉCNICA DE APROVAÇÃO F-0120 / ACOMPANHAMENTO DO OBJETO",
+      "sub_perguntas": [
+        { "pergunta": "22.1 A nota técnica de aprovação ou acompanhamento foi juntada quando necessária?" }
+      ]
+    },
+    {
+      "item": "23",
+      "elemento": "23 - FICHA DO BEM",
+      "sub_perguntas": [
+        { "pergunta": "23.1 A ficha do bem foi emitida nos casos patrimoniais?" }
+      ]
+    },
+    {
+      "item": "24",
+      "elemento": "24 - TERMO DE RESPONSABILIDADE F-0137",
+      "sub_perguntas": [
+        { "pergunta": "24.1 O termo de responsabilidade foi formalizado quando aplicável?" }
+      ]
+    },
+    {
+      "item": "25",
+      "elemento": "25 - FORMULÁRIO(S) DE ATESTE(S) DE SOLICITAÇÃO DE PAGAMENTO",
+      "sub_perguntas": [
+        { "pergunta": "25.1 Os formulários de ateste estão devidamente preenchidos?" }
+      ]
+    },
+    {
+      "item": "26",
+      "elemento": "26 - ATESTE(S) DO DOCUMENTO FISCAL PARA PAGAMENTO",
+      "sub_perguntas": [
+        { "pergunta": "26.1 O documento fiscal foi atestado corretamente para pagamento?" }
+      ]
+    },
+    {
+      "item": "27",
+      "elemento": "27 - COMPROVAÇÃO DA REGULARIDADE FISCAL DO CONTRATADO",
+      "sub_perguntas": [
+        { "pergunta": "27.1 As certidões fiscais e trabalhistas do contratado estão válidas?" },
+        { "pergunta": "27.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "item": "28",
+      "elemento": "28 - AUTORIZAÇÃO DO PAGAMENTO",
+      "sub_perguntas": [
+        { "pergunta": "28.1 A autorização de pagamento foi emitida pelas autoridades competentes?" }
+      ]
+    },
+    {
+      "marco": "Execução e pagamento - itens 22, 23, 24, 25, 26, 27 e 28",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+    {
+      "item": "29",
+      "elemento": "29 - COMPROVANTES DE TODOS OS PAGAMENTOS ANTES DO ARQUIVAMENTO",
+      "sub_perguntas": [
+        { "pergunta": "29.1 Os comprovantes dos pagamentos efetuados constam no processo?" }
+      ]
+    },
+    {
+      "item": "30",
+      "elemento": "30 - FICHA DO SIGA ATUALIZADA OU RESUMO DE ENTREGAS E PAGAMENTOS",
+      "sub_perguntas": [
+        { "pergunta": "30.1 O controle final de entregas e pagamentos foi atualizado?" }
+      ]
+    },
+    {
+      "item": "31",
+      "elemento": "31 - CUMPRIMENTO DO PROCEDIMENTO DE TERMO ADITIVO",
+      "sub_perguntas": [
+        { "pergunta": "31.1 Se houve aditivo, o procedimento foi cumprido corretamente?" }
+      ]
+    },
+    {
+      "item": "32",
+      "elemento": "32 - CUMPRIMENTO DO PROCEDIMENTO DE NOTIFICAÇÃO AO TOMADOR",
+      "sub_perguntas": [
+        { "pergunta": "32.1 Se aplicável, houve notificação formal ao tomador?" }
+      ]
+    },
+    {
+      "item": "33",
+      "elemento": "33 - TERMO DE RECEBIMENTO DO OBJETO CONTRATADO F-0245",
+      "sub_perguntas": [
+        { "pergunta": "33.1 O termo de recebimento do objeto foi juntado ao processo?" }
+      ]
+    },
+    {
+      "item": "34",
+      "elemento": "34 - BAIXA DE SALDO ANTES DO ARQUIVAMENTO",
+      "sub_perguntas": [
+        { "pergunta": "34.1 Foi realizada a baixa de saldo quando cabível?" }
+      ]
+    },
+    {
+      "item": "35",
+      "elemento": "35 - ENVIO DO PROCESSO PARA O CONTROLE INTERNO",
+      "sub_perguntas": [
+        { "pergunta": "35.1 O envio final ao Controle Interno foi formalizado?" }
+      ]
+    },
+    {
+      "item": "36",
+      "elemento": "36 - TERMO DE ENCERRAMENTO PARA ARQUIVAMENTO",
+      "sub_perguntas": [
+        { "pergunta": "36.1 O processo foi encerrado formalmente para arquivamento?" }
+      ]
+    },
+    {
+      "marco": "Encerramento do processo - itens 29, 30, 31, 32, 33, 34, 35 e 36",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    }
+  ]
+}

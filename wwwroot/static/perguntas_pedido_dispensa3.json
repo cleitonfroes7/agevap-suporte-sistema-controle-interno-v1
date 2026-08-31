@@ -1,0 +1,314 @@
+{
+  "tipo": "pedido-cot-dispensa-p3",
+  "perguntas": [
+  {
+    "item": "36",
+    "elemento": "36 - CHECKLIST PARTE 2 - RESPOSTA DO CONTROLE INTERNO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "36.1 Com os devidos ajustes, se houver?"}
+    ]
+  },
+  {
+    "item": "37",
+    "elemento": "37 - DEVOLUTIVAS AO CONTROLE INTERNO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "37.1 Houve alguma revisão e complementação?"}
+    ]
+  },
+  {
+    "item": "38",
+    "elemento": "38 - ANÁLISE DAS DEVOLUTIVAS E CIÊNCIA DO C.I.",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "38.1 O setor deu ciência às revisões e complementações?"}
+    ]
+  },
+
+  {
+    "marco": "Controle Interno - Checklist 2 - itens 36, 37 e 38",
+    "data_inicio": "",
+    "data_fim": "",
+    "tempo_dias": ""
+  },
+
+
+  {
+    "item": "39",
+    "elemento": "39 - SELEÇÃO DE FORNECEDORES",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "39.1 Numerada e assinada?"}
+    ]
+  },
+
+  {
+    "marco": "Resultado e homologação ou seleção de fornecedores - item 39",
+    "data_inicio": "",
+    "data_fim": "",
+    "tempo_dias": ""
+  },
+
+
+  {
+    "item": "40",
+    "elemento": "40 - CONTRATO F-0200 / ORDEM DE SERVIÇO F-0155 / AUTORIZAÇÃO DE FORNECIMENTO F-0272",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "40.1 As assinaturas estão compatíveis?"}
+    ]
+  },
+  {
+    "item": "41",
+    "elemento": "41 - PUBLICAÇÃO DO EXTRATO DO INSTRUMENTO CONTRATUAL NO DIÁRIO OFICIAL",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "41.1 Os dados estão corretos?"}
+    ]
+  },
+  {
+    "item": "42",
+    "elemento": "42 - PUBLICAÇÃO DA INTEGRA DO CONTRATO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "42.1 Site da AGEVAP?"}
+    ]
+  },
+
+  {
+    "marco": "Trâmites da assinatura do contrato - itens 40, 41 e 42, ",
+    "data_inicio": "",
+    "data_fim": "",
+    "tempo_dias": ""
+  },
+
+  {
+    "item": "43",
+    "elemento": "43 - NORMA INTERNA DE NOMEAÇÃO DO FISCAL DO CONTRATO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "43.1 Foi inserida no processo?"}
+    ]
+  },
+  {
+    "item": "44",
+    "elemento": "44 - ATUALIZAÇÃO DA DOTAÇÃO ORÇAMENTÁRIA",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "44.1 Folha de informação?"}
+    ]
+  },
+  {
+    "item": "45",
+    "elemento": "45 - EVIDÊNCIAS DA INCLUSÃO DE INFORMAÇÕES NO BANCO DE DADOS",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "45.1 Bens e/ou serviços + Valor?"}
+    ]
+  },
+  {
+    "item": "46",
+    "elemento": "46 - NOTA TÉCNICA DE APROVAÇÃO / ACOMPANHAMENTO DO OBJETO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "46.1 Os dados estão corretos?"}
+    ]
+  },
+  {
+    "item": "47",
+    "elemento": "47 - FICHA DO BEM",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "47.1 Em casos de bem patrimonial?"}
+    ]
+  },
+  {
+    "item": "48",
+    "elemento": "48 - TERMO DE RESPONSABILIDADE F-0137",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "48.1 Em casos de bem patrimonial?"}
+    ]
+  },
+  {
+    "item": "49",
+    "elemento": "49 - FORMULÁRIO(S) DE ATESTE(S) DE SOLICITAÇÃO DE PAGAMENTO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "49.1 Os dados estão corretos?"}
+    ]
+  },
+  {
+    "item": "50",
+    "elemento": "50 - ATESTE(S) DO DOCUMENTO FISCAL PARA PAGAMENTO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "50.1 Nota Fiscal ou Fatura?"}
+    ]
+  },
+  {
+    "item": "51",
+    "elemento": "51 - COMPROVAÇÃO DA REGULARIDADE FISCAL DO CONTRATADO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "51.1 Certidão Federal (válida?)"},
+      {"pergunta": "51.2 Certidão Estadual (válida?)"},
+      {"pergunta": "51.3 Certidão Municipal (válida?)"},
+      {"pergunta": "51.4 FGTS (válida?)"},
+      {"pergunta": "51.5 Trabalhista (válida?)"}
+    ]
+  },
+  {
+    "item": "52",
+    "elemento": "52 - AUTORIZAÇÃO DO PAGAMENTO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "52.1 Pelos ordenadores de despesas?"}
+    ]
+  },
+  {
+    "item": "53",
+    "elemento": "53 - COMPROVANTES DE TODOS OS PAGAMENTOS ANTES DO ARQUIVAMENTO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "53.1 Consta no processo?"}
+    ]
+  },
+  {
+    "item": "54",
+    "elemento": "54 - FICHA DO SIGA ATUALIZADA OU RESUMO DE ENTREGAS E PAGAMENTOS",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "54.1 Consta no processo?"}
+    ]
+  },
+  {
+    "item": "55",
+    "elemento": "55 - CUMPRIMENTO DO PROCEDIMENTO DE TERMO ADITIVO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "55.1 Houve análise jurídica e do Controle Interno? Seguiu o procedimento XXXXXXX?"}
+    ]
+  },
+  {
+    "item": "56",
+    "elemento": "56 - CUMPRIMENTO DO PROCEDIMENTO DE NOTIFICAÇÃO AO TOMADOR",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "56.1 Quando couber"}
+    ]
+  },
+  {
+    "item": "57",
+    "elemento": "57 - TERMO DE RECEBIMENTO DO OBJETO CONTRATADO F-0245",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "57.1 Foi inserido no processo?"}
+    ]
+  },
+  {
+    "item": "58",
+    "elemento": "58 - BAIXA DE SALDO ANTES DO ARQUIVAMENTO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "58.1 Quando couber, envio ao financeiro / orçamento"}
+    ]
+  },
+  {
+    "item": "59",
+    "elemento": "59 - EVIDÊNCIAS DA ATUALIZAÇÃO DO PLANEJAMENTO DO PROCESSO ADMINISTRATIVO F-0248",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "59.1 Está atualizado no prazo correto?"},
+      {"pergunta": "59.2 As etapas foram cumpridas no prazo? Caso não, possui justificativa e plano de ação?"},
+      {"pergunta": "59.3 Está assinado?"}
+    ]
+  },
+
+  {
+    "marco": "Gestão contratual - itens 43, 44, 45, 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58 e 59, ",
+    "data_inicio": "",
+    "data_fim": "",
+    "tempo_dias": ""
+  },
+
+
+  {
+    "item": "60",
+    "elemento": "60 - ENVIO DO PROCESSO PARA CONTROLE INTERNO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "60.1 Folha de Informação?"}
+    ]
+  },
+  {
+    "item": "61",
+    "elemento": "61 - TERMO DE ENCERRAMENTO PARA ARQUIVAMENTO",
+    "nup": "",
+    "análise": "",
+    "descricao": "",
+    "sub_perguntas": [
+      {"pergunta": "Foi inserido no processo??"}
+    ]
+  },
+
+  {
+    "marco": "Encerramento - itens  60 e 61",
+    "data_inicio": "",
+    "data_fim": "",
+    "tempo_dias": ""
+  }
+  
+]
+}

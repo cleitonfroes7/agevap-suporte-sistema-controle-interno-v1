@@ -1,0 +1,12 @@
+bin
+obj
+artifacts
+publish
+Logs
+.vs
+*.user
+*.suo
+*.tmp
+.env
+.env.*
+backup_*.sql

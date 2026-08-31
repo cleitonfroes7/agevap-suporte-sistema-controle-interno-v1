@@ -1,0 +1,26 @@
+# .NET
+bin/
+obj/
+publish/
+artifacts/
+
+# Logs
+Logs/
+*.log
+
+# User-specific files
+.vs/
+.vscode/
+
+# Docker
+**/bin/
+**/obj/
+docker-compose.local.yml
+.env
+.env.*
+!.env.example
+historicos_erro_aplicacao.md
+
+# OS
+Thumbs.db
+.DS_Store

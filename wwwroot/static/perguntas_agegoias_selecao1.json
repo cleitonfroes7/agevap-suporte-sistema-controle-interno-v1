@@ -1,0 +1,148 @@
+{
+  "tipo": "agegoias-selecao-p1",
+  "perguntas": [
+    {
+      "item": "1",
+      "elemento": "1 - PROTOCOLO DO PROCESSO E FICHA DE ABERTURA F-0253",
+      "sub_perguntas": [
+        { "pergunta": "1.1 O protocolo foi gerado e a ficha de abertura foi preenchida corretamente?" },
+        { "pergunta": "1.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "item": "2",
+      "elemento": "2 - ORIGEM DA DEMANDA",
+      "sub_perguntas": [
+        { "pergunta": "2.1 Existe despacho da SEMAD-GO ou documento equivalente justificando a demanda?" },
+        { "pergunta": "2.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "item": "3",
+      "elemento": "3 - NOMEAÇÃO DO GESTOR DO PROCESSO ADMINISTRATIVO",
+      "sub_perguntas": [
+        { "pergunta": "3.1 O gestor do processo foi formalmente nomeado?" }
+      ]
+    },
+    {
+      "marco": "Abertura do processo - itens 1, 2 e 3",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+    {
+      "item": "4",
+      "elemento": "4 - SOLICITAÇÃO DE PARECER DO SETOR DE PATRIMÔNIO SOBRE CLASSIFICAÇÃO DE BEM PERMANENTE",
+      "sub_perguntas": [
+        { "pergunta": "4.1 A consulta patrimonial foi aberta quando aplicável?" }
+      ]
+    },
+    {
+      "item": "5",
+      "elemento": "5 - RESPOSTA QUANTO À CLASSIFICAÇÃO DO BEM",
+      "sub_perguntas": [
+        { "pergunta": "5.1 A classificação do bem foi definida e registrada de forma clara?" }
+      ]
+    },
+    {
+      "item": "6",
+      "elemento": "6 - AUTORIZAÇÃO DO CONSELHO DE ADMINISTRAÇÃO DA AGEVAP - CA",
+      "sub_perguntas": [
+        { "pergunta": "6.1 A autorização do CA foi apresentada quando exigida?" }
+      ]
+    },
+    {
+      "marco": "Classificação patrimonial - itens 4, 5 e 6",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+    {
+      "item": "7",
+      "elemento": "7 - TERMO DE REFERÊNCIA DO-0100 OU F-0264",
+      "sub_perguntas": [
+        { "pergunta": "7.1 O termo de referência descreve adequadamente o objeto e os requisitos?" },
+        { "pergunta": "7.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "item": "8",
+      "elemento": "8 - PESQUISA DE PREÇO DE MERCADO / REALIZAÇÃO DE COTAÇÕES / ORÇAMENTOS / BALIZAMENTO DE MERCADO",
+      "sub_perguntas": [
+        { "pergunta": "8.1 Há balizamento de mercado suficiente para a modalidade escolhida?" },
+        { "pergunta": "8.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "item": "9",
+      "elemento": "9 - PLANILHA ORÇAMENTÁRIA / QUADRO COMPARATIVO PRELIMINAR F-0267",
+      "sub_perguntas": [
+        { "pergunta": "9.1 A planilha preliminar consolida corretamente os valores apurados?" }
+      ]
+    },
+    {
+      "item": "10",
+      "elemento": "10 - JUSTIFICATIVA PARA CONTRATAÇÃO SINGULAR (QUANDO COUBER)",
+      "sub_perguntas": [
+        { "pergunta": "10.1 Quando aplicável, a justificativa da contratação singular está fundamentada?" },
+        { "pergunta": "10.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "marco": "Preparação da contratação - itens 7, 8, 9 e 10",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+    {
+      "item": "11",
+      "elemento": "11 - SOLICITAÇÃO DE DISPONIBILIDADE DE DOTAÇÃO ORÇAMENTÁRIA",
+      "sub_perguntas": [
+        { "pergunta": "11.1 A solicitação de dotação foi formalizada?" }
+      ]
+    },
+    {
+      "item": "12",
+      "elemento": "12 - INFORMAÇÃO QUANTO À DISPONIBILIDADE DE DOTAÇÃO ORÇAMENTÁRIA",
+      "sub_perguntas": [
+        { "pergunta": "12.1 Houve confirmação da disponibilidade orçamentária?" }
+      ]
+    },
+    {
+      "item": "13",
+      "elemento": "13 - ORDEM DE EXECUÇÃO DO INVESTIMENTO (OEI) OU SOLICITAÇÃO DE COMPRAS E CONTRATAÇÕES (SCC)",
+      "sub_perguntas": [
+        { "pergunta": "13.1 A OEI/SCC está compatível com a seleção de propostas ou contratação pretendida?" }
+      ]
+    },
+    {
+      "item": "14",
+      "elemento": "14 - MINUTA DE EDITAL DA RESPECTIVA MODALIDADE DE COMPRA/CONTRATAÇÃO",
+      "sub_perguntas": [
+        { "pergunta": "14.1 A minuta do edital está estruturada e aderente ao objeto?" },
+        { "pergunta": "14.2 Outros apontamentos:" }
+      ]
+    },
+    {
+      "item": "15",
+      "elemento": "15 - MINUTA DO INSTRUMENTO JURÍDICO (CONTRATO / ORDEM DE SERVIÇO / FORNECIMENTO / OUTRO)",
+      "sub_perguntas": [
+        { "pergunta": "15.1 A minuta do instrumento jurídico está adequada ao edital ou à contratação?" }
+      ]
+    },
+    {
+      "item": "16",
+      "elemento": "16 - ANÁLISE DE CONFORMIDADE PROCESSUAL E JURÍDICA (CHECKLIST 1)",
+      "sub_perguntas": [
+        { "pergunta": "16.1 O processo passou pela análise de conformidade e/ou jurídica?" },
+        { "pergunta": "16.2 Existem ajustes pendentes nesta etapa?" }
+      ]
+    },
+    {
+      "marco": "Fechamento da parte 1 - itens 11, 12, 13, 14, 15 e 16",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    }
+  ]
+}

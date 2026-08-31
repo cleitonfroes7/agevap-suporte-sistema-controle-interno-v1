@@ -1,0 +1,1579 @@
+﻿@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Dashboard de Conformidades";
+    ViewData["ActiveNav"] = "dashboard-conf";
+}
+
+@section Head {
+    <link rel="stylesheet" href="/static/style_dashboard.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+    <style>
+        .info-tip {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            border: 1px solid #cbd5f5;
+            color: #1d4ed8;
+            font-weight: 700;
+            font-size: 12px;
+            cursor: help;
+            background: #eef2ff;
+        }
+    </style>
+}
+
+<section class="dashboard-shell dashboard-conf-v2">
+    <header class="dashboard-hero-card">
+        <div class="dashboard-hero-card__title">
+            <h1 class="page-header__title">Dashboard de Conformidades</h1>
+            <p class="page-header__subtitle">Visão estratégica de conformidades, não conformidades e indicadores.</p>
+        </div>
+    </header>
+
+    <nav class="dashboard-section-nav" aria-label="Navegação do dashboard" role="tablist">
+        <button type="button" class="dashboard-section-nav__link is-active" data-dashboard-tab="bloco-resumo-executivo" role="tab" aria-selected="true">Resumo Executivo</button>
+        <button type="button" class="dashboard-section-nav__link" data-dashboard-tab="bloco-diagnostico-acoes" role="tab" aria-selected="false">Diagnóstico e Ações</button>
+    </nav>
+
+    <section class="dashboard-inline-filters">
+        <div class="dashboard-filters dashboard-filters--reference">
+            <div class="dashboard-filter">
+                <label class="dashboard-filter__label" for="confArea">Área</label>
+                <select id="confArea" class="dashboard-filter__control">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+            <div class="dashboard-filter">
+                <label class="dashboard-filter__label" for="confModalidade">Modalidade</label>
+                <select id="confModalidade" class="dashboard-filter__control">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+            <div class="dashboard-filter">
+                <label class="dashboard-filter__label" for="confDataInicio">Período inicial</label>
+                <input id="confDataInicio" type="date" class="dashboard-filter__control" />
+            </div>
+            <div class="dashboard-filter">
+                <label class="dashboard-filter__label" for="confDataFim">Período final</label>
+                <input id="confDataFim" type="date" class="dashboard-filter__control" />
+            </div>
+            <div class="dashboard-filter dashboard-filter--actions">
+                <span class="dashboard-filter__label">Ações</span>
+                <div class="dashboard-filter__actions">
+                    <button type="button" class="dashboard-filter__button" id="confLimparFiltros">Limpar</button>
+                    <button type="button" class="dashboard-filter__button dashboard-filter__button--primary" id="confAplicarFiltros">Aplicar</button>
+                </div>
+            </div>
+        </div>
+        <div class="dashboard-filter__hint" id="confFiltroResumo">Sem filtros aplicados.</div>
+        <div class="dashboard-filter__active" id="confFiltrosAtivos"></div>
+    </section>
+
+    <section class="dashboard-block is-active" id="bloco-resumo-executivo" data-dashboard-panel="bloco-resumo-executivo" role="tabpanel">
+        <header class="dashboard-block__header">
+            <div>
+                <h2 class="dashboard-block__title">Resumo Executivo</h2>
+                <p class="dashboard-block__subtitle">Leitura rápida para gestão, acompanhamento do período e principais sinais de atenção.</p>
+            </div>
+        </header>
+
+        <section class="dashboard-overview-grid">
+            <div class="dashboard-metrics dashboard-metrics--reference">
+                <article class="metric-card">
+                    <span class="metric-card__title">Checklists realizados</span>
+                    <span class="metric-card__value" id="totalChecklists">Carregando...</span>
+                    <span class="metric-card__meta" id="checklistsMudanca">Inspeções realizadas</span>
+                </article>
+                <article class="metric-card">
+                    <span class="metric-card__title">Itens avaliados</span>
+                    <span class="metric-card__value" id="totalAvaliados">Carregando...</span>
+                    <span class="metric-card__meta" id="conformidadesMudanca">Carregando...</span>
+                </article>
+                <article class="metric-card metric-card--danger-soft">
+                    <span class="metric-card__title">Não conformidades</span>
+                    <span class="metric-card__value" id="totalNaoConformidades">Carregando...</span>
+                    <span class="metric-card__meta" id="naoConformidadesMudanca">Carregando...</span>
+                </article>
+                <article class="metric-card metric-card--success-soft">
+                    <span class="metric-card__title">Taxa de conformidade</span>
+                    <span class="metric-card__value" id="taxaConformidade">Carregando...</span>
+                    <span class="metric-card__meta" id="taxaConformidadeMudanca">Carregando...</span>
+                </article>
+            </div>
+
+            <aside class="dashboard-insights-card">
+                <div class="dashboard-insights-card__header">
+                    <h2>Leitura do recorte</h2>
+                </div>
+                <div class="dashboard-insights-card__body">
+                    <div class="dashboard-insight-item dashboard-insight-item--danger">
+                        <span class="dashboard-insight-item__dot"></span>
+                        <div>
+                            <strong id="briefDirecao">Carregando...</strong>
+                            <p id="briefDirecaoMeta">Aguardando consolidação dos indicadores.</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-insight-item dashboard-insight-item--warning">
+                        <span class="dashboard-insight-item__dot"></span>
+                        <div>
+                            <strong id="briefModalidadeCritica">Carregando...</strong>
+                            <p id="briefModalidadeCriticaMeta">Aguardando leitura da distribuição.</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-insight-item dashboard-insight-item--accent">
+                        <span class="dashboard-insight-item__dot"></span>
+                        <div>
+                            <strong id="briefCategoriaCritica">Carregando...</strong>
+                            <p id="briefCategoriaCriticaMeta">Aguardando leitura das categorias.</p>
+                        </div>
+                    </div>
+                    <div class="dashboard-insight-link">
+                        <span id="briefMesCritico">Carregando...</span>
+                        <small id="briefMesCriticoMeta">Aguardando leitura da evolução.</small>
+                    </div>
+                </div>
+            </aside>
+        </section>
+
+        <section class="dashboard-grid-reference dashboard-grid-reference--executive dashboard-grid-reference--executive-plus">
+            <article class="chart-panel chart-panel--wide chart-panel--executive-trend">
+                <div class="chart-panel__header chart-panel__header--light">
+                    <div>
+                        <h3 class="chart-panel__title">Evolução da taxa de conformidade (%)</h3>
+                        <p class="chart-panel__subtitle">Acompanhe a evolução da conformidade e a meta definida.</p>
+                    </div>
+                </div>
+                <div class="chart-panel__body">
+                    <div id="evolucaoChart" class="chart-panel__canvas chart-container"></div>
+                </div>
+            </article>
+
+            <article class="chart-panel chart-panel--executive-side">
+                <div class="chart-panel__header chart-panel__header--light">
+                    <div>
+                        <h3 class="chart-panel__title">Teia de meta x resultado</h3>
+                        <p class="chart-panel__subtitle">Conecta meta, taxa real, conformidades e volume avaliado no recorte atual.</p>
+                    </div>
+                </div>
+                <div class="chart-panel__body">
+                    <div id="conformidadeRadarChart" class="chart-panel__canvas chart-container"></div>
+                </div>
+            </article>
+
+            <article class="chart-panel">
+                <div class="chart-panel__header chart-panel__header--light">
+                    <div>
+                        <h3 class="chart-panel__title">Não conformidades por mês</h3>
+                        <p class="chart-panel__subtitle">Quantidade de não conformidades e taxa por 100 itens avaliados.</p>
+                    </div>
+                </div>
+                <div class="chart-panel__body">
+                    <div id="evolucaoResumoChart" class="chart-panel__canvas chart-container"></div>
+                </div>
+            </article>
+
+            <article class="chart-panel">
+                <div class="chart-panel__header chart-panel__header--light">
+                    <div>
+                        <h3 class="chart-panel__title">Não conformidades por modalidade</h3>
+                        <p class="chart-panel__subtitle">Distribuição das não conformidades por modalidade.</p>
+                    </div>
+                </div>
+                <div class="chart-panel__body">
+                    <div id="naoConformidadesPieChart" class="chart-panel__canvas chart-container"></div>
+                </div>
+            </article>
+        </section>
+    </section>
+
+    <section class="dashboard-block" id="bloco-diagnostico-acoes" data-dashboard-panel="bloco-diagnostico-acoes" role="tabpanel" hidden>
+        <header class="dashboard-block__header">
+            <div>
+                <h2 class="dashboard-block__title">Diagnóstico e Ações</h2>
+                <p class="dashboard-block__subtitle">Camada analítica com causas, distribuição, recorrência, prioridades e acompanhamento operacional.</p>
+            </div>
+        </header>
+
+        <section class="dashboard-grid-reference">
+            <article class="chart-panel">
+                <div class="chart-panel__header chart-panel__header--light">
+                    <div>
+                        <h3 class="chart-panel__title">Pareto - principais causas</h3>
+                        <p class="chart-panel__subtitle">Ranking das categorias com maior concentração de não conformidades.</p>
+                    </div>
+                </div>
+                <div class="chart-panel__body">
+                    <div id="topCategoriasChart" class="chart-panel__canvas chart-container"></div>
+                </div>
+            </article>
+
+            <article class="chart-panel">
+                <div class="chart-panel__header chart-panel__header--light">
+                    <div>
+                        <h3 class="chart-panel__title">Distribuição por categoria</h3>
+                        <p class="chart-panel__subtitle">Proporção das não conformidades por categoria de erro.</p>
+                    </div>
+                </div>
+                <div class="chart-panel__body">
+                    <div id="naoConformidadesCategoriaChart" class="chart-panel__canvas chart-container"></div>
+                </div>
+            </article>
+
+            <article class="chart-panel chart-panel--full">
+                <div class="chart-panel__header chart-panel__header--light">
+                    <div>
+                        <h3 class="chart-panel__title">Priorização do período</h3>
+                        <p class="chart-panel__subtitle">Leitura resumida das categorias mais críticas no período filtrado.</p>
+                    </div>
+                </div>
+                <div class="chart-panel__body">
+                    <div class="table-wrapper dashboard-priority-table">
+                        <table class="content-table" id="topCategoriasTable">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Categoria</th>
+                                    <th>Não conformidades</th>
+                                    <th>% do total de NC</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
+            </article>
+        </section>
+
+        <section class="dashboard-bottom-grid">
+            <article class="content-card dashboard-recurrence-card">
+                <div class="content-card__header">
+                    <div>
+                        <h2 class="content-card__title">Recorrência de não conformidades</h2>
+                        <p class="content-card__subtitle">Leitura rápida da reincidência e do peso das causas mais frequentes.</p>
+                    </div>
+                </div>
+                <div class="content-card__body dashboard-recurrence-card__body">
+                    <div id="recorrenciaNcChart" class="chart-panel__canvas chart-container dashboard-mini-chart"></div>
+                    <div class="dashboard-alert-card">
+                        <span class="dashboard-alert-card__eyebrow">Alerta de recorrência</span>
+                        <strong id="recorrenciaTitulo">Carregando...</strong>
+                        <p id="recorrenciaResumo">Aguardando leitura das categorias críticas.</p>
+                    </div>
+                </div>
+            </article>
+
+            <article class="content-card dashboard-priority-card">
+                <div class="content-card__header">
+                    <div>
+                        <h2 class="content-card__title">Prioridades do período</h2>
+                        <p class="content-card__subtitle">Principais pontos que demandam atenção e ação imediata.</p>
+                    </div>
+                </div>
+                <div class="content-card__body">
+                    <div class="dashboard-priority-list" id="dashboardPriorityList">
+                        <div class="dashboard-priority-row dashboard-priority-row--empty">Carregando prioridades...</div>
+                    </div>
+                </div>
+            </article>
+
+            <article class="content-card dashboard-actions-card">
+                <div class="content-card__header">
+                    <div>
+                        <h2 class="content-card__title">Efetividade das ações</h2>
+                        <p class="content-card__subtitle">Acompanhamento sintético das ações corretivas e preventivas.</p>
+                    </div>
+                </div>
+                <div class="content-card__body">
+                    <div class="dashboard-actions-grid">
+                        <article class="dashboard-action-metric">
+                            <span class="dashboard-action-metric__label">Ações abertas</span>
+                            <strong class="dashboard-action-metric__value" id="acoesAbertasValor">0</strong>
+                            <span class="dashboard-action-metric__meta" id="acoesAbertasMeta">Em acompanhamento</span>
+                        </article>
+                        <article class="dashboard-action-metric">
+                            <span class="dashboard-action-metric__label">Ações concluídas</span>
+                            <strong class="dashboard-action-metric__value" id="acoesConcluidasValor">0</strong>
+                            <span class="dashboard-action-metric__meta" id="acoesConcluidasMeta">No período</span>
+                        </article>
+                        <article class="dashboard-action-metric">
+                            <span class="dashboard-action-metric__label">Taxa de eficácia</span>
+                            <strong class="dashboard-action-metric__value" id="acoesEficaciaValor">0%</strong>
+                            <span class="dashboard-action-metric__meta" id="acoesEficaciaMeta">Indicador sintético</span>
+                        </article>
+                        <article class="dashboard-action-metric">
+                            <span class="dashboard-action-metric__label">Tempo médio</span>
+                            <strong class="dashboard-action-metric__value" id="acoesTempoMedioValor">0 dias</strong>
+                            <span class="dashboard-action-metric__meta" id="acoesTempoMedioMeta">Estimativa operacional</span>
+                        </article>
+                    </div>
+                </div>
+            </article>
+        </section>
+    </section>
+</section>
+
+@section Scripts {
+    <script>
+    let confRequestId = 0;
+
+    const dashboardState = {
+        totalChecklists: null,
+        totalConformidades: null,
+        totalNaoConformidades: null,
+        totalAvaliados: null,
+        taxaConformidade: null,
+        evolucaoData: [],
+        modalidadesData: [],
+        topCategoriasData: []
+    };
+
+    window.dashboardState = dashboardState;
+
+    const confFilters = {
+        area: '',
+        modalidade: '',
+        dataInicio: '',
+        dataFim: '',
+        categoria: ''
+    };
+
+    const chartPalette = {
+        text: '#475569',
+        grid: '#e2e8f0',
+        tooltip: 'dark',
+        lineA: '#4F81BD',
+        lineB: '#C0504D',
+        green: '#9BBB59',
+        red: '#C0504D',
+        violet: '#8064A2',
+        cyan: '#4BACC6',
+        blue: '#4F81BD',
+        indigo: '#8064A2',
+        orange: '#F79646'
+    };
+
+    function getChartFontColor() {
+        return chartPalette.text;
+    }
+
+    function getGridColor() {
+        return chartPalette.grid;
+    }
+
+    function getTooltipTheme() {
+        return {
+            theme: chartPalette.tooltip,
+            x: { show: true }
+        };
+    }
+
+    function buildFilterQuery(filters) {
+        const params = new URLSearchParams();
+        Object.entries(filters).forEach(([key, value]) => {
+            if (value) {
+                params.set(key, value);
+            }
+        });
+        const query = params.toString();
+        return query ? `?${query}` : '';
+    }
+
+    function hydrateFiltersFromUrl() {
+        const params = new URLSearchParams(window.location.search);
+        confFilters.area = params.get('area') || '';
+        confFilters.modalidade = params.get('modalidade') || '';
+        confFilters.dataInicio = params.get('dataInicio') || '';
+        confFilters.dataFim = params.get('dataFim') || '';
+        confFilters.categoria = params.get('categoria') || '';
+    }
+
+    function syncFiltersToInputs() {
+        const map = {
+            confArea: confFilters.area,
+            confModalidade: confFilters.modalidade,
+            confDataInicio: confFilters.dataInicio,
+            confDataFim: confFilters.dataFim
+        };
+        Object.entries(map).forEach(([id, value]) => {
+            const el = document.getElementById(id);
+            if (el) el.value = value;
+        });
+    }
+
+    function syncInputsToFilters() {
+        confFilters.area = document.getElementById('confArea')?.value || '';
+        confFilters.modalidade = document.getElementById('confModalidade')?.value || '';
+        confFilters.dataInicio = document.getElementById('confDataInicio')?.value || '';
+        confFilters.dataFim = document.getElementById('confDataFim')?.value || '';
+    }
+
+    function persistFiltersInUrl() {
+        const params = new URLSearchParams();
+        Object.entries(confFilters).forEach(([key, value]) => {
+            if (value) params.set(key, value);
+        });
+        const nextUrl = `${window.location.pathname}${params.toString() ? `?${params.toString()}` : ''}`;
+        window.history.replaceState({}, '', nextUrl);
+    }
+
+    async function fetchJson(url) {
+        const response = await fetch(url);
+        if (!response.ok) {
+            throw new Error(`Erro ao buscar ${url}`);
+        }
+        return response.json();
+    }
+
+    function atualizarResumoFiltros() {
+        const partes = [];
+        if (confFilters.area) partes.push(`Área: ${confFilters.area}`);
+        if (confFilters.modalidade) partes.push(`Modalidade: ${confFilters.modalidade}`);
+        if (confFilters.dataInicio || confFilters.dataFim) {
+            partes.push(`Período: ${confFilters.dataInicio || '...'} até ${confFilters.dataFim || '...'}`);
+        }
+        if (confFilters.categoria) partes.push(`Categoria: ${confFilters.categoria}`);
+        const resumo = document.getElementById('confFiltroResumo');
+        if (resumo) {
+            resumo.textContent = partes.length ? partes.join(' • ') : 'Sem filtros aplicados.';
+            resumo.style.display = partes.length ? 'block' : 'none';
+        }
+
+    }
+
+    function renderActiveFilterChips() {
+        const container = document.getElementById('confFiltrosAtivos');
+        if (!container) return;
+
+        const chips = [
+            confFilters.area ? { key: 'area', label: `Área: ${confFilters.area}` } : null,
+            confFilters.modalidade ? { key: 'modalidade', label: `Modalidade: ${confFilters.modalidade}` } : null,
+            confFilters.dataInicio || confFilters.dataFim ? { key: 'periodo', label: `Período: ${confFilters.dataInicio || '...'} até ${confFilters.dataFim || '...'}` } : null,
+            confFilters.categoria ? { key: 'categoria', label: `Categoria: ${confFilters.categoria}` } : null
+        ].filter(Boolean);
+
+        container.innerHTML = chips.map(chip => `
+            <span class="dashboard-filter__chip">
+                ${chip.label}
+                <button type="button" data-remove-filter="${chip.key}" aria-label="Remover filtro">&times;</button>
+            </span>
+        `).join('');
+
+        container.querySelectorAll('[data-remove-filter]').forEach(button => {
+            button.addEventListener('click', function () {
+                const key = this.getAttribute('data-remove-filter');
+                if (key === 'periodo') {
+                    confFilters.dataInicio = '';
+                    confFilters.dataFim = '';
+                    const inicio = document.getElementById('confDataInicio');
+                    const fim = document.getElementById('confDataFim');
+                    if (inicio) inicio.value = '';
+                    if (fim) fim.value = '';
+                } else if (key) {
+                    confFilters[key] = '';
+                    const map = {
+                        area: 'confArea',
+                        modalidade: 'confModalidade'
+                    };
+                    const inputId = map[key];
+                    if (inputId) {
+                        const input = document.getElementById(inputId);
+                        if (input) input.value = '';
+                    }
+                }
+                recarregarDashboardConf();
+            });
+        });
+    }
+
+    function resetDashboardState() {
+        dashboardState.totalChecklists = null;
+        dashboardState.totalConformidades = null;
+        dashboardState.totalNaoConformidades = null;
+        dashboardState.totalAvaliados = null;
+        dashboardState.taxaConformidade = null;
+        dashboardState.evolucaoData = [];
+        dashboardState.modalidadesData = [];
+        dashboardState.topCategoriasData = [];
+    }
+
+    async function carregarFiltrosConf() {
+        const data = await fetchJson('/api/dashboard/filtros');
+        preencherSelect('confArea', data.areas || [], 'Todas');
+        preencherSelect('confModalidade', data.modalidades || [], 'Todas');
+    }
+
+    function preencherSelect(id, values, defaultLabel) {
+        const select = document.getElementById(id);
+        if (!select) return;
+        const atual = select.value;
+        select.innerHTML = `<option value="">${defaultLabel}</option>` +
+            values.map(value => `<option value="${value}">${value}</option>`).join('');
+        select.value = values.includes(atual) ? atual : '';
+    }
+
+    async function recarregarDashboardConf() {
+        const requestId = ++confRequestId;
+        resetDashboardState();
+        persistFiltersInUrl();
+        atualizarResumoFiltros();
+        renderActiveFilterChips();
+        const results = await Promise.allSettled([
+            fetchEvolucaoConformidade(),
+            fetchChecklistPorMes(),
+            fetchTaxaConformidade(),
+            fetchTopCategoriasNaoConformidades()
+        ]);
+
+        if (requestId !== confRequestId) return;
+
+        if (results.every(result => result.status === 'rejected')) {
+            setText('totalChecklists', '0');
+            setText('totalAvaliados', '0');
+            setText('totalNaoConformidades', '0');
+            setText('taxaConformidade', '0%');
+        }
+    }
+
+    function ensureMetricCardShells() {
+        const cards = Array.from(document.querySelectorAll('.dashboard-metrics .metric-card'));
+        const configs = [
+            { cls: 'metric-card--spark metric-card--violet', icon: 'fa-chart-line', sparkId: 'sparkChecklists', footer: 'Volume diário' },
+            { cls: 'metric-card--spark metric-card--cyan', icon: 'fa-wave-square', sparkId: 'sparkConformidades', footer: 'Tendência positiva' },
+            { cls: 'metric-card--spark metric-card--indigo', icon: 'fa-chart-column', sparkId: 'sparkNaoConformes', footer: 'Desvios mapeados' },
+            { cls: 'metric-card--spark metric-card--slim', icon: 'fa-bullseye', sparkId: 'sparkTaxa', footer: 'Eficiência atual', bars: true }
+        ];
+
+        cards.forEach((card, index) => {
+            const title = card.querySelector('.metric-card__title');
+            const meta = card.querySelector('.metric-card__meta');
+            if (!title || card.querySelector('.metric-card__header')) {
+                return;
+            }
+
+            const config = configs[index];
+            card.className = `metric-card ${config.cls}`;
+            title.insertAdjacentHTML('beforebegin', `<div class="metric-card__header"></div>`);
+            const header = card.querySelector('.metric-card__header');
+            header.appendChild(title);
+            header.insertAdjacentHTML('beforeend', `<span class="metric-card__chip"><i class="fas ${config.icon}"></i></span>`);
+            meta.insertAdjacentHTML('afterend', `<div id="${config.sparkId}" class="metric-card__spark ${config.bars ? 'metric-card__spark--bars' : ''}"></div><span class="metric-card__footer">${config.footer}</span>`);
+        });
+    }
+
+    function renderMetricSpark(targetId, series, color, type) {
+        const target = document.getElementById(targetId);
+        if (!target) {
+            return;
+        }
+
+        destroyChart(target);
+        target.innerHTML = '';
+
+        renderApexChart(target, {
+            chart: {
+                type: type || 'area',
+                height: type === 'bar' ? 46 : 58,
+                sparkline: { enabled: true },
+                toolbar: { show: false }
+            },
+            series: [{ data: series }],
+            colors: [color],
+            stroke: { curve: 'smooth', width: type === 'bar' ? 0 : 3 },
+            fill: {
+                type: type === 'bar' ? 'solid' : 'gradient',
+                gradient: { shadeIntensity: 0.35, opacityFrom: 0.55, opacityTo: 0.08, stops: [0, 100] }
+            },
+            plotOptions: { bar: { columnWidth: '48%', borderRadius: 3 } },
+            tooltip: { enabled: false },
+            dataLabels: { enabled: false }
+        });
+    }
+
+    function destroyChart(target) {
+        if (target && target.__apexChartInstance) {
+            try {
+                target.__apexChartInstance.destroy();
+            } catch (_error) {
+            }
+            target.__apexChartInstance = null;
+        }
+    }
+
+    function renderApexChart(target, options) {
+        if (!target) return null;
+        destroyChart(target);
+        target.innerHTML = '';
+        const chart = new ApexCharts(target, options);
+        target.__apexChartInstance = chart;
+        chart.render();
+        return chart;
+    }
+
+    function formatarMesGrafico(valor) {
+        if (!valor) return '';
+        const partes = String(valor).split('-');
+        if (partes.length < 2) return String(valor);
+
+        const ano = partes[0];
+        const mes = Number(partes[1]);
+        const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
+
+        if (!Number.isFinite(mes) || mes < 1 || mes > 12) return String(valor);
+        return `${meses[mes - 1]}/${String(ano).slice(-2)}`;
+    }
+
+    function formatarNumeroGrafico(valor, casas = 0) {
+        const numero = Number(valor);
+        if (!Number.isFinite(numero)) return '0';
+        return numero.toLocaleString('pt-BR', {
+            minimumFractionDigits: casas,
+            maximumFractionDigits: casas
+        });
+    }
+
+    function formatarResumoPeriodoFiltro() {
+        const inicio = confFilters.dataInicio || '';
+        const fim = confFilters.dataFim || '';
+
+        if (!inicio && !fim) {
+            return 'Todo período';
+        }
+
+        const inicioFmt = inicio ? formatarMesGrafico(inicio) : 'início aberto';
+        const fimFmt = fim ? formatarMesGrafico(fim) : 'até hoje';
+
+        if (inicio && fim && inicio.slice(0, 7) === fim.slice(0, 7)) {
+            return inicioFmt;
+        }
+
+        return `${inicioFmt} a ${fimFmt}`;
+    }
+
+    function setText(id, text) {
+        const el = document.getElementById(id);
+        if (el) {
+            el.textContent = text;
+        }
+    }
+
+    function setExecutiveBrief(idValue, value, idMeta, meta) {
+        setText(idValue, value);
+        setText(idMeta, meta);
+    }
+
+    function renderRadarConformidadeChart(data) {
+        const chartElement = document.querySelector('#conformidadeRadarChart');
+        if (!chartElement) return;
+
+        destroyChart(chartElement);
+
+        if (!Array.isArray(data) || data.length === 0) {
+            chartElement.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            return;
+        }
+
+        const totalAvaliados = data.reduce((acc, curr) => acc + (curr.avaliados || 0), 0);
+        const totalConformes = data.reduce((acc, curr) => acc + (curr.conformes || 0), 0);
+        const totalNaoConformes = data.reduce((acc, curr) => acc + (curr.nao_conformes || 0), 0);
+        const taxaMedia = data.length ? data.reduce((acc, curr) => acc + (curr.taxa_conformidade || 0), 0) / data.length : 0;
+        const picoAvaliado = Math.max(...data.map(item => item.avaliados || 0), 0);
+        const mediaAvaliada = data.length ? totalAvaliados / data.length : 0;
+        const conformesPercent = totalAvaliados > 0 ? (totalConformes / totalAvaliados) * 100 : 0;
+        const naoConformesPercent = totalAvaliados > 0 ? (totalNaoConformes / totalAvaliados) * 100 : 0;
+        const coberturaPercent = picoAvaliado > 0 ? (mediaAvaliada / picoAvaliado) * 100 : 0;
+        const controleNcPercent = Math.max(0, 100 - naoConformesPercent);
+
+        renderApexChart(chartElement, {
+            chart: { type: 'radar', height: 338, toolbar: { show: false } },
+            series: [
+                {
+                    name: 'Resultado real',
+                    data: [
+                        Number(taxaMedia.toFixed(1)),
+                        Number(conformesPercent.toFixed(1)),
+                        Number(controleNcPercent.toFixed(1)),
+                        Number(coberturaPercent.toFixed(1)),
+                        Number(Math.max(0, 100 - ((totalNaoConformes / Math.max(totalAvaliados, 1)) * 100)).toFixed(1))
+                    ]
+                },
+                {
+                    name: 'Meta / referência',
+                    data: [98, 98, 98, 100, 98]
+                }
+            ],
+            labels: ['Taxa real', 'Conformes', 'Controle de NC', 'Cobertura', 'Meta global'],
+            colors: ['#2f80ed', '#ff6b6b'],
+            stroke: { width: 2 },
+            fill: { opacity: 0.18 },
+            markers: { size: 4, hover: { size: 5 } },
+            yaxis: {
+                min: 0,
+                max: 100,
+                tickAmount: 5,
+                labels: {
+                    formatter: value => `${formatarNumeroGrafico(value)}%`,
+                    style: { colors: [getChartFontColor()] }
+                }
+            },
+            xaxis: {
+                labels: {
+                    style: {
+                        fontSize: '12px',
+                        colors: Array(5).fill(getChartFontColor())
+                    }
+                }
+            },
+            tooltip: {
+                ...getTooltipTheme(),
+                y: {
+                    formatter: value => `${formatarNumeroGrafico(value, 1)}%`
+                }
+            },
+            legend: { position: 'bottom', horizontalAlign: 'center' },
+            noData: { text: 'Sem dados para exibir' }
+        });
+    }
+
+    function updateKpiCards() {
+        if (dashboardState.totalChecklists !== null) setText('totalChecklists', dashboardState.totalChecklists);
+        if (dashboardState.totalAvaliados !== null) setText('totalAvaliados', dashboardState.totalAvaliados);
+        if (dashboardState.totalNaoConformidades !== null) setText('totalNaoConformidades', dashboardState.totalNaoConformidades);
+        if (dashboardState.taxaConformidade !== null) setText('taxaConformidade', `${dashboardState.taxaConformidade.toFixed(2)}%`);
+
+        if (dashboardState.totalAvaliados !== null) {
+            const totalAvaliados = dashboardState.totalAvaliados;
+            const conformes = dashboardState.totalConformidades ?? 0;
+            const naoConformes = dashboardState.totalNaoConformidades ?? 0;
+            const percentConformes = totalAvaliados > 0 ? (conformes / totalAvaliados) * 100 : 0;
+            const percentNao = totalAvaliados > 0 ? (naoConformes / totalAvaliados) * 100 : 0;
+
+            setText('conformidadesMudanca', totalAvaliados > 0 ? `${conformes} conformes no período` : 'Sem itens avaliados');
+            setText('naoConformidadesMudanca', totalAvaliados > 0 ? `Taxa de não conformidade: ${percentNao.toFixed(1)}%` : 'Sem itens avaliados');
+            setText('taxaConformidadeMudanca', totalAvaliados > 0 ? `${conformes} de ${totalAvaliados} avaliados` : 'Sem itens avaliados');
+        } else {
+            if (dashboardState.totalConformidades !== null) setText('conformidadesMudanca', 'Volume consolidado do período');
+            if (dashboardState.totalNaoConformidades !== null) setText('naoConformidadesMudanca', 'Total de não conformidades');
+        }
+    }
+
+    async function fetchEvolucaoConformidade() {
+        try {
+            const response = await fetch(`/api/evolucao-conformidade${buildFilterQuery(confFilters)}`);
+            if (!response.ok) throw new Error('Erro ao buscar dados de evolução');
+
+            const data = await response.json();
+            if (!Array.isArray(data)) throw new Error('Formato de dados inválido');
+            dashboardState.evolucaoData = data;
+
+            const totalConformidades = data.reduce((acc, curr) => acc + (curr.conformes || 0), 0);
+            const totalNaoConformidades = data.reduce((acc, curr) => acc + (curr.nao_conformes || 0), 0);
+
+            if (dashboardState.totalAvaliados === null) {
+                dashboardState.totalConformidades = totalConformidades;
+                dashboardState.totalNaoConformidades = totalNaoConformidades;
+                updateKpiCards();
+            }
+
+            const mesCritico = data.reduce((acc, curr) => {
+                const volumeAtual = curr.nao_conformes || 0;
+                if (!acc || volumeAtual > acc.volume) {
+                    return {
+                        nome: curr.mes || '-',
+                        volume: volumeAtual,
+                        taxa: curr.taxa_conformidade || 0
+                    };
+                }
+                return acc;
+            }, null);
+
+            if (mesCritico) {
+                setExecutiveBrief(
+                    'briefMesCritico',
+                    formatarResumoPeriodoFiltro(),
+                    'briefMesCriticoMeta',
+                    `Pico mensal em ${formatarMesGrafico(mesCritico.nome)} com ${formatarNumeroGrafico(mesCritico.volume)} não conformidades e taxa de ${formatarNumeroGrafico(mesCritico.taxa, 1)}%.`
+                );
+            }
+
+            const chartElement = document.querySelector('#evolucaoChart');
+            if (!chartElement) throw new Error('Elemento do gráfico não encontrado');
+
+            destroyChart(chartElement);
+
+            const taxaSeries = data.map(item => item.taxa_conformidade || 0);
+            const metaSeries = data.map(() => 98);
+
+            const options = {
+                chart: { type: 'line', height: 292, id: 'evolucaoChart', toolbar: { show: false }, zoom: { enabled: false } },
+                series: [
+                    { name: 'Taxa de conformidade (%)', type: 'line', data: taxaSeries },
+                    { name: 'Meta: 98%', type: 'line', data: metaSeries }
+                ],
+                xaxis: {
+                    categories: data.map(item => formatarMesGrafico(item.mes || '')),
+                    labels: { rotate: -45, style: { fontSize: '12px', colors: getChartFontColor() } }
+                },
+                yaxis: [
+                    {
+                        title: { text: 'Taxa (%)' },
+                        min: 90,
+                        max: 100,
+                        tickAmount: 5,
+                        labels: {
+                            formatter: value => `${value.toFixed(0)}%`,
+                            style: { colors: [getChartFontColor()] }
+                        }
+                    }
+                ],
+                stroke: { curve: 'smooth', width: [3, 2], dashArray: [0, 6] },
+                fill: {
+                    type: ['gradient', 'solid'],
+                    gradient: { shadeIntensity: 0.25, opacityFrom: 0.45, opacityTo: 0.05, stops: [0, 100] }
+                },
+                colors: ['#2f80ed', '#ff6b6b'],
+                dataLabels: { enabled: false },
+                tooltip: { ...getTooltipTheme(), shared: true, intersect: false },
+                markers: { size: [4, 0], strokeWidth: 0, hover: { sizeOffset: 2 } },
+                grid: { borderColor: getGridColor(), strokeDashArray: 4 },
+                legend: { position: 'bottom', horizontalAlign: 'center' },
+                noData: { text: 'Sem dados para exibir' }
+            };
+
+            renderApexChart(chartElement, options);
+            renderEvolucaoResumoChart(data);
+            renderRadarConformidadeChart(data);
+        } catch (error) {
+            console.error('Erro ao carregar evolução de conformidades:', error);
+            setText('totalConformidades', 'Erro');
+            setText('totalNaoConformidades', 'Erro');
+            setText('conformidadesMudanca', 'Erro ao carregar dados');
+            setText('naoConformidadesMudanca', 'Erro ao carregar dados');
+            const resumoChart = document.querySelector('#evolucaoResumoChart');
+            if (resumoChart) resumoChart.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            const radarChart = document.querySelector('#conformidadeRadarChart');
+            if (radarChart) radarChart.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+        }
+    }
+
+    function renderEvolucaoResumoChart(data) {
+        const chartElement = document.querySelector('#evolucaoResumoChart');
+        if (!chartElement) return;
+
+        destroyChart(chartElement);
+
+        if (!Array.isArray(data) || data.length === 0) {
+            chartElement.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            return;
+        }
+
+        const taxaNcPor100 = data.map(item => {
+            const avaliados = item.avaliados || 0;
+            const naoConformes = item.nao_conformes || 0;
+            return avaliados > 0 ? (naoConformes / avaliados) * 100 : 0;
+        });
+
+        const options = {
+            chart: { type: 'line', height: 292, toolbar: { show: false } },
+            series: [
+                { name: 'Não conformidades', type: 'column', data: data.map(item => item.nao_conformes || 0) },
+                { name: 'NC por 100 itens avaliados', type: 'line', data: taxaNcPor100 }
+            ],
+            xaxis: { categories: data.map(item => formatarMesGrafico(item.mes || '')), labels: { rotate: -45, style: { fontSize: '12px', colors: getChartFontColor() } } },
+            yaxis: [
+                {
+                    title: { text: 'NC' },
+                    labels: {
+                        formatter: value => formatarNumeroGrafico(value),
+                        style: { colors: [getChartFontColor()] }
+                    }
+                },
+                {
+                    opposite: true,
+                    title: { text: 'Taxa (%)' },
+                    labels: {
+                        formatter: value => `${value.toFixed(2)}%`,
+                        style: { colors: [getChartFontColor()] }
+                    }
+                }
+            ],
+            plotOptions: { bar: { columnWidth: '42%', borderRadius: 6 } },
+            stroke: { width: [0, 3], curve: 'smooth' },
+            colors: ['#8b6fd8', '#1696c4'],
+            dataLabels: { enabled: false },
+            fill: { opacity: 0.92 },
+            tooltip: { ...getTooltipTheme(), shared: true, intersect: false },
+            grid: { borderColor: getGridColor(), strokeDashArray: 4 },
+            markers: { size: [0, 4], hover: { sizeOffset: 2 } },
+            legend: { position: 'bottom', horizontalAlign: 'center' },
+            noData: { text: 'Sem dados para exibir' }
+        };
+
+        renderApexChart(chartElement, options);
+    }
+
+    async function fetchChecklistPorMes() {
+        try {
+            const response = await fetch(`/api/checklist-por-mes${buildFilterQuery(confFilters)}`);
+            if (!response.ok) throw new Error('Erro ao buscar checklists por mês');
+
+            const data = await response.json();
+            const total = Array.isArray(data) ? data.reduce((acc, curr) => acc + (curr.total || 0), 0) : 0;
+            dashboardState.totalChecklists = total;
+            updateKpiCards();
+
+            const modalidadesResponse = await fetch(`/api/nao-conformidades-por-modalidade${buildFilterQuery(confFilters)}`);
+            if (!modalidadesResponse.ok) throw new Error('Erro ao buscar modalidades');
+
+            const modalidadesData = await modalidadesResponse.json();
+            dashboardState.modalidadesData = Array.isArray(modalidadesData) ? modalidadesData : [];
+            const pieTarget = document.querySelector('#naoConformidadesPieChart');
+            if (pieTarget) destroyChart(pieTarget);
+
+            const modalidadeCritica = Array.isArray(modalidadesData)
+                ? [...modalidadesData].sort((a, b) => (b.nao_conformes || 0) - (a.nao_conformes || 0))[0]
+                : null;
+
+            if (modalidadeCritica) {
+                setExecutiveBrief(
+                    'briefModalidadeCritica',
+                    modalidadeCritica.modalidade || 'Sem modalidade',
+                    'briefModalidadeCriticaMeta',
+                    `${modalidadeCritica.nao_conformes || 0} nao conformidades registradas nessa frente.`
+                );
+            }
+
+            const modalidadeSeries = Array.isArray(modalidadesData) ? modalidadesData.map(item => item.nao_conformes || 0) : [];
+            const totalModalidadesNc = modalidadeSeries.reduce((acc, value) => acc + value, 0);
+
+            renderApexChart(document.querySelector('#naoConformidadesPieChart'), {
+                chart: {
+                    type: 'bar',
+                    height: 292,
+                    toolbar: { show: false },
+                    events: {
+                        dataPointSelection: function (_event, _chartContext, config) {
+                            const categoriaSelecionada = modalidadesData?.[config.dataPointIndex]?.modalidade || '';
+                            if (!categoriaSelecionada) return;
+                            confFilters.modalidade = categoriaSelecionada === confFilters.modalidade ? '' : categoriaSelecionada;
+                            const modalidadeInput = document.getElementById('confModalidade');
+                            if (modalidadeInput) modalidadeInput.value = confFilters.modalidade;
+                            recarregarDashboardConf();
+                        }
+                    }
+                },
+                series: [{ name: 'Não conformidades', data: modalidadeSeries }],
+                xaxis: {
+                    categories: Array.isArray(modalidadesData) ? modalidadesData.map(item => item.modalidade || '') : [],
+                    labels: { style: { fontSize: '12px', colors: getChartFontColor() } },
+                    title: { text: 'Não conformidades' }
+                },
+                yaxis: {
+                    labels: { style: { colors: [getChartFontColor()] } }
+                },
+                plotOptions: {
+                    bar: {
+                        horizontal: true,
+                        barHeight: '54%',
+                        borderRadius: 7,
+                        distributed: true
+                    }
+                },
+                colors: [chartPalette.violet, chartPalette.cyan, chartPalette.blue, chartPalette.orange, chartPalette.indigo],
+                dataLabels: {
+                    enabled: true,
+                    formatter: (val) => {
+                        const percentual = totalModalidadesNc > 0 ? (val / totalModalidadesNc) * 100 : 0;
+                        return `${val}`;
+                    },
+                    style: { fontSize: '11px', fontWeight: 700, colors: ['#f8fafc'] }
+                },
+                stroke: { width: 0 },
+                tooltip: { ...getTooltipTheme(), y: { formatter: val => `${formatarNumeroGrafico(val)} não conformidades` } },
+                grid: { borderColor: getGridColor(), strokeDashArray: 4 },
+                legend: { show: false },
+                noData: { text: 'Sem dados para exibir' }
+            }).render();
+        } catch (error) {
+            console.error('Erro ao carregar total de checklists:', error);
+            setText('totalChecklists', '0');
+        }
+    }
+
+    async function fetchTaxaConformidade() {
+        try {
+            const response = await fetch(`/api/taxa-conformidade${buildFilterQuery(confFilters)}`);
+            if (!response.ok) throw new Error('Erro ao buscar taxa de conformidade');
+
+            const data = await response.json();
+            if (typeof data.taxa !== 'number' || typeof data.total_avaliados !== 'number' || typeof data.conformes !== 'number' || typeof data.nao_conformes !== 'number') {
+                throw new Error('Formato de dados inválido');
+            }
+
+            dashboardState.taxaConformidade = data.taxa;
+            dashboardState.totalAvaliados = data.total_avaliados;
+            dashboardState.totalConformidades = data.conformes;
+            dashboardState.totalNaoConformidades = data.nao_conformes;
+            updateKpiCards();
+        } catch (error) {
+            console.error('Erro ao carregar taxa de conformidade:', error);
+            setText('taxaConformidade', 'Erro');
+            setText('taxaConformidadeMudanca', 'Erro ao carregar dados');
+        }
+    }
+
+    async function fetchTopCategoriasNaoConformidades() {
+        try {
+            const query = buildFilterQuery({ ...confFilters, top: '10' });
+            const response = await fetch(`/api/top-categorias-nao-conformidades${query}`);
+            if (!response.ok) throw new Error('Erro ao buscar categorias com mais não conformidades');
+
+            const data = await response.json();
+            const categorias = Array.isArray(data) ? [...data] : [];
+            categorias.sort((a, b) => (b.total_nao_conformidades || 0) - (a.total_nao_conformidades || 0));
+            const topCategorias = categorias.slice(0, 10);
+            dashboardState.topCategoriasData = topCategorias;
+
+            if (topCategorias[0]) {
+                const principal = topCategorias[0];
+                setExecutiveBrief(
+                    'briefCategoriaCritica',
+                    principal.categoria || 'Sem categoria',
+                    'briefCategoriaCriticaMeta',
+                    `${principal.total_nao_conformidades || 0} NC, equivalente a ${(principal.percentual_total_nc || 0).toFixed(1)}% do total do período.`
+                );
+            }
+
+            renderTopCategoriasChart(topCategorias);
+            renderTopCategoriasTable(topCategorias);
+            renderCategoriasDonut(topCategorias);
+            renderSupplementaryCards();
+        } catch (error) {
+            console.error('Erro ao carregar categorias com mais não conformidades:', error);
+        }
+    }
+
+    function renderSupplementaryCards() {
+        renderRecorrenciaChart();
+        renderPriorityList();
+        renderActionMetrics();
+    }
+
+    function renderRecorrenciaChart() {
+        const target = document.querySelector('#recorrenciaNcChart');
+        if (!target) return;
+
+        destroyChart(target);
+
+        const topCategorias = Array.isArray(dashboardState.topCategoriasData) ? dashboardState.topCategoriasData.slice(0, 3) : [];
+        if (!topCategorias.length) {
+            target.innerHTML = '<div style="text-align:center;color:#888;padding:32px 0;">Sem dados para exibir</div>';
+            setText('recorrenciaTitulo', 'Sem recorrência crítica');
+            setText('recorrenciaResumo', 'Não há categorias suficientes para calcular a recorrência no período.');
+            return;
+        }
+
+        const totalNc = topCategorias.reduce((acc, item) => acc + (item.total_nao_conformidades || 0), 0);
+        const series = topCategorias.map(item => item.total_nao_conformidades || 0);
+        const labels = topCategorias.map((item, index) => `${index + 1}ª ocorrência`);
+
+        renderApexChart(target, {
+            chart: {
+                type: 'donut',
+                height: 220,
+                toolbar: { show: false }
+            },
+            series,
+            labels,
+            colors: ['#ff5b6e', '#ff9b2f', '#f4c542'],
+            legend: {
+                position: 'right',
+                fontSize: '12px',
+                labels: { colors: getChartFontColor() }
+            },
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '62%',
+                        labels: {
+                            show: true,
+                            total: {
+                                show: true,
+                                label: 'Total NC',
+                                color: getChartFontColor(),
+                                formatter: function () {
+                                    return formatarNumeroGrafico(totalNc);
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function (_value, opts) {
+                    const atual = series[opts.seriesIndex] || 0;
+                    const percentual = totalNc > 0 ? (atual / totalNc) * 100 : 0;
+                    return `${percentual.toFixed(1)}%`;
+                }
+            },
+            tooltip: { ...getTooltipTheme(), y: { formatter: val => `${formatarNumeroGrafico(val)} não conformidades` } },
+            stroke: { width: 3, colors: ['#ffffff'] }
+        }).render();
+
+        const principal = topCategorias[0];
+        const percentualPrincipal = totalNc > 0 ? ((principal.total_nao_conformidades || 0) / totalNc) * 100 : 0;
+        setText('recorrenciaTitulo', principal?.categoria || 'Sem categoria');
+        setText('recorrenciaResumo', `${principal?.total_nao_conformidades || 0} não conformidades (${percentualPrincipal.toFixed(1)}%) concentradas na principal causa do período.`);
+    }
+
+    function renderPriorityList() {
+        const container = document.getElementById('dashboardPriorityList');
+        if (!container) return;
+
+        const prioridades = (dashboardState.topCategoriasData || []).slice(0, 4);
+        if (!prioridades.length) {
+            container.innerHTML = '<div class="dashboard-priority-row dashboard-priority-row--empty">Sem prioridades calculadas.</div>';
+            return;
+        }
+
+        container.innerHTML = prioridades.map((item, index) => {
+            const taxa = item.percentual_total_nc || 0;
+            const nivel = index === 0 ? 'Alta' : (index === 1 ? 'Média' : 'Atenção');
+            const tendencia = taxa >= 10 ? '↑' : (taxa >= 5 ? '→' : '↓');
+            const tendenciaClasse = taxa >= 10 ? 'danger' : (taxa >= 5 ? 'warning' : 'success');
+
+            return `
+                <div class="dashboard-priority-row">
+                    <span class="dashboard-priority-row__badge dashboard-priority-row__badge--${index === 0 ? 'danger' : (index === 1 ? 'warning' : 'neutral')}">${nivel}</span>
+                    <div class="dashboard-priority-row__content">
+                        <strong>${item.categoria || 'Sem categoria'}</strong>
+                        <span>${item.total_nao_conformidades || 0} NC, representando ${taxa.toFixed(1)}% do total</span>
+                    </div>
+                    <div class="dashboard-priority-row__trend dashboard-priority-row__trend--${tendenciaClasse}">
+                        ${tendencia} ${taxa.toFixed(1)}%
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    function renderActionMetrics() {
+        const totalNc = dashboardState.totalNaoConformidades || 0;
+        const totalConformes = dashboardState.totalConformidades || 0;
+        const categoriasCriticas = (dashboardState.topCategoriasData || []).slice(0, 4);
+        const abertas = categoriasCriticas.reduce((acc, item) => acc + Math.ceil((item.total_nao_conformidades || 0) / 12), 0);
+        const concluidas = Math.max(0, Math.round(abertas * ((dashboardState.taxaConformidade || 0) / 100)));
+        const eficacia = totalNc + totalConformes > 0 ? (totalConformes / (totalConformes + totalNc)) * 100 : 0;
+        const tempoMedio = categoriasCriticas.length ? Math.max(3, Math.round(30 / categoriasCriticas.length)) : 0;
+
+        setText('acoesAbertasValor', String(abertas));
+        setText('acoesAbertasMeta', abertas > 0 ? 'Demandas em acompanhamento' : 'Sem ações pendentes');
+        setText('acoesConcluidasValor', String(concluidas));
+        setText('acoesConcluidasMeta', 'Estimativa com base na estabilidade atual');
+        setText('acoesEficaciaValor', `${eficacia.toFixed(1)}%`);
+        setText('acoesEficaciaMeta', 'Indicador sintético de resposta');
+        setText('acoesTempoMedioValor', `${tempoMedio} dias`);
+        setText('acoesTempoMedioMeta', 'Janela média projetada');
+    }
+
+    function renderTopCategoriasChart(data) {
+        const chartElement = document.querySelector('#topCategoriasChart');
+        if (!chartElement) return;
+
+        destroyChart(chartElement);
+
+        if (!Array.isArray(data) || data.length === 0) {
+            chartElement.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            return;
+        }
+
+        const categorias = data.map(item => item.categoria || 'Sem categoria');
+        const volumes = data.map(item => item.total_nao_conformidades || 0);
+        const acumuladoTotal = volumes.reduce((acc, value) => acc + value, 0);
+        let acumuladoAtual = 0;
+        const serieAcumulada = volumes.map(value => {
+            acumuladoAtual += value;
+            return acumuladoTotal > 0 ? (acumuladoAtual / acumuladoTotal) * 100 : 0;
+        });
+
+        renderApexChart(chartElement, {
+            chart: {
+                type: 'line',
+                height: 292,
+                toolbar: { show: false },
+                events: {
+                    dataPointSelection: function (_event, _chartContext, config) {
+                        const categoriaSelecionada = data?.[config.dataPointIndex]?.categoria || '';
+                        if (!categoriaSelecionada) return;
+                        confFilters.categoria = categoriaSelecionada === confFilters.categoria ? '' : categoriaSelecionada;
+                        recarregarDashboardConf();
+                    }
+                }
+            },
+            series: [
+                { name: 'Não conformidades', type: 'bar', data: volumes },
+                { name: '% acumulado', type: 'line', data: serieAcumulada }
+            ],
+            xaxis: { categories: categorias, labels: { rotate: -35, style: { fontSize: '12px', colors: getChartFontColor() } } },
+            yaxis: [
+                {
+                    title: { text: 'Não conformidades' },
+                    labels: { style: { fontSize: '12px', colors: [getChartFontColor()] } }
+                },
+                {
+                    opposite: true,
+                    max: 100,
+                    title: { text: '% acumulado' },
+                    labels: {
+                        formatter: value => `${value.toFixed(0)}%`,
+                        style: { fontSize: '12px', colors: [getChartFontColor()] }
+                    }
+                }
+            ],
+            plotOptions: { bar: { columnWidth: '52%', borderRadius: 6 } },
+            stroke: { width: [0, 3], curve: 'smooth' },
+            colors: ['#8b6fd8', '#1696c4'],
+            fill: { type: ['solid', 'solid'] },
+            dataLabels: { enabled: false },
+            markers: { size: [0, 4] },
+            tooltip: {
+                ...getTooltipTheme(),
+                shared: true,
+                intersect: false,
+                y: {
+                    formatter: (val, { seriesIndex }) => seriesIndex === 1 ? `${formatarNumeroGrafico(val, 1)}% acumulado` : `${formatarNumeroGrafico(val)} não conformidades`
+                }
+            },
+            grid: { borderColor: getGridColor(), strokeDashArray: 4 },
+            legend: { position: 'bottom', horizontalAlign: 'center' },
+            noData: { text: 'Sem dados para exibir' }
+        });
+    }
+
+    function renderTopCategoriasTable(data) {
+        const tbody = document.querySelector('#topCategoriasTable tbody');
+        if (!tbody) return;
+
+        tbody.innerHTML = '';
+        if (!Array.isArray(data) || data.length === 0) {
+            const tr = document.createElement('tr');
+            tr.innerHTML = '<td colspan="4" style="text-align:center;color:#888;">Sem dados</td>';
+            tbody.appendChild(tr);
+            return;
+        }
+
+        data.forEach((item, idx) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${idx + 1}</td>
+                <td>${item.categoria || 'Sem categoria'}</td>
+                <td>${item.total_nao_conformidades || 0}</td>
+                <td>${(item.percentual_total_nc || 0).toFixed(1)}%</td>
+            `;
+            tbody.appendChild(tr);
+        });
+    }
+
+    function renderCategoriasDonut(data) {
+        const chartElement = document.querySelector('#naoConformidadesCategoriaChart');
+        if (!chartElement) return;
+
+        destroyChart(chartElement);
+
+        if (!Array.isArray(data) || data.length === 0) {
+            chartElement.innerHTML = '<div style="text-align:center;color:#888;padding:40px 0;">Sem dados para exibir</div>';
+            return;
+        }
+
+        const series = data.map(item => item.total_nao_conformidades || 0);
+        const labels = data.map(item => item.categoria || 'Sem categoria');
+
+        renderApexChart(chartElement, {
+            chart: {
+                type: 'donut',
+                height: 292,
+                toolbar: { show: false },
+                events: {
+                    dataPointSelection: function (_event, _chartContext, config) {
+                        const categoriaSelecionada = data?.[config.dataPointIndex]?.categoria || '';
+                        if (!categoriaSelecionada) return;
+                        confFilters.categoria = categoriaSelecionada === confFilters.categoria ? '' : categoriaSelecionada;
+                        recarregarDashboardConf();
+                    }
+                }
+            },
+            series,
+            labels,
+            legend: {
+                position: 'right',
+                fontSize: '12px',
+                labels: { colors: getChartFontColor() }
+            },
+            colors: ['#8b5fd3', '#b58adf', '#ffb340', '#6ec24a', '#3b82f6', '#9fb6ff', '#ef4444', '#14b8a6'],
+            plotOptions: {
+                pie: {
+                    donut: {
+                        size: '68%',
+                        labels: {
+                            show: true,
+                            total: {
+                                show: true,
+                                label: 'Total NC',
+                                color: getChartFontColor(),
+                                formatter: function () {
+                                    return formatarNumeroGrafico(series.reduce((acc, value) => acc + value, 0));
+                                }
+                            },
+                            value: {
+                                color: getChartFontColor(),
+                                formatter: function (value) {
+                                    return formatarNumeroGrafico(value);
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            dataLabels: {
+                enabled: true,
+                formatter: function (_value, opts) {
+                    const total = series.reduce((acc, value) => acc + value, 0);
+                    const atual = series[opts.seriesIndex] || 0;
+                    const percentual = total > 0 ? (atual / total) * 100 : 0;
+                    return `${percentual.toFixed(1)}%`;
+                },
+                style: { fontSize: '11px', fontWeight: 700 }
+            },
+            tooltip: { ...getTooltipTheme(), y: { formatter: val => `${formatarNumeroGrafico(val)} não conformidades` } },
+            stroke: { width: 3, colors: ['#ffffff'] },
+            noData: { text: 'Sem dados para exibir' }
+        });
+    }
+
+    function updateExecutiveDirection() {
+        if (dashboardState.taxaConformidade === null || dashboardState.totalNaoConformidades === null) {
+            return;
+        }
+
+        if (dashboardState.taxaConformidade >= 95 && dashboardState.totalNaoConformidades <= 3) {
+            setExecutiveBrief('briefDirecao', 'Cenario controlado', 'briefDirecaoMeta', 'Qualidade alta, com baixo volume de desvios e boa estabilidade operacional.');
+            return;
+        }
+
+        if (dashboardState.taxaConformidade >= 90) {
+            setExecutiveBrief('briefDirecao', 'Atencao moderada', 'briefDirecaoMeta', 'A base segue saudavel, mas ja existe concentracao de desvios que pede ajuste fino.');
+            return;
+        }
+
+        setExecutiveBrief('briefDirecao', 'Intervencao recomendada', 'briefDirecaoMeta', 'A taxa atual indica necessidade de atuar nas causas-raiz e nas frentes com maior recorrencia.');
+    }
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        hydrateFiltersFromUrl();
+        ensureMetricCardShells();
+        await carregarFiltrosConf();
+        syncFiltersToInputs();
+        document.getElementById('confAplicarFiltros')?.addEventListener('click', function () {
+            syncInputsToFilters();
+            recarregarDashboardConf();
+        });
+        ['confArea', 'confModalidade', 'confDataInicio', 'confDataFim'].forEach(id => {
+            document.getElementById(id)?.addEventListener('change', function () {
+                syncInputsToFilters();
+                recarregarDashboardConf();
+            });
+        });
+        document.getElementById('confLimparFiltros')?.addEventListener('click', function () {
+            ['confArea', 'confModalidade', 'confDataInicio', 'confDataFim'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = '';
+            });
+            confFilters.area = '';
+            confFilters.modalidade = '';
+            confFilters.dataInicio = '';
+            confFilters.dataFim = '';
+            confFilters.categoria = '';
+            recarregarDashboardConf();
+        });
+        await recarregarDashboardConf();
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const p = chartPalette;
+        renderMetricSpark('sparkChecklists', [18, 24, 22, 30, 27, 33, 29], p.violet, 'area');
+        renderMetricSpark('sparkConformidades', [32, 38, 36, 42, 46, 44, 48], p.cyan, 'area');
+        renderMetricSpark('sparkNaoConformes', [9, 12, 11, 14, 10, 13, 8], p.indigo, 'area');
+        renderMetricSpark('sparkTaxa', [42, 58, 54, 67, 61], p.blue, 'bar');
+    });
+    </script>
+
+    <script>
+    (function () {
+        const originalRenderMetricSpark = window.renderMetricSpark;
+        const originalUpdateKpiCards = window.updateKpiCards;
+
+        window.ensureMetricCardShells = function () {
+            const cards = Array.from(document.querySelectorAll('.dashboard-metrics .metric-card'));
+            const configs = [
+                { cls: 'metric-card--spark metric-card--violet', icon: 'fa-chart-line', sparkId: 'sparkChecklists', footer: 'Volume diário' },
+                { cls: 'metric-card--spark metric-card--cyan', icon: 'fa-wave-square', sparkId: 'sparkConformidades', footer: 'Tendência positiva' },
+                { cls: 'metric-card--spark metric-card--indigo', icon: 'fa-chart-line', sparkId: 'sparkNaoConformes', footer: 'Desvios mapeados' },
+                { cls: 'metric-card--spark metric-card--slim', icon: 'fa-bullseye', sparkId: 'sparkTaxa', footer: 'Eficiência atual', radial: true }
+            ];
+
+            cards.forEach((card, index) => {
+                const title = card.querySelector('.metric-card__title');
+                const meta = card.querySelector('.metric-card__meta');
+                if (!title || !meta || card.querySelector('.metric-card__header')) {
+                    return;
+                }
+
+                const config = configs[index];
+                const sparkClass = config?.radial
+                    ? 'metric-card__spark--radial'
+                    : (config?.bars ? 'metric-card__spark--bars' : '');
+
+                card.className = `metric-card ${config.cls}`;
+                title.insertAdjacentHTML('beforebegin', '<div class="metric-card__header"></div>');
+                const header = card.querySelector('.metric-card__header');
+                header.appendChild(title);
+                header.insertAdjacentHTML('beforeend', `<span class="metric-card__chip"><i class="fas ${config.icon}"></i></span>`);
+                meta.insertAdjacentHTML('afterend', `<div id="${config.sparkId}" class="metric-card__spark ${sparkClass}"></div><span class="metric-card__footer">${config.footer}</span>`);
+            });
+        };
+
+        window.renderMetricSpark = function (targetId, series, color, type) {
+            if (type !== 'radial') {
+                return originalRenderMetricSpark(targetId, series, color, type);
+            }
+
+            const target = document.getElementById(targetId);
+            if (!target) {
+                return;
+            }
+
+            if (typeof destroyChart === 'function') {
+                destroyChart(target);
+            }
+
+            target.innerHTML = '';
+
+            const rawValue = Array.isArray(series) && series.length ? Number(series[0]) : 0;
+            const percent = Number.isFinite(rawValue) ? Math.max(0, Math.min(100, rawValue)) : 0;
+            const palette = typeof getActivePalette === 'function' ? chartPalette : null;
+            const labelColor = '#14213d';
+            const trackColor = 'rgba(148, 163, 184, 0.22)';
+
+            renderApexChart(target, {
+                chart: {
+                    type: 'radialBar',
+                    height: 78,
+                    sparkline: { enabled: true },
+                    toolbar: { show: false }
+                },
+                series: [percent],
+                colors: [color || palette?.blue || '#4facfe'],
+                plotOptions: {
+                    radialBar: {
+                        startAngle: -110,
+                        endAngle: 110,
+                        hollow: { size: '58%' },
+                        track: { background: trackColor, strokeWidth: '96%' },
+                        dataLabels: {
+                            name: { show: false },
+                            value: {
+                                offsetY: 4,
+                                fontSize: '0.8rem',
+                                fontWeight: 700,
+                                color: labelColor,
+                                formatter: function (value) {
+                                    return `${Math.round(value)}%`;
+                                }
+                            }
+                        }
+                    }
+                },
+                stroke: { lineCap: 'round' },
+                tooltip: { enabled: false }
+            });
+        };
+
+        window.updateKpiCards = function () {
+            originalUpdateKpiCards();
+            updateExecutiveDirection();
+
+            if (dashboardState.taxaConformidade !== null && dashboardState.taxaConformidade !== undefined) {
+                const palette = typeof getActivePalette === 'function' ? chartPalette : null;
+                window.renderMetricSpark('sparkTaxa', [dashboardState.taxaConformidade], palette?.blue || '#4facfe', 'radial');
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const palette = typeof getActivePalette === 'function' ? chartPalette : null;
+            window.renderMetricSpark('sparkChecklists', [18, 24, 22, 30, 27, 33, 29], palette?.violet || '#c158ff', 'area');
+            window.renderMetricSpark('sparkConformidades', [32, 38, 36, 42, 46, 44, 48], palette?.cyan || '#2ad6ff', 'area');
+            window.renderMetricSpark('sparkNaoConformes', [5, 9, 8, 11, 7, 10, 4], palette?.indigo || '#8b93ff', 'area');
+            window.renderMetricSpark('sparkTaxa', [dashboardState.taxaConformidade ?? 0], palette?.blue || '#4facfe', 'radial');
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const storageKey = 'dashboard-conf-active-tab';
+            const navLinks = Array.from(document.querySelectorAll('[data-dashboard-tab]'));
+            const panels = Array.from(document.querySelectorAll('[data-dashboard-panel]'));
+
+            if (!navLinks.length || !panels.length) {
+                return;
+            }
+
+            function setActiveTab(tabId) {
+                navLinks.forEach(link => {
+                    const isActive = link.getAttribute('data-dashboard-tab') === tabId;
+                    link.classList.toggle('is-active', isActive);
+                    link.setAttribute('aria-selected', isActive ? 'true' : 'false');
+                });
+
+                panels.forEach(panel => {
+                    const isActive = panel.getAttribute('data-dashboard-panel') === tabId;
+                    panel.classList.toggle('is-active', isActive);
+                    panel.hidden = !isActive;
+                });
+
+                try {
+                    localStorage.setItem(storageKey, tabId);
+                } catch (_error) {
+                }
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', function () {
+                    const targetId = this.getAttribute('data-dashboard-tab');
+                    if (targetId) {
+                        setActiveTab(targetId);
+                    }
+                });
+            });
+
+            let initialTab = navLinks[0].getAttribute('data-dashboard-tab');
+            try {
+                const savedTab = localStorage.getItem(storageKey);
+                if (savedTab && panels.some(panel => panel.getAttribute('data-dashboard-panel') === savedTab)) {
+                    initialTab = savedTab;
+                }
+            } catch (_error) {
+            }
+
+            if (initialTab) {
+                setActiveTab(initialTab);
+            }
+        });
+    })();
+    </script>
+
+}
+
+
+

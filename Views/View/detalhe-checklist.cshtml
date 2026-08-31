@@ -1,0 +1,47 @@
+@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Detalhes do Checklist";
+    ViewData["PageDescription"] = "Visualização executiva do checklist com histórico, não conformidades e tratativas.";
+    ViewData["ActiveNav"] = "checklists";
+}
+
+@section Head {
+    <script>
+        window.__CHECKLIST_ID__ = @((ViewData["ChecklistId"] as int?) ?? 0);
+    </script>
+}
+
+<header class="page-header">
+    <div>
+        <h1 class="page-header__title">Detalhes do checklist</h1>
+        <p class="page-header__subtitle">Leitura completa do checklist, incluindo resultado, tratativa e linha do tempo.</p>
+    </div>
+</header>
+
+<section class="content-card">
+    <div class="content-card__header">
+        <div>
+            <h2 class="content-card__title">Painel do checklist</h2>
+            <p class="content-card__subtitle">Consulte o processo, os apontamentos e a tratativa registrada sem abrir modal.</p>
+        </div>
+        <div class="page-actions">
+            <a href="/TELA-LISTA-CHECKLIST" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i>
+                Voltar para checklists
+            </a>
+            <button type="button" class="btn btn-primary" id="btnImprimirChecklistPagina">
+                <i class="fas fa-print"></i>
+                Imprimir checklist
+            </button>
+        </div>
+    </div>
+    <div class="content-card__body">
+        <div id="checklistDetalheContainer">
+            <div class="empty-state">Carregando checklist...</div>
+        </div>
+    </div>
+</section>
+
+@section Scripts {
+    <script src="/static/script_detalhe_checklist.js"></script>
+}

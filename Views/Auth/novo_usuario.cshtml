@@ -1,0 +1,1026 @@
+@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Gestão de Acessos";
+    ViewData["PageDescription"] = "Administre usuários, perfis e senhas temporárias do portal.";
+    ViewData["ActiveNav"] = "usuarios";
+}
+
+@section Head {
+    <style>
+        .access-page { display: grid; gap: 24px; }
+
+        .access-hero {
+            display: grid;
+            grid-template-columns: minmax(0, 1.3fr) minmax(260px, 0.7fr);
+            gap: 18px;
+            padding: 24px 26px;
+            border-radius: 28px;
+            background: var(--color-surface, #ffffff);
+            border: 1px solid var(--color-border, #d6e3f1);
+            color: var(--color-heading, #112a46);
+            box-shadow: var(--shadow-sm, 0 18px 40px rgba(17, 42, 70, 0.08));
+        }
+
+        .access-hero__eyebrow {
+            display: inline-flex;
+            padding: 6px 12px;
+            border-radius: 999px;
+            background: #eef6fc;
+            border: 1px solid #d6e8f5;
+            color: #315b7d;
+            font-size: 0.74rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .access-hero h2 {
+            margin: 14px 0 10px;
+            font-size: 1.9rem;
+            line-height: 1.1;
+        }
+
+        .access-hero p {
+            margin: 0;
+            color: var(--color-text-muted, #60758c);
+            max-width: 56ch;
+        }
+
+        .access-hero__stats {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            align-self: end;
+        }
+
+        .access-stat {
+            padding: 16px 14px;
+            border-radius: 20px;
+            background: linear-gradient(180deg, #f8fafc, #ffffff);
+            border: 1px solid #e1e8f0;
+        }
+
+        .access-stat strong {
+            color: var(--color-heading, #112a46);
+        }
+
+        .access-stat strong {
+            display: block;
+            font-size: 1.28rem;
+            margin-bottom: 4px;
+        }
+
+        .access-stat span {
+            color: var(--color-text-muted, #60758c);
+            font-size: 0.82rem;
+        }
+
+        .access-card {
+            background: #ffffff;
+            border: 1px solid #d6e3f1;
+            border-radius: 26px;
+            padding: 24px;
+            box-shadow: 0 18px 40px rgba(17, 42, 70, 0.08);
+        }
+
+        .access-card + .access-card {
+            margin-top: 0;
+        }
+
+        .access-card__header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 14px;
+            margin-bottom: 18px;
+        }
+
+        .access-card__header h3 {
+            margin: 0 0 6px;
+            font-size: 1.2rem;
+            color: #112a46;
+        }
+
+        .access-card__header p {
+            margin: 0;
+            color: #60758c;
+            line-height: 1.5;
+        }
+
+        .access-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 40px;
+            height: 40px;
+            padding: 0 12px;
+            border-radius: 999px;
+            background: rgba(0, 153, 204, 0.12);
+            color: #005ca0;
+            font-weight: 800;
+            font-size: 0.76rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .access-alert {
+            display: none;
+            border-radius: 16px;
+            padding: 13px 15px;
+            margin-bottom: 16px;
+            font-weight: 700;
+            white-space: pre-line;
+        }
+
+        .access-alert--error {
+            background: #fff1f2;
+            color: #b42318;
+            border: 1px solid #fecdd3;
+        }
+
+        .access-alert--success {
+            background: #ecfdf3;
+            color: #166534;
+            border: 1px solid #bbf7d0;
+        }
+
+        .access-password-panel {
+            display: none;
+            gap: 12px;
+            margin-top: 16px;
+            padding: 16px;
+            border-radius: 18px;
+            background: linear-gradient(180deg, #f7fbff 0%, #eef7ff 100%);
+            border: 1px solid #d2e7fb;
+        }
+
+        .access-password-panel.is-visible {
+            display: grid;
+        }
+
+        .access-password-panel__label {
+            font-size: 0.78rem;
+            font-weight: 800;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            color: #005ca0;
+        }
+
+        .access-password-panel__row {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .access-password-panel__value {
+            flex: 1;
+            min-width: 0;
+            padding: 12px 14px;
+            border-radius: 14px;
+            background: #ffffff;
+            border: 1px dashed #b9d7ff;
+            color: #112a46;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+            word-break: break-all;
+        }
+
+        .access-password-panel__hint {
+            color: #58708d;
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .access-form {
+            display: grid;
+            gap: 14px;
+        }
+
+        .access-form__grid,
+        .access-edit__grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .access-field--full,
+        .access-edit__full {
+            grid-column: 1 / -1;
+        }
+
+        .access-field label {
+            display: block;
+            margin-bottom: 6px;
+            color: #112a46;
+            font-weight: 700;
+            font-size: 0.9rem;
+        }
+
+        .access-field input,
+        .access-field select {
+            width: 100%;
+            border: 1px solid #c9d8ea;
+            border-radius: 14px;
+            padding: 12px 14px;
+            background: #fbfdff;
+            color: #112a46;
+        }
+
+        .access-field small {
+            display: block;
+            margin-top: 6px;
+            color: #6c8299;
+            line-height: 1.45;
+        }
+
+        .access-actions,
+        .access-row__actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .access-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 11px 16px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .access-btn--primary {
+            background: linear-gradient(135deg, #0099cc, #005ca0);
+            color: #fff;
+            box-shadow: 0 14px 28px rgba(0, 92, 160, 0.18);
+        }
+
+        .access-btn--ghost {
+            background: #f2f7fc;
+            color: #112a46;
+            border: 1px solid #d6e3f1;
+        }
+
+        .access-btn--danger {
+            background: #fff1f2;
+            color: #b42318;
+            border: 1px solid #fecdd3;
+        }
+
+        .access-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            margin-bottom: 16px;
+        }
+
+        .access-toolbar__filters {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+
+        .access-toolbar__filters input,
+        .access-toolbar__filters select {
+            min-width: 220px;
+            padding: 10px 14px;
+            border-radius: 14px;
+            border: 1px solid #c9d8ea;
+            background: #fbfdff;
+            color: #112a46;
+        }
+
+        .access-toolbar__meta {
+            color: #60758c;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .access-table-wrap {
+            border: 1px solid #dbe6f2;
+            border-radius: 22px;
+            overflow: hidden;
+            background: #fff;
+        }
+
+        .access-table-scroll {
+            width: 100%;
+            overflow-x: auto;
+        }
+
+        .access-table {
+            width: 100%;
+            min-width: 980px;
+            border-collapse: collapse;
+        }
+
+        .access-table thead th {
+            background: #112a46;
+            color: #fff;
+            text-align: left;
+            padding: 14px 16px;
+            font-size: 0.82rem;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .access-table tbody td {
+            padding: 14px 16px;
+            border-top: 1px solid #e3ebf5;
+            color: #31465e;
+            vertical-align: top;
+        }
+
+        .access-table tbody tr:hover td {
+            background: #f8fbff;
+        }
+
+        .access-table__name {
+            color: #112a46;
+            font-weight: 800;
+        }
+
+        .access-table__sub {
+            display: block;
+            margin-top: 4px;
+            color: #6a7f96;
+            font-size: 0.86rem;
+            line-height: 1.45;
+        }
+
+        .access-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            border-radius: 999px;
+            padding: 6px 10px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+        }
+
+        .access-badge--adm {
+            background: #eaf3ff;
+            color: #005ca0;
+            border-color: #b9d7ff;
+        }
+
+        .access-badge--ci {
+            background: #ecfdf3;
+            color: #166534;
+            border-color: #bbf7d0;
+        }
+
+        .access-badge--padrao {
+            background: #fff8e6;
+            color: #a16207;
+            border-color: #fde68a;
+        }
+
+        .access-badge--off {
+            background: #fff1f2;
+            color: #b42318;
+            border-color: #fecdd3;
+        }
+
+        .access-badge--empresa-agevap {
+            background: rgba(14, 165, 198, 0.1);
+            color: #0b6f88;
+            border-color: rgba(14, 165, 198, 0.18);
+        }
+
+        .access-badge--empresa-agedoce {
+            background: rgba(31, 157, 85, 0.1);
+            color: #1f6a41;
+            border-color: rgba(31, 157, 85, 0.18);
+        }
+
+        .access-badge--empresa-agegrande {
+            background: rgba(124, 58, 237, 0.1);
+            color: #6b21c8;
+            border-color: rgba(124, 58, 237, 0.18);
+        }
+
+        .access-badge--empresa-agegoias {
+            background: rgba(245, 158, 11, 0.12);
+            color: #a16207;
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .access-edit-row {
+            display: none;
+        }
+
+        .access-edit-row.is-open {
+            display: table-row;
+        }
+
+        .access-edit-row td {
+            background: linear-gradient(180deg, #f8fbff 0%, #f3f8fd 100%);
+        }
+
+        .access-edit-panel {
+            padding: 8px 0 2px;
+        }
+
+        .access-empty {
+            padding: 26px;
+            text-align: center;
+            color: #60758c;
+        }
+
+        @@media (max-width: 1180px) {
+            .access-hero {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 760px) {
+            .access-form__grid,
+            .access-edit__grid,
+            .access-hero__stats,
+            .access-toolbar__filters {
+                grid-template-columns: 1fr;
+            }
+
+            .access-card,
+            .access-hero {
+                padding: 20px;
+                border-radius: 22px;
+            }
+
+            .access-toolbar {
+                align-items: stretch;
+            }
+
+            .access-toolbar__filters {
+                display: grid;
+            }
+
+            .access-toolbar__filters input,
+            .access-toolbar__filters select {
+                min-width: 0;
+                width: 100%;
+            }
+        }
+    </style>
+}
+
+<section class="access-page">
+    <section class="access-hero">
+        <div>
+            <span class="access-hero__eyebrow">Administração de acesso</span>
+            <h2>Painel profissional para controle de perfis e senhas</h2>
+            <p>Cadastre novos usuários, defina a empresa vinculada ao login e mantenha a base de acesso organizada para o portal inteiro.</p>
+        </div>
+        <div class="access-hero__stats">
+            <div class="access-stat">
+                <strong>3</strong>
+                <span>Perfis controlados</span>
+            </div>
+            <div class="access-stat">
+                <strong>4</strong>
+                <span>Marcas suportadas</span>
+            </div>
+            <div class="access-stat">
+                <strong>1</strong>
+                <span>Base central de acesso</span>
+            </div>
+        </div>
+    </section>
+
+    <article class="access-card">
+        <div class="access-card__header">
+            <div>
+                <h3>Novo usuário</h3>
+                <p>Cadastre o usuário, perfil e empresa já no início para que a experiência do portal fique correta desde o primeiro acesso.</p>
+            </div>
+            <span class="access-pill">ADM</span>
+        </div>
+
+        <div id="createAlert" class="access-alert"></div>
+
+        <form id="createUserForm" class="access-form">
+            <div class="access-form__grid">
+                <div class="access-field access-field--full">
+                    <label for="name">Nome completo</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="access-field">
+                    <label for="login">Login</label>
+                    <input type="text" id="login" name="login" required>
+                </div>
+                <div class="access-field">
+                    <label for="email">E-mail corporativo</label>
+                    <input type="email" id="email" name="email" required>
+                </div>
+                <div class="access-field">
+                    <label for="perfil">Perfil de acesso</label>
+                    <select id="perfil" name="perfil" required>
+                        <option value="USER_CI">Controle Interno</option>
+                        <option value="USER_PADRAO">Usuário padrão</option>
+                        <option value="USER_ADM">Administrador</option>
+                    </select>
+                </div>
+                <div class="access-field">
+                    <label for="empresa">Empresa / marca</label>
+                    <select id="empresa" name="empresa" required>
+                        <option value="AGEVAP">AGEVAP</option>
+                        <option value="AGEDOCE">AGEDOCE</option>
+                        <option value="AGEGRANDE">AGEGRANDE</option>
+                        <option value="AGEGOIAS">AGEGOIAS</option>
+                    </select>
+                    <small>A empresa escolhida neste campo será usada no acesso e na identificação do usuário.</small>
+                </div>
+                <div class="access-field">
+                    <label for="senha">Senha temporária</label>
+                    <input type="text" id="senha" name="senha" required>
+                    <small>O usuário poderá trocar essa senha depois em <strong>Meu Perfil</strong>.</small>
+                </div>
+            </div>
+
+            <div class="access-actions">
+                <button type="button" class="access-btn access-btn--ghost" id="generatePasswordButton">Gerar senha</button>
+                <button type="submit" class="access-btn access-btn--primary">Salvar usuário</button>
+            </div>
+        </form>
+
+        <div id="createdPasswordPanel" class="access-password-panel">
+            <span class="access-password-panel__label">Senha temporária gerada</span>
+            <div class="access-password-panel__row">
+                <div id="createdPasswordValue" class="access-password-panel__value"></div>
+                <button type="button" class="access-btn access-btn--ghost" id="copyCreatedPasswordButton">Copiar senha</button>
+            </div>
+            <div class="access-password-panel__hint">Entregue essa senha ao usuário e oriente a troca imediata em <strong>Meu Perfil</strong>.</div>
+        </div>
+    </article>
+
+    <article class="access-card">
+        <div class="access-card__header">
+            <div>
+                <h3>Usuários cadastrados</h3>
+                <p>Use o filtro por empresa e mantenha a base organizada. Ações de edição e exclusão ficam na última coluna.</p>
+            </div>
+            <span class="access-pill">Base</span>
+        </div>
+
+        <div id="listAlert" class="access-alert"></div>
+
+        <div class="access-toolbar">
+            <div class="access-toolbar__filters">
+                <input type="text" id="userSearch" placeholder="Filtrar por nome, login ou e-mail">
+                <select id="userCompanyFilter">
+                    <option value="">Todas as empresas</option>
+                    <option value="AGEVAP">AGEVAP</option>
+                    <option value="AGEDOCE">AGEDOCE</option>
+                    <option value="AGEGRANDE">AGEGRANDE</option>
+                    <option value="AGEGOIAS">AGEGOIAS</option>
+                </select>
+            </div>
+            <div class="access-toolbar__meta" id="userCountInfo">0 usuário(s)</div>
+        </div>
+
+        <div class="access-table-wrap">
+            <div class="access-table-scroll">
+                <table class="access-table">
+                    <thead>
+                        <tr>
+                            <th>Usuário</th>
+                            <th>Login</th>
+                            <th>E-mail</th>
+                            <th>Empresa</th>
+                            <th>Perfil</th>
+                            <th>Status</th>
+                            <th>Ações</th>
+                        </tr>
+                    </thead>
+                    <tbody id="userTableBody">
+                        <tr>
+                            <td colspan="7" class="access-empty">Carregando usuários...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </article>
+</section>
+
+@section Scripts {
+    <script>
+        const createForm = document.getElementById('createUserForm');
+        const createAlert = document.getElementById('createAlert');
+        const listAlert = document.getElementById('listAlert');
+        const userTableBody = document.getElementById('userTableBody');
+        const userSearch = document.getElementById('userSearch');
+        const userCompanyFilter = document.getElementById('userCompanyFilter');
+        const userCountInfo = document.getElementById('userCountInfo');
+        const createNameInput = document.getElementById('name');
+        const createLoginInput = document.getElementById('login');
+        const createEmailInput = document.getElementById('email');
+        const createPerfilSelect = document.getElementById('perfil');
+        const createEmpresaSelect = document.getElementById('empresa');
+        const createSenhaInput = document.getElementById('senha');
+        const generatePasswordButton = document.getElementById('generatePasswordButton');
+        const createdPasswordPanel = document.getElementById('createdPasswordPanel');
+        const createdPasswordValue = document.getElementById('createdPasswordValue');
+        const copyCreatedPasswordButton = document.getElementById('copyCreatedPasswordButton');
+
+        const state = {
+            usuarios: [],
+            filtrados: []
+        };
+
+        function showAlert(element, message, type) {
+            element.textContent = message;
+            element.className = `access-alert access-alert--${type}`;
+            element.style.display = 'block';
+        }
+
+        function hideAlert(element) {
+            element.style.display = 'none';
+            element.textContent = '';
+            element.className = 'access-alert';
+        }
+
+        async function copiarTexto(texto) {
+            if (!texto) return false;
+            try {
+                await navigator.clipboard.writeText(texto);
+                return true;
+            } catch (_error) {
+                return false;
+            }
+        }
+
+        function mostrarSenhaGerada(senha) {
+            if (!senha) return;
+            createdPasswordValue.textContent = senha;
+            createdPasswordPanel.classList.add('is-visible');
+        }
+
+        function ocultarSenhaGerada() {
+            createdPasswordValue.textContent = '';
+            createdPasswordPanel.classList.remove('is-visible');
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        function gerarSenhaTemporaria(tamanho = 12) {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789!@@#$%&*';
+            const bytes = new Uint32Array(tamanho);
+            window.crypto.getRandomValues(bytes);
+            return Array.from(bytes, value => chars[value % chars.length]).join('');
+        }
+
+        function perfilBadge(perfil) {
+            if (perfil === 'USER_ADM') return '<span class="access-badge access-badge--adm">Administrador</span>';
+            if (perfil === 'USER_PADRAO') return '<span class="access-badge access-badge--padrao">Usuário padrão</span>';
+            return '<span class="access-badge access-badge--ci">Controle Interno</span>';
+        }
+
+        function empresaBadge(empresa) {
+            const valor = String(empresa || 'AGEVAP').trim().toUpperCase();
+            const css = valor.toLowerCase();
+            return `<span class="access-badge access-badge--empresa-${css}">${escapeHtml(valor)}</span>`;
+        }
+
+        function statusBadge(ativo) {
+            return ativo
+                ? '<span class="access-badge access-badge--ci">Ativo</span>'
+                : '<span class="access-badge access-badge--off">Inativo</span>';
+        }
+
+        function renderEditRow(usuario) {
+            return `
+                <tr class="access-edit-row" data-edit-row-id="${usuario.id}">
+                    <td colspan="7">
+                        <div class="access-edit-panel">
+                            <form class="access-edit" data-user-id="${usuario.id}">
+                                <div class="access-edit__grid">
+                                    <div class="access-field access-edit__full">
+                                        <label>Nome completo</label>
+                                        <input type="text" name="name" value="${escapeHtml(usuario.name)}" required>
+                                    </div>
+                                    <div class="access-field">
+                                        <label>Login</label>
+                                        <input type="text" name="login" value="${escapeHtml(usuario.login)}" required>
+                                    </div>
+                                    <div class="access-field">
+                                        <label>E-mail corporativo</label>
+                                        <input type="email" name="email" value="${escapeHtml(usuario.email)}" required>
+                                    </div>
+                                    <div class="access-field">
+                                        <label>Perfil</label>
+                                        <select name="perfil">
+                                            <option value="USER_CI" ${usuario.perfil === 'USER_CI' ? 'selected' : ''}>Controle Interno</option>
+                                            <option value="USER_PADRAO" ${usuario.perfil === 'USER_PADRAO' ? 'selected' : ''}>Usuário padrão</option>
+                                            <option value="USER_ADM" ${usuario.perfil === 'USER_ADM' ? 'selected' : ''}>Administrador</option>
+                                        </select>
+                                    </div>
+                                    <div class="access-field">
+                                        <label>Empresa / marca</label>
+                                        <select name="empresa">
+                                            <option value="AGEVAP" ${usuario.empresa === 'AGEVAP' ? 'selected' : ''}>AGEVAP</option>
+                                            <option value="AGEDOCE" ${usuario.empresa === 'AGEDOCE' ? 'selected' : ''}>AGEDOCE</option>
+                                            <option value="AGEGRANDE" ${usuario.empresa === 'AGEGRANDE' ? 'selected' : ''}>AGEGRANDE</option>
+                                            <option value="AGEGOIAS" ${usuario.empresa === 'AGEGOIAS' ? 'selected' : ''}>AGEGOIAS</option>
+                                        </select>
+                                    </div>
+                                    <div class="access-field">
+                                        <label>Status</label>
+                                        <select name="ativo">
+                                            <option value="true" ${usuario.ativo ? 'selected' : ''}>Ativo</option>
+                                            <option value="false" ${!usuario.ativo ? 'selected' : ''}>Inativo</option>
+                                        </select>
+                                    </div>
+                                    <div class="access-field access-edit__full">
+                                        <label>Nova senha / reset</label>
+                                        <input type="text" name="senha" placeholder="Use gerar senha para resetar o acesso">
+                                    </div>
+                                </div>
+
+                                <div class="access-row__actions" style="margin-top: 14px;">
+                                    <button type="button" class="access-btn access-btn--ghost" data-action="generate-reset">Gerar senha</button>
+                                    <button type="submit" class="access-btn access-btn--primary">Salvar alterações</button>
+                                    <button type="button" class="access-btn access-btn--ghost" data-action="cancel-edit">Cancelar</button>
+                                </div>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        }
+
+        function renderUserRow(usuario) {
+            return `
+                <tr data-user-id="${usuario.id}">
+                    <td>
+                        <span class="access-table__name">${escapeHtml(usuario.name)}</span>
+                    </td>
+                    <td>${escapeHtml(usuario.login)}</td>
+                    <td>
+                        ${escapeHtml(usuario.email)}
+                        <span class="access-table__sub">Empresa atual: ${escapeHtml(usuario.empresa || 'AGEVAP')}</span>
+                    </td>
+                    <td>${empresaBadge(usuario.empresa)}</td>
+                    <td>${perfilBadge(usuario.perfil)}</td>
+                    <td>${statusBadge(usuario.ativo)}</td>
+                    <td>
+                        <div class="access-row__actions">
+                            <button type="button" class="access-btn access-btn--ghost" data-action="toggle-edit" data-user-id="${usuario.id}">Editar</button>
+                            <button type="button" class="access-btn access-btn--danger" data-action="delete" data-user-id="${usuario.id}">Excluir</button>
+                        </div>
+                    </td>
+                </tr>
+                ${renderEditRow(usuario)}
+            `;
+        }
+
+        function atualizarContador() {
+            userCountInfo.textContent = `${state.filtrados.length} usuário(s) exibido(s)`;
+        }
+
+        function renderTable() {
+            if (!state.filtrados.length) {
+                userTableBody.innerHTML = '<tr><td colspan="7" class="access-empty">Nenhum usuário encontrado para o filtro atual.</td></tr>';
+                atualizarContador();
+                return;
+            }
+
+            userTableBody.innerHTML = state.filtrados.map(renderUserRow).join('');
+            atualizarContador();
+        }
+
+        function aplicarFiltros() {
+            const termo = String(userSearch.value || '').trim().toLowerCase();
+            const empresa = String(userCompanyFilter.value || '').trim().toUpperCase();
+
+            state.filtrados = state.usuarios.filter((usuario) => {
+                const bateEmpresa = !empresa || String(usuario.empresa || '').toUpperCase() === empresa;
+                const alvoTexto = [
+                    usuario.name,
+                    usuario.login,
+                    usuario.email,
+                    usuario.empresa,
+                    usuario.perfil
+                ].join(' ').toLowerCase();
+                const bateTermo = !termo || alvoTexto.includes(termo);
+                return bateEmpresa && bateTermo;
+            });
+
+            renderTable();
+        }
+
+        async function loadUsers() {
+            hideAlert(listAlert);
+
+            try {
+                const response = await fetch('/api/usuarios', { headers: { 'Accept': 'application/json', 'Cache-Control': 'no-cache' }, cache: 'no-store', credentials: 'same-origin' });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.message || 'Não foi possível carregar os usuários.');
+                state.usuarios = Array.isArray(data.usuarios) ? data.usuarios : [];
+                aplicarFiltros();
+            } catch (error) {
+                state.usuarios = [];
+                state.filtrados = [];
+                userTableBody.innerHTML = '<tr><td colspan="7" class="access-empty">Não foi possível carregar os usuários.</td></tr>';
+                showAlert(listAlert, error.message || 'Erro ao buscar usuários.', 'error');
+                atualizarContador();
+            }
+        }
+
+        function fecharEdicoes() {
+            userTableBody.querySelectorAll('.access-edit-row').forEach((row) => row.classList.remove('is-open'));
+        }
+
+        generatePasswordButton.addEventListener('click', function () {
+            createSenhaInput.value = gerarSenhaTemporaria();
+        });
+
+        copyCreatedPasswordButton.addEventListener('click', async function () {
+            const ok = await copiarTexto(createdPasswordValue.textContent.trim());
+            if (ok) {
+                showAlert(createAlert, 'Senha temporária copiada para a área de transferência.', 'success');
+            } else {
+                showAlert(createAlert, 'Não foi possível copiar a senha automaticamente.', 'error');
+            }
+        });
+
+        createForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+            hideAlert(createAlert);
+            ocultarSenhaGerada();
+
+            const payload = {
+                name: createNameInput.value.trim(),
+                login: createLoginInput.value.trim(),
+                email: createEmailInput.value.trim(),
+                perfil: createPerfilSelect.value,
+                empresa: createEmpresaSelect.value,
+                senha: createSenhaInput.value.trim()
+            };
+
+            if (!payload.senha) {
+                payload.senha = gerarSenhaTemporaria();
+                createSenhaInput.value = payload.senha;
+            }
+
+            try {
+                const response = await fetch('/novo-usuario', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.message || 'Não foi possível criar o usuário.');
+
+                const senhaGerada = data.senha_temporaria || payload.senha;
+                createForm.reset();
+                createPerfilSelect.value = 'USER_CI';
+                createEmpresaSelect.value = 'AGEVAP';
+                createSenhaInput.value = gerarSenhaTemporaria();
+                mostrarSenhaGerada(senhaGerada);
+                showAlert(createAlert, 'Usuário criado com sucesso.', 'success');
+                await loadUsers();
+            } catch (error) {
+                showAlert(createAlert, error.message || 'Erro ao criar usuário.', 'error');
+            }
+        });
+
+        userTableBody.addEventListener('click', async function (event) {
+            const button = event.target.closest('button[data-action]');
+            if (!button) return;
+
+            const userId = button.dataset.userId || button.closest('tr')?.dataset.editRowId || '';
+            if (!userId) return;
+
+            const editRow = Array.from(userTableBody.querySelectorAll('.access-edit-row'))
+                .find(row => row.dataset.editRowId === userId);
+            const form = editRow?.querySelector('form.access-edit');
+
+            if (button.dataset.action === 'toggle-edit') {
+                if (!editRow) {
+                    showAlert(listAlert, 'Não foi possível localizar a edição deste usuário.', 'error');
+                    return;
+                }
+
+                const abrir = !editRow.classList.contains('is-open');
+                fecharEdicoes();
+                if (abrir) {
+                    editRow.classList.add('is-open');
+                }
+                return;
+            }
+
+            if (button.dataset.action === 'cancel-edit') {
+                editRow?.classList.remove('is-open');
+                return;
+            }
+
+            if (button.dataset.action === 'generate-reset') {
+                const senhaInput = form?.querySelector('input[name="senha"]');
+                if (senhaInput) {
+                    senhaInput.value = gerarSenhaTemporaria();
+                }
+                return;
+            }
+
+            if (button.dataset.action === 'delete') {
+                if (!window.confirm('Deseja realmente excluir este usuário?')) return;
+
+                try {
+                    const response = await fetch(`/api/usuarios/${userId}`, {
+                        method: 'DELETE',
+                        headers: { 'Accept': 'application/json' },
+                        credentials: 'same-origin'
+                    });
+                    const data = await response.json();
+                    if (!response.ok || !data.success) throw new Error(data.message || 'Não foi possível excluir o usuário.');
+                    showAlert(listAlert, 'Usuário excluído com sucesso.', 'success');
+                    await loadUsers();
+                } catch (error) {
+                    showAlert(listAlert, error.message || 'Erro ao excluir usuário.', 'error');
+                }
+            }
+        });
+
+        userTableBody.addEventListener('submit', async function (event) {
+            const form = event.target.closest('form.access-edit');
+            if (!form) return;
+
+            event.preventDefault();
+            hideAlert(listAlert);
+
+            const userId = form.dataset.userId;
+            const nameInput = form.querySelector('input[name="name"]');
+            const loginInput = form.querySelector('input[name="login"]');
+            const emailInput = form.querySelector('input[name="email"]');
+            const perfilInput = form.querySelector('select[name="perfil"]');
+            const empresaInput = form.querySelector('select[name="empresa"]');
+            const ativoInput = form.querySelector('select[name="ativo"]');
+            const senhaInput = form.querySelector('input[name="senha"]');
+
+            if (!nameInput || !loginInput || !emailInput || !perfilInput || !empresaInput || !ativoInput || !senhaInput) {
+                showAlert(listAlert, 'Não foi possível localizar os campos de edição do usuário.', 'error');
+                return;
+            }
+
+            const payload = {
+                name: nameInput.value.trim(),
+                login: loginInput.value.trim(),
+                email: emailInput.value.trim(),
+                perfil: perfilInput.value,
+                empresa: empresaInput.value,
+                ativo: ativoInput.value,
+                senha: senhaInput.value.trim()
+            };
+
+            try {
+                const response = await fetch(`/api/usuarios/${userId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json' },
+                    credentials: 'same-origin',
+                    body: JSON.stringify(payload)
+                });
+                const data = await response.json();
+                if (!response.ok || !data.success) throw new Error(data.message || 'Não foi possível atualizar o usuário.');
+
+                const usuarioAtualizado = data.usuario;
+                if (!usuarioAtualizado || usuarioAtualizado.empresa !== payload.empresa) {
+                    throw new Error('O servidor não confirmou a empresa selecionada.');
+                }
+
+                state.usuarios = state.usuarios.map((usuario) =>
+                    String(usuario.id) === String(usuarioAtualizado.id) ? usuarioAtualizado : usuario
+                );
+                aplicarFiltros();
+                const senhaInfo = payload.senha ? `\nSenha de reset definida: ${payload.senha}` : '';
+                showAlert(listAlert, `Usuário atualizado com sucesso.${senhaInfo}`, 'success');
+            } catch (error) {
+                showAlert(listAlert, error.message || 'Erro ao atualizar usuário.', 'error');
+            }
+        });
+
+        createPerfilSelect.value = 'USER_CI';
+        createEmpresaSelect.value = 'AGEVAP';
+        createSenhaInput.value = gerarSenhaTemporaria();
+
+        userSearch.addEventListener('input', aplicarFiltros);
+        userCompanyFilter.addEventListener('change', aplicarFiltros);
+
+        loadUsers();
+    </script>
+}

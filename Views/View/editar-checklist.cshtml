@@ -1,0 +1,102 @@
+@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Editar Checklist";
+    ViewData["PageDescription"] = "Edição operacional de checklist com atualização de itens e cronoanálise.";
+    ViewData["ActiveNav"] = "checklists";
+}
+
+@section Head {
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
+    <script>
+        window.__CHECKLIST_ID__ = @((ViewData["ChecklistId"] as int?) ?? 0);
+    </script>
+}
+
+<header class="page-header">
+    <div>
+        <h1 class="page-header__title">Editar checklist</h1>
+        <p class="page-header__subtitle">Atualize respostas, justificativas e marcos de prazo preservando a estrutura já vinculada ao processo.</p>
+    </div>
+</header>
+
+<form id="editarChecklistForm" class="form-stack" onsubmit="event.preventDefault(); editarChecklist('concluir');">
+    <section class="form-card">
+        <header class="form-card__header">
+            <div>
+                <h2 class="form-card__title">Identificação do checklist</h2>
+                <p class="form-card__subtitle">Os dados do processo são carregados automaticamente a partir do checklist selecionado.</p>
+            </div>
+            <div class="page-actions">
+                <a href="/TELA-LISTA-CHECKLIST" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Voltar para checklists
+                </a>
+                <button type="button" class="btn btn-secondary" onclick="editarChecklist('continuar')">
+                    <i class="fas fa-file-pen"></i>
+                    Salvar e continuar depois
+                </button>
+                <button type="button" class="btn btn-primary" onclick="editarChecklist('concluir')">
+                    <i class="fas fa-save"></i>
+                    Salvar
+                </button>
+            </div>
+        </header>
+        <div class="form-card__body">
+            <div class="field-grid">
+                <div class="field" id="campoSelecaoChecklist">
+                    <label for="checklistSelect">Checklist</label>
+                    <select id="checklistSelect" name="checklistSelect">
+                        <option value="">Selecione um checklist</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label for="checklistId">ID do checklist</label>
+                    <input type="text" id="checklistId" name="checklistId" readonly>
+                </div>
+                <div class="field">
+                    <label for="processo">Processo</label>
+                    <input type="text" id="processo" name="processo" readonly>
+                </div>
+                <div class="field">
+                    <label for="tipoChecklist">Tipo de checklist</label>
+                    <input type="text" id="tipoChecklist" name="tipoChecklist" readonly>
+                </div>
+                <div class="field">
+                    <label for="modalidade">Modalidade</label>
+                    <input type="text" id="modalidade" name="modalidade" readonly>
+                </div>
+                <div class="field">
+                    <label for="dataInicio">Data do checklist</label>
+                    <input type="date" id="dataInicio" name="dataInicio">
+                </div>
+                <input type="hidden" id="status" name="status" value="em_preenchimento">
+                <div class="field">
+                    <label for="competencias">Competências</label>
+                    <input type="text" id="competencias" name="competencias" readonly>
+                    <span class="field-helper">Campo herdado do processo ou do checklist já salvo.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="form-card">
+        <header class="form-card__header">
+            <div>
+                <h2 class="form-card__title">Elementos avaliados</h2>
+                <p class="form-card__subtitle">Atualize apenas o que mudou. Os itens permanecem agrupados por elemento para facilitar manutenção.</p>
+            </div>
+        </header>
+        <div class="form-card__body">
+            <div id="perguntasContainer" class="element-collection">
+                <div class="empty-state">Carregando checklist...</div>
+            </div>
+        </div>
+    </section>
+
+</form>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="~/static/script_editar_checklist.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,103 @@
+@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Novo Checklist";
+    ViewData["PageDescription"] = "Criação padronizada de checklist com preenchimento orientado por processo.";
+    ViewData["ActiveNav"] = "checklists";
+}
+
+@section Head {
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet">
+}
+
+<header class="page-header">
+</header>
+
+<form id="formNovoChecklist" class="form-stack" onsubmit="event.preventDefault(); salvarNovoChecklist('concluir');">
+    <section class="form-card">
+        <header class="form-card__header">
+            <div>
+                <h2 class="form-card__title">Dados do checklist</h2>
+                <p class="form-card__subtitle">Selecione o processo e o tipo para abrir o formulário completo imediatamente.</p>
+            </div>
+            <div class="page-actions">
+                <a href="/TELA-LISTA-CHECKLIST" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    Voltar para checklists
+                </a>
+                <button type="button" class="btn btn-secondary" onclick="salvarNovoChecklist('continuar')">Salvar e continuar depois</button>
+                <button type="submit" class="btn btn-primary">Salvar</button>
+            </div>
+        </header>
+        <div class="form-card__body">
+            <div class="field-grid">
+                <div class="field">
+                    <label for="processo">Processo</label>
+                    <select id="processo" name="processo" required>
+                        <option value="">Selecione um processo</option>
+                    </select>
+                    <span class="field-helper">A lista considera os processos cadastrados no sistema.</span>
+                </div>
+                <div class="field">
+                    <label for="modalidade">Modalidade</label>
+                    <input type="text" id="modalidade" name="modalidade" readonly>
+                </div>
+                <div class="field">
+                    <label for="competencias">Competências</label>
+                    <input type="text" id="competencias" name="competencias" readonly>
+                </div>
+                <div class="field">
+                    <label for="dataInicio">Data do checklist</label>
+                    <input type="date" id="dataInicio" name="dataInicio" required>
+                </div>
+                <input type="hidden" id="status" name="status" value="em_preenchimento">
+                <div class="field">
+                    <label for="tipoChecklist">Tipo de checklist</label>
+                    <select id="tipoChecklist" name="tipoChecklist" required>
+                        <option value="">Selecione o tipo</option>
+                        <optgroup label="Base atual - AGEVAP / AGEDOCE / AGEGRANDE">
+                            <option value="gestor-unico">Gestor - Único</option>
+                            <option value="ato-convocatorio-p1">Ato convocatório - P1</option>
+                            <option value="ato-convocatorio-p2">Ato convocatório - P2</option>
+                            <option value="ato-convocatorio-p3">Ato convocatório - P3</option>
+                            <option value="pedido-cot-dispensa-p1">Pedido cot./dispensa - P1</option>
+                            <option value="pedido-cot-dispensa-p2">Pedido cot./dispensa - P2</option>
+                            <option value="pedido-cot-dispensa-p3">Pedido cot./dispensa - P3</option>
+                            <option value="inexigibilidade-p1">Inexigibilidade - P1</option>
+                            <option value="inexigibilidade-p2">Inexigibilidade - P2</option>
+                            <option value="inexigibilidade-p3">Inexigibilidade - P3</option>
+                        </optgroup>
+                        <optgroup label="AGEGOIÁS">
+                            <option value="agegoias-consulta-p1">Consulta de preços AGEGOIÁS - P1</option>
+                            <option value="agegoias-consulta-p2">Consulta de preços AGEGOIÁS - P2</option>
+                            <option value="agegoias-selecao-p1">Seleção de propostas AGEGOIÁS - P1</option>
+                            <option value="agegoias-selecao-p2">Seleção de propostas AGEGOIÁS - P2</option>
+                            <option value="agegoias-selecao-p3">Seleção de propostas AGEGOIÁS - P3</option>
+                        </optgroup>
+                    </select>
+                    <span class="field-helper">Ao escolher o tipo, os itens já são carregados para preenchimento.</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="form-card">
+        <header class="form-card__header">
+            <div>
+                <h2 class="form-card__title">Itens do checklist</h2>
+                <p class="form-card__subtitle">Preencha as análises, justificativas e informações complementares antes de concluir.</p>
+            </div>
+        </header>
+        <div class="form-card__body">
+            <div id="perguntasDinamicas" class="element-collection">
+                <div class="empty-state">Selecione um tipo de checklist para carregar o formulário.</div>
+            </div>
+        </div>
+    </section>
+
+</form>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js"></script>
+    <script src="~/static/script_novo_checklist.js" asp-append-version="true"></script>
+}

@@ -1,0 +1,1544 @@
+@{
+    Layout = "~/Views/Shared/_InternalLayout.cshtml";
+    ViewData["Title"] = "Fluxo Árvore";
+    ViewData["PageDescription"] = "Visualização lateral do fluxo em árvore sequencial, usando a mesma base do fluxo oficial.";
+    ViewData["ActiveNav"] = "fluxo-arvore";
+}
+
+@section Head {
+    <style>
+        .arvore-shell {
+            display: grid;
+            gap: 18px;
+        }
+
+        .arvore-hero,
+        .arvore-board,
+        .arvore-detail {
+            background: var(--color-surface);
+            border-radius: 24px;
+            border: 1px solid var(--color-border);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .arvore-hero {
+            padding: 22px;
+            display: grid;
+            gap: 18px;
+        }
+
+        .arvore-hero__header {
+            display: grid;
+            grid-template-columns: minmax(0, 1.15fr) minmax(260px, 0.85fr);
+            gap: 18px;
+            align-items: start;
+        }
+
+        .arvore-hero__title {
+            margin: 0;
+            font-size: 1.08rem;
+            color: var(--color-heading);
+        }
+
+        .arvore-hero__text {
+            margin: 8px 0 0;
+            font-size: 0.84rem;
+            line-height: 1.7;
+            color: var(--color-text-muted);
+            max-width: 72ch;
+        }
+
+        .arvore-hero__aside {
+            border-radius: 18px;
+            padding: 16px;
+            background: linear-gradient(180deg, rgba(239, 246, 255, 0.96), rgba(248, 250, 252, 0.98));
+            border: 1px solid rgba(96, 165, 250, 0.14);
+        }
+
+        .arvore-hero__aside h3 {
+            margin: 0 0 6px;
+            font-size: 0.82rem;
+            color: var(--color-heading);
+        }
+
+        .arvore-hero__aside p {
+            margin: 0;
+            font-size: 0.76rem;
+            line-height: 1.55;
+            color: var(--color-text-muted);
+        }
+
+        .arvore-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .arvore-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            border: 1px solid rgba(96, 165, 250, 0.18);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(239, 246, 255, 0.92));
+            color: #4f6b89;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .arvore-board {
+            padding: 18px;
+            display: grid;
+            gap: 16px;
+            overflow: visible;
+        }
+
+        .arvore-board__header {
+            display: flex;
+            align-items: end;
+            justify-content: space-between;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .arvore-board__header > div:first-child {
+            display: grid;
+            gap: 9px;
+        }
+
+        .arvore-board__header h2,
+        .arvore-detail__header h2 {
+            margin: 0;
+            font-size: 0.96rem;
+            color: var(--color-heading);
+            line-height: 1.25;
+        }
+
+        .arvore-board__header p,
+        .arvore-detail__header p {
+            margin: 0;
+            font-size: 0.76rem;
+            max-width: 68ch;
+            line-height: 1.5;
+            color: var(--color-text-muted);
+        }
+
+        .arvore-tabs {
+            display: inline-flex;
+            align-items: flex-end;
+            gap: 0;
+            border-bottom: 1px solid rgba(148, 163, 184, 0.22);
+            margin-bottom: 2px;
+        }
+
+        .arvore-tab {
+            border: 1px solid transparent;
+            border-bottom: none;
+            background: linear-gradient(180deg, rgba(248, 250, 252, 0.92), rgba(241, 245, 249, 0.86));
+            color: #5c7392;
+            padding: 12px 18px;
+            border-radius: 18px 18px 0 0;
+            font-size: 0.84rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .arvore-tab.is-active {
+            color: var(--color-heading);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+            border-color: rgba(148, 163, 184, 0.24);
+            box-shadow: inset 0 -3px 0 #112A46;
+        }
+
+        .arvore-tab:not(.is-active):hover {
+            color: #1f4d82;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(239, 246, 255, 0.92));
+        }
+
+        .arvore-graph {
+            position: relative;
+            min-width: 0;
+            overflow: visible;
+        }
+
+        .arvore-graph__svg {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            overflow: visible;
+            z-index: 0;
+        }
+
+        .arvore-lanes {
+            display: grid;
+            grid-template-columns: repeat(4, minmax(240px, 1fr));
+            gap: 52px;
+            overflow: auto;
+            padding-bottom: 8px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .arvore-lane {
+            display: grid;
+            gap: 12px;
+            align-content: start;
+            min-width: 0;
+            position: relative;
+        }
+
+        .arvore-lane__title {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            width: fit-content;
+            background: rgba(239, 246, 255, 0.92);
+            border: 1px solid rgba(96, 165, 250, 0.18);
+            color: #315f93;
+            font-size: 0.72rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .arvore-node-list {
+            display: grid;
+            gap: 12px;
+        }
+
+
+        .arvore-node-card {
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            border-radius: 20px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.99), rgba(248, 250, 252, 0.96));
+            padding: 14px 14px 14px 18px;
+            text-align: left;
+            cursor: pointer;
+            display: grid;
+            gap: 8px;
+            position: relative;
+            transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+            box-shadow: 0 12px 24px rgba(15, 23, 42, 0.05);
+        }
+
+        .arvore-node-card.is-muted {
+            opacity: 0.46;
+            filter: grayscale(0.18);
+            box-shadow: none;
+        }
+
+        .arvore-node-card:hover {
+            transform: translateY(-1px);
+            border-color: rgba(59, 130, 246, 0.28);
+            box-shadow: 0 16px 28px rgba(15, 23, 42, 0.08);
+        }
+
+        .arvore-node-card.is-muted:hover {
+            opacity: 0.72;
+            filter: grayscale(0.08);
+        }
+
+        .arvore-node-card.is-active {
+            border-color: rgba(37, 99, 235, 0.48);
+            background: linear-gradient(180deg, rgba(219, 234, 254, 0.96), rgba(255, 255, 255, 0.99));
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16), 0 18px 30px rgba(15, 23, 42, 0.12);
+            transform: translateY(-1px);
+        }
+
+        .arvore-node-card.is-path {
+            transform: translateY(-1px);
+        }
+
+        .arvore-node-card::before {
+            content: "";
+            position: absolute;
+            left: 0;
+            top: 16px;
+            bottom: 16px;
+            width: 4px;
+            border-radius: 999px;
+            background: #3b82f6;
+        }
+
+        .arvore-node-card--parte::before { background: #3b82f6; }
+        .arvore-node-card--etapa::before { background: #22c55e; }
+        .arvore-node-card--item::before { background: #f59e0b; }
+        .arvore-node-card--tipo::before { background: #7c3aed; }
+
+        .arvore-node-card--tipo.is-active {
+            border-color: rgba(124, 58, 237, 0.48);
+            background: linear-gradient(180deg, rgba(245, 243, 255, 0.98), rgba(255, 255, 255, 0.99));
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.16), 0 18px 30px rgba(15, 23, 42, 0.12);
+        }
+
+        .arvore-node-card--tipo.is-path:not(.is-active) {
+            border-color: rgba(124, 58, 237, 0.32);
+            background: linear-gradient(180deg, rgba(245, 243, 255, 0.92), rgba(255, 255, 255, 0.99));
+            box-shadow: 0 0 0 2px rgba(124, 58, 237, 0.10), 0 14px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .arvore-node-card--tipo.is-active .arvore-node-card__title,
+        .arvore-node-card--tipo.is-active .arvore-node-card__meta {
+            color: #5b21b6;
+        }
+
+        .arvore-node-card--tipo.is-active .arvore-node-card__meta {
+            background: rgba(124, 58, 237, 0.12);
+        }
+
+        .arvore-node-card--parte.is-active {
+            border-color: rgba(37, 99, 235, 0.48);
+            background: linear-gradient(180deg, rgba(219, 234, 254, 0.96), rgba(255, 255, 255, 0.99));
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.16), 0 18px 30px rgba(15, 23, 42, 0.12);
+        }
+
+        .arvore-node-card--parte.is-path:not(.is-active) {
+            border-color: rgba(59, 130, 246, 0.30);
+            background: linear-gradient(180deg, rgba(239, 246, 255, 0.94), rgba(255, 255, 255, 0.99));
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.10), 0 14px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .arvore-node-card--parte.is-active .arvore-node-card__title,
+        .arvore-node-card--parte.is-active .arvore-node-card__meta {
+            color: #1d4ed8;
+        }
+
+        .arvore-node-card--parte.is-active .arvore-node-card__meta {
+            background: rgba(59, 130, 246, 0.12);
+        }
+
+        .arvore-node-card--etapa.is-active {
+            border-color: rgba(34, 197, 94, 0.42);
+            background: linear-gradient(180deg, rgba(240, 253, 244, 0.98), rgba(255, 255, 255, 0.99));
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.14), 0 18px 30px rgba(15, 23, 42, 0.12);
+        }
+
+        .arvore-node-card--etapa.is-path:not(.is-active) {
+            border-color: rgba(34, 197, 94, 0.28);
+            background: linear-gradient(180deg, rgba(240, 253, 244, 0.94), rgba(255, 255, 255, 0.99));
+            box-shadow: 0 0 0 2px rgba(34, 197, 94, 0.10), 0 14px 24px rgba(15, 23, 42, 0.08);
+        }
+
+        .arvore-node-card--etapa.is-active .arvore-node-card__title,
+        .arvore-node-card--etapa.is-active .arvore-node-card__meta {
+            color: #15803d;
+        }
+
+        .arvore-node-card--etapa.is-active .arvore-node-card__meta {
+            background: rgba(34, 197, 94, 0.12);
+        }
+
+        .arvore-node-card--item.is-active {
+            border-color: rgba(245, 158, 11, 0.46);
+            background: linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 255, 255, 0.99));
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15), 0 18px 30px rgba(15, 23, 42, 0.12);
+        }
+
+        .arvore-node-card--item.is-active .arvore-node-card__title,
+        .arvore-node-card--item.is-active .arvore-node-card__meta {
+            color: #b45309;
+        }
+
+        .arvore-node-card--item.is-active .arvore-node-card__meta {
+            background: rgba(245, 158, 11, 0.14);
+        }
+
+        .arvore-node-card.is-active .arvore-node-card__title {
+            color: #163e73;
+        }
+
+        .arvore-node-card.is-active .arvore-node-card__meta {
+            background: rgba(37, 99, 235, 0.14);
+            color: #17406f;
+        }
+
+        .arvore-connection {
+            fill: none;
+            stroke-width: 3;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            opacity: 0.95;
+            filter: drop-shadow(0 2px 4px rgba(15, 23, 42, 0.08));
+        }
+
+        .arvore-connection--tipo-parte {
+            stroke: #7c3aed;
+        }
+
+        .arvore-connection--parte-etapa {
+            stroke: #2563eb;
+        }
+
+        .arvore-connection--etapa-item {
+            stroke: #16a34a;
+        }
+
+        .arvore-node-card__eyebrow {
+            font-size: 0.67rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-muted);
+        }
+
+        .arvore-node-card__title {
+            font-size: 0.86rem;
+            font-weight: 800;
+            color: var(--color-heading);
+            line-height: 1.4;
+        }
+
+        .arvore-node-card__hint {
+            font-size: 0.74rem;
+            line-height: 1.5;
+            color: var(--color-text-muted);
+        }
+
+        .arvore-node-card__meta {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: fit-content;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #315f93;
+            font-size: 0.7rem;
+            font-weight: 700;
+        }
+
+        .arvore-node-card__questions {
+            display: grid;
+            gap: 8px;
+            margin-top: 4px;
+            padding-top: 10px;
+            border-top: 1px solid rgba(148, 163, 184, 0.18);
+        }
+
+        .arvore-node-card__question {
+            display: grid;
+            gap: 4px;
+            padding: 8px 10px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.82);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+        }
+
+        .arvore-node-card__question-index {
+            font-size: 0.64rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-muted);
+        }
+
+        .arvore-node-card__question-text {
+            font-size: 0.73rem;
+            line-height: 1.45;
+            font-weight: 700;
+            color: var(--color-heading);
+        }
+
+        .arvore-node-list--root .arvore-node-card {
+            min-height: 132px;
+            align-content: center;
+        }
+
+        .arvore-node-card--construction {
+            border-style: dashed;
+            background: linear-gradient(180deg, rgba(255, 251, 235, 0.98), rgba(255, 255, 255, 0.96));
+        }
+
+        .arvore-node-card--construction::before {
+            background: #f59e0b;
+        }
+
+        .arvore-node-card__status {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            width: fit-content;
+            padding: 5px 8px;
+            border-radius: 999px;
+            background: rgba(245, 158, 11, 0.12);
+            color: #9a6708;
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .arvore-empty {
+            border: 1px dashed rgba(148, 163, 184, 0.34);
+            border-radius: 18px;
+            padding: 18px;
+            background: rgba(248, 250, 252, 0.82);
+            color: var(--color-text-muted);
+            font-size: 0.78rem;
+            line-height: 1.55;
+            text-align: center;
+        }
+
+        .arvore-detail {
+            overflow: hidden;
+        }
+
+        .arvore-detail__header {
+            padding: 18px 18px 14px;
+            border-bottom: 1px solid rgba(18, 24, 33, 0.08);
+        }
+
+        .arvore-detail__body {
+            padding: 18px;
+            display: grid;
+            gap: 14px;
+        }
+
+        .arvore-breadcrumb {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .arvore-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(239, 246, 255, 0.9);
+            border: 1px solid rgba(96, 165, 250, 0.16);
+            color: #4f6b89;
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .arvore-summary {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+        }
+
+        .arvore-summary__card,
+        .arvore-panel,
+        .arvore-question {
+            border: 1px solid var(--color-border);
+            border-radius: 18px;
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 250, 252, 0.96));
+        }
+
+        .arvore-summary__card {
+            padding: 14px;
+            display: grid;
+            gap: 6px;
+        }
+
+        .arvore-summary__label {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-muted);
+        }
+
+        .arvore-summary__value {
+            font-size: 0.92rem;
+            font-weight: 800;
+            color: var(--color-heading);
+            line-height: 1.35;
+        }
+
+        .arvore-summary__text {
+            color: var(--color-text-muted);
+            font-size: 0.76rem;
+            line-height: 1.5;
+        }
+
+        .arvore-panel {
+            padding: 16px;
+            display: grid;
+            gap: 12px;
+        }
+
+        .arvore-panel__eyebrow {
+            display: inline-flex;
+            width: fit-content;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(37, 99, 235, 0.08);
+            color: #315f93;
+            font-size: 0.71rem;
+            font-weight: 800;
+        }
+
+        .arvore-panel h3 {
+            margin: 0;
+            font-size: 1rem;
+            color: var(--color-heading);
+            line-height: 1.35;
+        }
+
+        .arvore-panel p {
+            margin: 0;
+            color: var(--color-text-muted);
+            font-size: 0.8rem;
+            line-height: 1.65;
+        }
+
+        .arvore-panel__tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .arvore-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 10px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.96);
+            border: 1px solid rgba(148, 163, 184, 0.22);
+            color: var(--color-text-muted);
+            font-size: 0.72rem;
+            font-weight: 700;
+        }
+
+        .arvore-questions {
+            display: grid;
+            gap: 10px;
+        }
+
+        .arvore-question {
+            padding: 14px 14px 14px 16px;
+            display: grid;
+            gap: 8px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .arvore-question__index {
+            font-size: 0.68rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--color-text-muted);
+        }
+
+        .arvore-question__text {
+            color: var(--color-heading);
+            font-size: 0.82rem;
+            line-height: 1.55;
+            font-weight: 700;
+        }
+
+        .arvore-question__hint {
+            color: var(--color-text-muted);
+            font-size: 0.75rem;
+            line-height: 1.5;
+        }
+
+        @@media (max-width: 1320px) {
+            .arvore-hero__header {
+                grid-template-columns: 1fr;
+            }
+
+            .arvore-summary {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @@media (max-width: 860px) {
+            .arvore-board__header {
+                align-items: stretch;
+            }
+
+            .arvore-board,
+            .arvore-detail__header,
+            .arvore-detail__body,
+            .arvore-hero {
+                padding-left: 14px;
+                padding-right: 14px;
+            }
+        }
+    </style>
+}
+
+<section class="arvore-shell">
+    <section class="arvore-hero">
+        <div class="arvore-hero__header">
+            <div>
+                <h1 class="arvore-hero__title">Fluxo em árvore lateral</h1>
+                <p class="arvore-hero__text">
+                    Esta visão abstrai o módulo de fluxo já existente para uma leitura mais executiva e sequencial.
+                    Em vez de navegar por blocos empilhados, você acompanha o processo em árvore lateral: modalidade,
+                    partes, etapas e itens, com detalhamento abaixo para apoiar a tomada de decisão.
+                </p>
+                <div class="arvore-chips">
+                    <span class="arvore-chip"><i class="fas fa-code-branch"></i> Árvore lateral</span>
+                    <span class="arvore-chip"><i class="fas fa-sitemap"></i> Base do fluxo oficial</span>
+                    <span class="arvore-chip"><i class="fas fa-shield-check"></i> Módulo seguro para testes</span>
+                </div>
+            </div>
+            <aside class="arvore-hero__aside">
+                <h3>Como funciona</h3>
+                <p>Selecione a modalidade e navegue da esquerda para a direita. Cada coluna representa um nível do fluxo. Ao clicar em qualquer nó, o painel abaixo mostra a leitura prática daquele ponto.</p>
+            </aside>
+        </div>
+    </section>
+
+    <section class="arvore-board">
+        <div class="arvore-board__header">
+            <div>
+                <div class="arvore-tabs" id="arvoreTabs">
+                    <button type="button" class="arvore-tab is-active" data-grupo-tab="base-publica">AGEVAP, AGEDOCE e AGEGRANDE</button>
+                    <button type="button" class="arvore-tab" data-grupo-tab="agegoias">AGEGOIÁS</button>
+                </div>
+                <h2>Árvore do processo</h2>
+                <p>Leitura sequencial do fluxo, organizada em camadas para facilitar entendimento, hierarquia e decisão.</p>
+            </div>
+        </div>
+
+        <div class="arvore-graph" id="arvoreGraph">
+            <svg class="arvore-graph__svg" id="arvoreGraphSvg" aria-hidden="true"></svg>
+            <div class="arvore-lanes" id="arvoreLanes"></div>
+        </div>
+    </section>
+
+    <section class="arvore-detail">
+        <div class="arvore-detail__header">
+            <h2>Painel de leitura</h2>
+            <p>Orientações práticas, contexto do fluxo e pontos de conferência do nó selecionado.</p>
+        </div>
+        <div class="arvore-detail__body" id="arvoreDetail"></div>
+    </section>
+</section>
+
+@section Scripts {
+    <script>
+        const fluxoCatalogo = {
+            'ato-convocatorio': {
+                nome: 'Ato convocatório',
+                grupo: 'base-publica',
+                status: 'ativo',
+                partes: [
+                    { id: 'parte-1', nome: 'Parte 1 - Contratação', url: '/static/perguntas_ato1.json' },
+                    { id: 'parte-2', nome: 'Parte 2 - Homologação', url: '/static/perguntas_ato2.json' },
+                    { id: 'parte-3', nome: 'Parte 3 - Arquivamento', url: '/static/perguntas_ato3.json' }
+                ]
+            },
+            'pedido-cot-dispensa': {
+                nome: 'Pedido de cotação / dispensa',
+                grupo: 'base-publica',
+                status: 'ativo',
+                partes: [
+                    { id: 'parte-1', nome: 'Parte 1 - Contratação', url: '/static/perguntas_pedido_dispensa1.json' },
+                    { id: 'parte-2', nome: 'Parte 2 - Homologação', url: '/static/perguntas_pedido_dispensa2.json' },
+                    { id: 'parte-3', nome: 'Parte 3 - Arquivamento', url: '/static/perguntas_pedido_dispensa3.json' }
+                ]
+            },
+            'agegoias-consulta': {
+                nome: 'Consulta de preços',
+                grupo: 'agegoias',
+                status: 'ativo',
+                partes: [
+                    { id: 'parte-1', nome: 'Parte 1 - Preparação', url: '/static/perguntas_agegoias_consulta1.json' },
+                    { id: 'parte-2', nome: 'Parte 2 - Formalização e encerramento', url: '/static/perguntas_agegoias_consulta2.json' }
+                ]
+            },
+            'agegoias-selecao': {
+                nome: 'Seleção de propostas / chamada de trabalhos / contratação singular',
+                grupo: 'agegoias',
+                status: 'ativo',
+                partes: [
+                    { id: 'parte-1', nome: 'Parte 1 - Preparação', url: '/static/perguntas_agegoias_selecao1.json' },
+                    { id: 'parte-2', nome: 'Parte 2 - Certame e homologação', url: '/static/perguntas_agegoias_selecao2.json' },
+                    { id: 'parte-3', nome: 'Parte 3 - Execução e encerramento', url: '/static/perguntas_agegoias_selecao3.json' }
+                ]
+            },
+            'inexigibilidade': {
+                nome: 'Inexigibilidade',
+                grupo: 'base-publica',
+                status: 'construcao',
+                partes: []
+            }
+        };
+
+        const arvoreLanesEl = document.getElementById('arvoreLanes');
+        const arvoreGraphEl = document.getElementById('arvoreGraph');
+        const arvoreGraphSvgEl = document.getElementById('arvoreGraphSvg');
+        const arvoreDetailEl = document.getElementById('arvoreDetail');
+        const arvoreTabsEl = document.getElementById('arvoreTabs');
+
+        const arvoreState = {
+            cache: {},
+            arvores: {},
+            grupoAtual: 'base-publica',
+            tipo: '',
+            parteId: '',
+            etapaId: '',
+            selectedNodeId: ''
+        };
+
+        inicializarArvore();
+
+        function inicializarArvore() {
+            renderTreeBoard();
+            renderPlaceholder('Selecione uma modalidade para abrir a árvore lateral do fluxo.');
+        }
+
+        function selecionarGrupo(grupo) {
+            arvoreState.grupoAtual = grupo;
+
+            const tipoAtual = fluxoCatalogo[arvoreState.tipo];
+            if (tipoAtual && tipoAtual.grupo !== grupo) {
+                arvoreState.tipo = '';
+                arvoreState.parteId = '';
+                arvoreState.etapaId = '';
+                arvoreState.selectedNodeId = '';
+                renderTreeBoard();
+                renderPlaceholder('Selecione uma modalidade para abrir a árvore lateral do fluxo.');
+                return;
+            }
+
+            renderTreeBoard();
+            if (arvoreState.selectedNodeId) {
+                renderSelectedNode();
+            } else {
+                renderPlaceholder('Selecione uma modalidade para abrir a árvore lateral do fluxo.');
+            }
+        }
+        async function selecionarTipo(tipo) {
+            arvoreState.tipo = tipo;
+            arvoreState.parteId = '';
+            arvoreState.etapaId = '';
+            arvoreState.selectedNodeId = `tipo:${tipo}`;
+            arvoreLanesEl.innerHTML = '<div class="arvore-empty">Carregando árvore do fluxo...</div>';
+
+            const configuracao = fluxoCatalogo[tipo];
+            if (configuracao?.status === 'construcao') {
+                renderTreeBoard();
+                renderConstrucaoDetail(configuracao);
+                return;
+            }
+
+            try {
+                if (!arvoreState.arvores[tipo]) {
+                    arvoreState.arvores[tipo] = await construirArvoreModalidade(tipo);
+                }
+
+                const arvore = arvoreState.arvores[tipo];
+
+                if (!arvore.children.length) {
+                    renderTreeBoard();
+                    renderPlaceholder();
+                    return;
+                }
+
+                renderTreeBoard();
+                renderSelectedNode();
+            } catch (error) {
+                renderTreeBoard();
+                renderPlaceholder('Não foi possível carregar a estrutura do fluxo para esta modalidade.');
+            }
+        }
+
+        function selecionarParte(parteId) {
+            arvoreState.parteId = parteId;
+            arvoreState.etapaId = '';
+            arvoreState.selectedNodeId = parteId;
+            renderTreeBoard();
+            renderSelectedNode();
+        }
+
+        function selecionarEtapa(etapaId) {
+            arvoreState.etapaId = etapaId;
+            arvoreState.selectedNodeId = etapaId;
+            renderTreeBoard();
+            renderSelectedNode();
+        }
+
+        function selecionarItem(itemId) {
+            arvoreState.selectedNodeId = itemId;
+            renderTreeBoard();
+            renderSelectedNode();
+        }
+
+        async function construirArvoreModalidade(tipo) {
+            const fluxo = fluxoCatalogo[tipo];
+            const root = {
+                id: `tipo:${tipo}`,
+                type: 'tipo',
+                title: fluxo.nome,
+                hint: 'Modalidade principal do fluxo.',
+                meta: { partes: fluxo.partes.length },
+                children: []
+            };
+
+            for (const parte of fluxo.partes) {
+                const dados = await carregarParte(parte);
+                const etapas = normalizarFases(dados.perguntas || []);
+                const parteNode = {
+                    id: `parte:${tipo}:${parte.id}`,
+                    type: 'parte',
+                    title: parte.nome,
+                    hint: 'Bloco macro do processo nesta modalidade.',
+                    meta: {
+                        etapas: etapas.length,
+                        itens: etapas.reduce((acc, etapa) => acc + etapa.itens.length, 0)
+                    },
+                    raw: parte,
+                    children: []
+                };
+
+                etapas.forEach((etapa, etapaIndex) => {
+                    const etapaNode = {
+                        id: `etapa:${tipo}:${parte.id}:${etapa.id}`,
+                        type: 'etapa',
+                        title: etapa.titulo,
+                        hint: `Etapa ${etapaIndex + 1} deste bloco.`,
+                        meta: {
+                            itens: etapa.itens.length,
+                            perguntas: etapa.itens.reduce((acc, item) => acc + item.perguntas.length, 0)
+                        },
+                        raw: etapa,
+                        parent: parteNode.id,
+                        children: []
+                    };
+
+                    etapa.itens.forEach((item, itemIndex) => {
+                        etapaNode.children.push({
+                            id: `item:${tipo}:${parte.id}:${etapa.id}:${itemIndex}`,
+                            type: 'item',
+                            title: item.titulo,
+                            hint: 'Item específico de conferência dentro da etapa.',
+                            meta: {
+                                codigo: item.codigo || String(itemIndex + 1),
+                                perguntas: item.perguntas.length
+                            },
+                            raw: item,
+                            parent: etapaNode.id,
+                            children: []
+                        });
+                    });
+
+                    parteNode.children.push(etapaNode);
+                });
+
+                root.children.push(parteNode);
+            }
+
+            return root;
+        }
+
+        async function carregarParte(parte) {
+            if (arvoreState.cache[parte.url]) {
+                return arvoreState.cache[parte.url];
+            }
+
+            const response = await fetch(parte.url, { cache: 'no-store' });
+            if (!response.ok) {
+                throw new Error(`Falha ao carregar ${parte.url}`);
+            }
+
+            const dados = await response.json();
+            arvoreState.cache[parte.url] = dados;
+            return dados;
+        }
+
+        function normalizarFases(registros) {
+            const fases = [];
+            let bufferItens = [];
+            let indice = 1;
+
+            for (const registro of registros) {
+                if (registro.marco) {
+                    fases.push(criarFase(`etapa-${indice++}`, registro.marco, bufferItens));
+                    bufferItens = [];
+                    continue;
+                }
+
+                if (registro.elemento || registro.item) {
+                    bufferItens.push(registro);
+                }
+            }
+
+            if (bufferItens.length) {
+                fases.push(criarFase(`etapa-${indice}`, 'Etapa complementar', bufferItens));
+            }
+
+            return fases.filter((fase) => fase.itens.length > 0);
+        }
+
+        function criarFase(id, titulo, itens) {
+            return {
+                id,
+                titulo,
+                itens: itens.map((item) => ({
+                    codigo: item.item || '',
+                    titulo: item.elemento || item.titulo || 'Elemento',
+                    perguntas: (item.sub_perguntas || item.subPerguntas || [])
+                        .map((sub) => sub.pergunta || sub.descricao || '')
+                        .filter(Boolean)
+                }))
+            };
+        }
+
+        function renderTreeBoard() {
+            const tipoLane = renderTiposLane();
+            const configuracao = fluxoCatalogo[arvoreState.tipo];
+
+            if (!arvoreState.tipo) {
+                arvoreLanesEl.innerHTML = tipoLane
+                    + renderLane('Partes do fluxo', [], 'parte', 'Clique em uma modalidade para abrir a próxima coluna.')
+                    + renderLane('Etapas', [], 'etapa', 'A árvore vai mostrando o próximo nível conforme sua seleção.')
+                    + renderLane('Itens de conferência', [], 'item', 'Os itens aparecem quando uma etapa for escolhida.');
+                bindLaneActions();
+                return;
+            }
+
+            if (configuracao?.status === 'construcao') {
+                arvoreLanesEl.innerHTML = tipoLane
+                    + renderLane('Partes do fluxo', [], 'parte', 'Módulo em construção para esta modalidade.')
+                    + renderLane('Etapas', [], 'etapa', 'A estrutura de etapas será liberada quando o fluxo for concluído.')
+                    + renderLane('Itens de conferência', [], 'item', 'Os itens aparecerão aqui quando a modalidade estiver disponível.');
+                bindLaneActions();
+                return;
+            }
+
+            const arvore = arvoreState.arvores[arvoreState.tipo];
+            if (!arvore) {
+                arvoreLanesEl.innerHTML = tipoLane
+                    + renderLane('Partes do fluxo', [], 'parte', 'Carregando estrutura desta modalidade...')
+                    + renderLane('Etapas', [], 'etapa', 'Selecione uma parte do fluxo.')
+                    + renderLane('Itens de conferência', [], 'item', 'Selecione uma etapa para ver os itens.');
+                bindLaneActions();
+                return;
+            }
+
+            const selectedParte = encontrarNodePorId(arvore, arvoreState.parteId) || null;
+            const selectedEtapa = encontrarNodePorId(arvore, arvoreState.etapaId) || null;
+
+            arvoreLanesEl.innerHTML = tipoLane
+                + renderLane('Partes do fluxo', arvore.children, 'parte')
+                + renderLane('Etapas', selectedParte?.children || [], 'etapa', 'Escolha uma parte do fluxo para liberar as etapas.')
+                + renderLane('Itens de conferência', selectedEtapa?.children || [], 'item', 'Escolha uma etapa para liberar os itens.');
+
+            bindLaneActions();
+        }
+
+        function bindLaneActions() {
+            if (arvoreTabsEl) {
+                arvoreTabsEl.querySelectorAll('[data-grupo-tab]').forEach((button) => {
+                    button.classList.toggle('is-active', button.dataset.grupoTab === arvoreState.grupoAtual);
+                    button.onclick = () => selecionarGrupo(button.dataset.grupoTab || 'base-publica');
+                });
+            }
+
+            arvoreLanesEl.querySelectorAll('[data-tipo-id]').forEach((button) => {
+                button.addEventListener('click', () => selecionarTipo(button.dataset.tipoId || ''));
+            });
+
+            arvoreLanesEl.querySelectorAll('[data-parte-id]').forEach((button) => {
+                button.addEventListener('click', () => selecionarParte(button.dataset.parteId || ''));
+            });
+
+            arvoreLanesEl.querySelectorAll('[data-etapa-id]').forEach((button) => {
+                button.addEventListener('click', () => selecionarEtapa(button.dataset.etapaId || ''));
+            });
+
+            arvoreLanesEl.querySelectorAll('[data-item-id]').forEach((button) => {
+                button.addEventListener('click', () => selecionarItem(button.dataset.itemId || ''));
+            });
+
+            desenharConexoesFluxo();
+        }
+
+        function renderTiposLane() {
+            const tipos = Object.entries(fluxoCatalogo)
+                .filter(([, fluxo]) => fluxo.grupo === arvoreState.grupoAtual)
+                .map(([id, fluxo]) => ({
+                    id: `tipo:${id}`,
+                    datasetId: id,
+                    type: 'tipo',
+                    title: fluxo.nome,
+                    hint: fluxo.status === 'construcao'
+                        ? 'Fluxo de exemplo, ainda em construção.'
+                        : arvoreState.grupoAtual === 'agegoias'
+                            ? 'Fluxo privado da AGEGOIÁS, estruturado nas mesmas partes do modelo principal.'
+                            : 'Modalidade principal do fluxo.',
+                    meta: { partes: fluxo.partes.length || 0 },
+                    status: fluxo.status
+                }));
+
+            return `
+                <section class="arvore-lane">
+                    <span class="arvore-lane__title">Modalidades</span>
+                    <div class="arvore-node-list arvore-node-list--root">
+                        ${tipos.map((node) => renderTipoCard(node)).join('')}
+                    </div>
+                </section>
+            `;
+        }
+        function renderTipoCard(node) {
+            const emCaminho = arvoreState.tipo === node.datasetId;
+            const ativo = arvoreState.selectedNodeId === `tipo:${node.datasetId}` ? 'is-active' : '';
+            const path = emCaminho ? 'is-path' : '';
+            const emConstrucao = node.status === 'construcao';
+            const muted = arvoreState.tipo && !emCaminho ? 'is-muted' : '';
+            return `
+                <button type="button" class="arvore-node-card arvore-node-card--tipo ${emConstrucao ? 'arvore-node-card--construction' : ''} ${ativo} ${path} ${muted}" data-tipo-id="${escapeHtml(node.datasetId)}">
+                    <span class="arvore-node-card__eyebrow">Modalidade</span>
+                    <span class="arvore-node-card__title">${escapeHtml(node.title)}</span>
+                    <span class="arvore-node-card__hint">${escapeHtml(node.hint)}</span>
+                    ${emConstrucao ? '<span class="arvore-node-card__status"><i class="fas fa-hammer"></i> Em construção</span>' : ''}
+                    <span class="arvore-node-card__meta"><i class="fas fa-layer-group"></i> ${escapeHtml(`${node.meta.partes} parte(s)`)}</span>
+                </button>
+            `;
+        }
+
+        function renderLane(title, nodes, modifier, emptyText) {
+            const content = Array.isArray(nodes) && nodes.length
+                ? nodes.map((node) => renderNodeCard(node, modifier)).join('')
+                : `<div class="arvore-empty">${escapeHtml(emptyText || 'Nenhum item disponível neste nível.')}</div>`;
+
+            return `
+                <section class="arvore-lane">
+                    <span class="arvore-lane__title">${escapeHtml(title)}</span>
+                    <div class="arvore-node-list">
+                        ${content}
+                    </div>
+                </section>
+            `;
+        }
+
+        function renderNodeCard(node, modifier) {
+            const active = arvoreState.selectedNodeId === node.id ? 'is-active' : '';
+            const laneHasSelection = (
+                (node.type === 'parte' && !!arvoreState.parteId) ||
+                (node.type === 'etapa' && !!arvoreState.etapaId) ||
+                (node.type === 'item' && !!arvoreState.selectedNodeId && String(arvoreState.selectedNodeId).startsWith('item:'))
+            );
+            const isPath = (
+                (node.type === 'parte' && arvoreState.parteId === node.id) ||
+                (node.type === 'etapa' && arvoreState.etapaId === node.id) ||
+                (node.type === 'item' && arvoreState.selectedNodeId === node.id)
+            );
+            const path = isPath ? 'is-path' : '';
+            const muted = laneHasSelection && !isPath ? 'is-muted' : '';
+            const eyebrow = node.type === 'tipo'
+                ? 'Modalidade'
+                : node.type === 'parte'
+                    ? 'Bloco do processo'
+                    : node.type === 'etapa'
+                        ? 'Etapa guiada'
+                        : `Item ${escapeHtml(node.meta.codigo || '')}`;
+
+            const meta = node.type === 'tipo'
+                ? `${node.meta.partes} parte(s)`
+                : node.type === 'parte'
+                    ? `${node.meta.etapas} etapa(s)`
+                    : node.type === 'etapa'
+                        ? `${node.meta.itens} item(ns)`
+                        : `${node.meta.perguntas} pergunta(s)`;
+
+            const datasetAttr = node.type === 'parte'
+                ? `data-parte-id="${escapeHtml(node.id)}"`
+                : node.type === 'etapa'
+                    ? `data-etapa-id="${escapeHtml(node.id)}"`
+                    : `data-item-id="${escapeHtml(node.id)}"`;
+
+            const perguntasInline = node.type === 'item' && active
+                ? renderPerguntasInline(node.raw?.perguntas || [])
+                : '';
+
+            return `
+                <button type="button" class="arvore-node-card arvore-node-card--${modifier} ${active} ${path} ${muted}" ${datasetAttr}>
+                    <span class="arvore-node-card__eyebrow">${eyebrow}</span>
+                    <span class="arvore-node-card__title">${escapeHtml(node.title)}</span>
+                    <span class="arvore-node-card__hint">${escapeHtml(node.hint || '')}</span>
+                    <span class="arvore-node-card__meta"><i class="fas fa-layer-group"></i> ${escapeHtml(meta)}</span>
+                    ${perguntasInline}
+                </button>
+            `;
+        }
+
+        function renderPerguntasInline(perguntas) {
+            const lista = Array.isArray(perguntas) ? perguntas.filter(Boolean) : [];
+            if (!lista.length) {
+                return `
+                    <div class="arvore-node-card__questions">
+                        <div class="arvore-node-card__question">
+                            <span class="arvore-node-card__question-index">Sem perguntas</span>
+                            <span class="arvore-node-card__question-text">Este item ainda não possui perguntas mapeadas para conferência.</span>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="arvore-node-card__questions">
+                    ${lista.map((pergunta, index) => `
+                        <div class="arvore-node-card__question">
+                            <span class="arvore-node-card__question-index">Pergunta ${index + 1}</span>
+                            <span class="arvore-node-card__question-text">${escapeHtml(pergunta)}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function desenharConexoesFluxo() {
+            if (!arvoreGraphEl || !arvoreGraphSvgEl) {
+                return;
+            }
+
+            arvoreGraphSvgEl.innerHTML = '';
+
+            const graphRect = arvoreGraphEl.getBoundingClientRect();
+            if (!graphRect.width || !graphRect.height) {
+                return;
+            }
+
+            arvoreGraphSvgEl.setAttribute('viewBox', `0 0 ${graphRect.width} ${graphRect.height}`);
+
+            const conexoes = [];
+
+            if (arvoreState.tipo && arvoreState.parteId) {
+                conexoes.push({
+                    from: document.querySelector(`[data-tipo-id="${CSS.escape(arvoreState.tipo)}"]`),
+                    to: document.querySelector(`[data-parte-id="${CSS.escape(arvoreState.parteId)}"]`),
+                    cls: 'arvore-connection--tipo-parte'
+                });
+            }
+
+            if (arvoreState.parteId && arvoreState.etapaId) {
+                conexoes.push({
+                    from: document.querySelector(`[data-parte-id="${CSS.escape(arvoreState.parteId)}"]`),
+                    to: document.querySelector(`[data-etapa-id="${CSS.escape(arvoreState.etapaId)}"]`),
+                    cls: 'arvore-connection--parte-etapa'
+                });
+            }
+
+            if (arvoreState.etapaId && arvoreState.selectedNodeId && String(arvoreState.selectedNodeId).startsWith('item:')) {
+                conexoes.push({
+                    from: document.querySelector(`[data-etapa-id="${CSS.escape(arvoreState.etapaId)}"]`),
+                    to: document.querySelector(`[data-item-id="${CSS.escape(arvoreState.selectedNodeId)}"]`),
+                    cls: 'arvore-connection--etapa-item'
+                });
+            }
+
+            conexoes.forEach((conexao) => {
+                if (!conexao.from || !conexao.to) {
+                    return;
+                }
+
+                const fromRect = conexao.from.getBoundingClientRect();
+                const toRect = conexao.to.getBoundingClientRect();
+
+                const startX = fromRect.right - graphRect.left + 2;
+                const startY = fromRect.top - graphRect.top + (fromRect.height / 2);
+                const endX = toRect.left - graphRect.left - 2;
+                const endY = toRect.top - graphRect.top + (toRect.height / 2);
+
+                if (endX <= startX) {
+                    return;
+                }
+
+                const horizontalSpan = endX - startX;
+                const elbowOffset = Math.max(18, Math.min(34, horizontalSpan * 0.22));
+                const middleX = startX + (horizontalSpan / 2);
+                const innerLeftX = Math.min(middleX, endX - elbowOffset);
+                const innerRightX = Math.max(middleX, startX + elbowOffset);
+
+                const pathData = [
+                    `M ${startX} ${startY}`,
+                    `L ${innerLeftX} ${startY}`,
+                    `L ${innerRightX} ${endY}`,
+                    `L ${endX} ${endY}`
+                ].join(' ');
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('class', `arvore-connection ${conexao.cls}`);
+                path.setAttribute('d', pathData);
+                arvoreGraphSvgEl.appendChild(path);
+            });
+        }
+
+        function renderSelectedNode() {
+            const arvore = arvoreState.arvores[arvoreState.tipo];
+            if (fluxoCatalogo[arvoreState.tipo]?.status === 'construcao') {
+                renderConstrucaoDetail(fluxoCatalogo[arvoreState.tipo]);
+                return;
+            }
+            const node = encontrarNodePorId(arvore, arvoreState.selectedNodeId);
+
+            if (!node) {
+                renderPlaceholder();
+                return;
+            }
+
+            const caminho = encontrarCaminho(arvore, arvoreState.selectedNodeId);
+            const breadcrumbs = caminho.map((item) => `<span class="arvore-badge">${escapeHtml(item.title)}</span>`).join('');
+
+            if (node.type === 'parte') {
+                renderParteDetail(node, breadcrumbs);
+                return;
+            }
+
+            if (node.type === 'etapa') {
+                renderEtapaDetail(node, breadcrumbs, caminho);
+                return;
+            }
+
+            if (node.type === 'item') {
+                renderItemDetail(node, breadcrumbs, caminho);
+                return;
+            }
+
+            renderTipoDetail(node, breadcrumbs);
+        }
+
+        function renderTipoDetail(node, breadcrumbs) {
+            arvoreDetailEl.innerHTML = `
+                <div class="arvore-breadcrumb">${breadcrumbs}</div>
+                <div class="arvore-summary">
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Modalidade</span>
+                        <span class="arvore-summary__value">${escapeHtml(node.title)}</span>
+                        <span class="arvore-summary__text">Ponto de partida da leitura lateral do fluxo.</span>
+                    </article>
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Partes</span>
+                        <span class="arvore-summary__value">${node.meta.partes}</span>
+                        <span class="arvore-summary__text">Blocos principais distribuídos no processo.</span>
+                    </article>
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Leitura sugerida</span>
+                        <span class="arvore-summary__value">Da esquerda para a direita</span>
+                        <span class="arvore-summary__text">Comece pelas partes, avance para etapas e depois detalhe os itens.</span>
+                    </article>
+                </div>
+                <article class="arvore-panel">
+                    <span class="arvore-panel__eyebrow"><i class="fas fa-play"></i> Início da árvore</span>
+                    <h3>${escapeHtml(node.title)}</h3>
+                    <p>Esta modalidade organiza todo o fluxo em uma sequência macro de blocos. Use a árvore lateral para acompanhar a estrutura do processo de forma mais visual, entender a hierarquia e chegar rapidamente ao item que precisa ser conferido.</p>
+                    <div class="arvore-panel__tags">
+                        <span class="arvore-tag"><i class="fas fa-sitemap"></i> Leitura hierárquica</span>
+                        <span class="arvore-tag"><i class="fas fa-arrow-right"></i> Navegação lateral</span>
+                        <span class="arvore-tag"><i class="fas fa-folder-tree"></i> Base do fluxo oficial</span>
+                    </div>
+                </article>
+            `;
+        }
+
+        function renderConstrucaoDetail(configuracao) {
+            arvoreDetailEl.innerHTML = `
+                <div class="arvore-breadcrumb">
+                    <span class="arvore-badge">${escapeHtml(configuracao.nome)}</span>
+                    <span class="arvore-badge">Em construção</span>
+                </div>
+                <div class="arvore-summary">
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Modalidade</span>
+                        <span class="arvore-summary__value">${escapeHtml(configuracao.nome)}</span>
+                        <span class="arvore-summary__text">Fluxo reservado como base de exemplo para evolução futura.</span>
+                    </article>
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Status</span>
+                        <span class="arvore-summary__value">Em construção</span>
+                        <span class="arvore-summary__text">A estrutura desta modalidade ainda não foi consolidada na árvore lateral.</span>
+                    </article>
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Próximo passo</span>
+                        <span class="arvore-summary__value">Modelagem futura</span>
+                        <span class="arvore-summary__text">Quando você definir a base, este mesmo painel passa a exibir partes, etapas e itens.</span>
+                    </article>
+                </div>
+                <article class="arvore-panel">
+                    <span class="arvore-panel__eyebrow"><i class="fas fa-hammer"></i> Fluxo em preparação</span>
+                    <h3>${escapeHtml(configuracao.nome)}</h3>
+                    <p>Esta modalidade foi mantida aqui como espaço controlado de evolução. Por enquanto ela funciona como um marcador visual dentro da árvore, sem afetar o fluxo principal já utilizado nas demais modalidades.</p>
+                    <div class="arvore-panel__tags">
+                        <span class="arvore-tag"><i class="fas fa-screwdriver-wrench"></i> Estrutura futura</span>
+                        <span class="arvore-tag"><i class="fas fa-shield-check"></i> Sem impacto no módulo oficial</span>
+                        <span class="arvore-tag"><i class="fas fa-lightbulb"></i> Base de exemplo</span>
+                    </div>
+                </article>
+            `;
+        }
+
+        function renderParteDetail(node, breadcrumbs) {
+            arvoreDetailEl.innerHTML = `
+                <div class="arvore-breadcrumb">${breadcrumbs}</div>
+                <div class="arvore-summary">
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Bloco selecionado</span>
+                        <span class="arvore-summary__value">${escapeHtml(node.title)}</span>
+                        <span class="arvore-summary__text">Leitura macro para entender a função desta parte no processo.</span>
+                    </article>
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Etapas</span>
+                        <span class="arvore-summary__value">${node.meta.etapas}</span>
+                        <span class="arvore-summary__text">Etapas vinculadas a este bloco.</span>
+                    </article>
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Itens mapeados</span>
+                        <span class="arvore-summary__value">${node.meta.itens}</span>
+                        <span class="arvore-summary__text">Itens de conferência distribuídos nas etapas abaixo.</span>
+                    </article>
+                </div>
+                <article class="arvore-panel">
+                    <span class="arvore-panel__eyebrow"><i class="fas fa-compass"></i> Visão do bloco</span>
+                    <h3>${escapeHtml(node.title)}</h3>
+                    <p>Este bloco reúne um conjunto de etapas hierarquizadas do fluxo oficial. O ideal aqui é entender a função do bloco dentro da modalidade e depois aprofundar as etapas que destrincham a execução e a conferência.</p>
+                    <div class="arvore-panel__tags">
+                        <span class="arvore-tag"><i class="fas fa-folder-open"></i> Estrutura do processo</span>
+                        <span class="arvore-tag"><i class="fas fa-route"></i> Continue pela próxima coluna</span>
+                        <span class="arvore-tag"><i class="fas fa-shield-check"></i> Base de conferência</span>
+                    </div>
+                </article>
+            `;
+        }
+
+        function renderEtapaDetail(node, breadcrumbs, caminho) {
+            const parte = caminho.find((item) => item.type === 'parte');
+            const totalPerguntas = node.meta.perguntas;
+
+            arvoreDetailEl.innerHTML = `
+                <div class="arvore-breadcrumb">${breadcrumbs}</div>
+                <div class="arvore-summary">
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Etapa atual</span>
+                        <span class="arvore-summary__value">${escapeHtml(node.title)}</span>
+                        <span class="arvore-summary__text">Etapa inserida no bloco ${escapeHtml(parte?.title || '')}.</span>
+                    </article>
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Itens</span>
+                        <span class="arvore-summary__value">${node.meta.itens}</span>
+                        <span class="arvore-summary__text">Itens distribuídos dentro desta etapa.</span>
+                    </article>
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Perguntas</span>
+                        <span class="arvore-summary__value">${totalPerguntas}</span>
+                        <span class="arvore-summary__text">Pontos de conferência herdados da estrutura oficial.</span>
+                    </article>
+                </div>
+                <article class="arvore-panel">
+                    <span class="arvore-panel__eyebrow"><i class="fas fa-route"></i> O que fazer agora</span>
+                    <h3>${escapeHtml(node.title)}</h3>
+                    <p>Nesta etapa, a árvore funciona como uma linha de navegação operacional. Primeiro identifique quais itens compõem a etapa e depois abra o item específico para ver as perguntas de conferência que orientam a preparação do processo.</p>
+                    <div class="arvore-panel__tags">
+                        <span class="arvore-tag"><i class="fas fa-list-check"></i> Preparação guiada</span>
+                        <span class="arvore-tag"><i class="fas fa-arrow-right"></i> Próximo nível: item</span>
+                        <span class="arvore-tag"><i class="fas fa-circle-check"></i> Revisão preventiva</span>
+                    </div>
+                </article>
+                <div class="arvore-questions">
+                    ${node.children.map((item, index) => `
+                        <article class="arvore-question">
+                            <span class="arvore-question__index">Item ${escapeHtml(item.meta.codigo || String(index + 1))}</span>
+                            <span class="arvore-question__text">${escapeHtml(item.title)}</span>
+                            <span class="arvore-question__hint">${item.meta.perguntas} pergunta(s) vinculada(s). Abra este item na árvore para detalhar a conferência.</span>
+                        </article>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderItemDetail(node, breadcrumbs, caminho) {
+            const etapa = caminho.find((item) => item.type === 'etapa');
+            const parte = caminho.find((item) => item.type === 'parte');
+            const perguntas = Array.isArray(node.raw?.perguntas) ? node.raw.perguntas : [];
+
+            arvoreDetailEl.innerHTML = `
+                <div class="arvore-breadcrumb">${breadcrumbs}</div>
+                <div class="arvore-summary">
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Item selecionado</span>
+                        <span class="arvore-summary__value">${escapeHtml(node.title)}</span>
+                        <span class="arvore-summary__text">Código de referência: ${escapeHtml(node.meta.codigo || '-')}.</span>
+                    </article>
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Contexto</span>
+                        <span class="arvore-summary__value">${escapeHtml(etapa?.title || '-')}</span>
+                        <span class="arvore-summary__text">Este item pertence ao bloco ${escapeHtml(parte?.title || '-')}.</span>
+                    </article>
+                    <article class="arvore-summary__card">
+                        <span class="arvore-summary__label">Pontos de conferência</span>
+                        <span class="arvore-summary__value">${perguntas.length}</span>
+                        <span class="arvore-summary__text">Perguntas efetivamente herdadas do fluxo atual.</span>
+                    </article>
+                </div>
+                <article class="arvore-panel">
+                    <span class="arvore-panel__eyebrow"><i class="fas fa-list-check"></i> Leitura detalhada do item</span>
+                    <h3>${escapeHtml(node.title)}</h3>
+                    <p>Este é o nível mais específico da árvore. As perguntas abaixo representam os pontos práticos de conferência que estruturam a revisão desta parte do processo e ajudam a reduzir retrabalho e inconsistências.</p>
+                    <div class="arvore-panel__tags">
+                        <span class="arvore-tag"><i class="fas fa-magnifying-glass"></i> Conferência preventiva</span>
+                        <span class="arvore-tag"><i class="fas fa-file-circle-check"></i> Validação documental</span>
+                        <span class="arvore-tag"><i class="fas fa-arrow-rotate-right"></i> Continuidade operacional</span>
+                    </div>
+                </article>
+                <div class="arvore-questions">
+                    ${perguntas.map((pergunta, index) => `
+                        <article class="arvore-question">
+                            <span class="arvore-question__index">Ponto ${index + 1}</span>
+                            <span class="arvore-question__text">${escapeHtml(pergunta)}</span>
+                            <span class="arvore-question__hint">Use este ponto como trilha objetiva de preparo antes da análise formal do Controle Interno.</span>
+                        </article>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderPlaceholder(message) {
+            arvoreDetailEl.innerHTML = `
+                <div class="arvore-empty">${escapeHtml(message || 'Escolha uma modalidade e clique em um bloco, etapa ou item para visualizar o detalhamento completo do fluxo.')}</div>
+            `;
+        }
+
+        function encontrarNodePorId(node, id) {
+            if (!node || !id) return null;
+            if (node.id === id) return node;
+            for (const child of node.children || []) {
+                const found = encontrarNodePorId(child, id);
+                if (found) return found;
+            }
+            return null;
+        }
+
+        function encontrarCaminho(node, id, trail = []) {
+            if (!node) return [];
+            const nextTrail = node.type === 'tipo' ? trail : [...trail, node];
+            if (node.id === id) {
+                return nextTrail;
+            }
+            for (const child of node.children || []) {
+                const found = encontrarCaminho(child, id, nextTrail);
+                if (found.length) return found;
+            }
+            return [];
+        }
+
+        function escapeHtml(value) {
+            return String(value ?? '')
+                .replaceAll('&', '&amp;')
+                .replaceAll('<', '&lt;')
+                .replaceAll('>', '&gt;')
+                .replaceAll('"', '&quot;')
+                .replaceAll("'", '&#39;');
+        }
+
+        window.addEventListener('resize', () => {
+            window.requestAnimationFrame(desenharConexoesFluxo);
+        });
+    </script>
+}

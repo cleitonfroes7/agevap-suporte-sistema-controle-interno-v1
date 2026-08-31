@@ -1,0 +1,671 @@
+<html><head><base href="">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script src="/static/csrf.js"></script>
+    <title>Relatórios de Processos de Contratações</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <link rel="stylesheet" href="/static/style_dashboard.css">
+
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #fff;
+        }
+        .container {
+            display: flex;
+            min-height: 100vh;
+        }
+        .main-content {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #fff;
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+        }
+        .sidebar {
+            background: #fff !important;
+            color: #333 !important;
+        }
+        .sidebar h2 {
+            color: #333;
+            font-size: 1.2em;
+            margin-bottom: 20px;
+        }
+        .menu-item a {
+            color: #333 !important;
+            background: #fff !important;
+            text-decoration: none;
+            display: block;
+            padding: 8px;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        .menu-item a:hover, .menu-item a.active {
+            background-color: #f2f2f2 !important;
+            color: #222 !important;
+        }
+        .sidebar-footer {
+            background: #fff !important;
+            color: #333 !important;
+        }
+        .report-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .report-type-select, .date-range-select, .filter-select {
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #bdc3c7;
+        }
+        .generate-btn, .export-pdf-btn {
+            padding: 10px 20px;
+            font-size: 1em;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        .generate-btn:hover, .export-pdf-btn:hover {
+            background-color: #2980b9;
+        }
+        .export-pdf-btn {
+            background-color: #2ecc71;
+            margin-left: 10px;
+        }
+        .export-pdf-btn:hover {
+            background-color: #27ae60;
+        }
+        .report-content {
+            background-color: #fff !important;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        th {
+            background-color: #f2f2f2 !important;
+            color: #222 !important;
+        }
+        .chart-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .chart-item {
+            width: 48%;
+            height: 300px;
+        }
+        .table-container {
+            display: flex;
+            justify-content: space-between;
+        }
+        .table-column {
+            width: 48%;
+        }
+        /* Evitar quebra de página no meio de quadros/seções ao imprimir */
+        @@media print {
+            body, .container, .main-content, .sidebar, .report-content, .table-container, .chart-container {
+                background: #fff !important;
+                color: #222 !important;
+            }
+            .sidebar, .sidebar-footer, .menu-item, .menu-item a {
+                background: #fff !important;
+                color: #222 !important;
+            }
+            .report-content, .table-container, .chart-container {
+                page-break-inside: avoid !important;
+                break-inside: avoid !important;
+            }
+            .sidebar {
+                display: none !important;
+            }
+            .main-content {
+                margin: 0 !important;
+                width: 100% !important;
+            }
+        }
+    </style>
+    </head>
+    <body>
+     <div class="container">
+        <div class="sidebar">
+            <a href="https://www.agevap.org.br/">
+              <img src="static\logo_agevap.jpeg" alt="Descrição da Imagem">
+            </a>
+            <div class="menu-item">
+                <a href="/">Dashboard</a>
+            </div>
+            <div class="menu-item">
+                <a href="/TELA-LISTA-PROCESSO">Processos</a>
+            </div>
+            <div class="menu-item">
+                <a href="/TELA-LISTA-CHECKLIST" >Checklists</a>
+            </div>
+            <div class="menu-item">
+                <a href="/manualApp">Guia do Usuário</a>
+            </div>
+
+            <div class="menu-item">
+                <a href="/TELA-RELATORIO"class="active">Relatórios</a>
+            </div>
+            <div class="menu-item">
+                <a href="/DASHBOARD-CRONO">DashBoard CronoAnálise</a>
+            </div>
+
+            <div class="menu-item">
+                <a href="/logout">Sair</a>
+            </div>
+            
+            <div class="sidebar-footer">
+                <p>&copy; 2024 Controle Interno</p>
+                <img src="URL_DA_SUA_IMAGEM" alt="">
+            </div>
+            <div class="sidebar-footer">
+                <p>&copy; 2024 Controle Interno</p>
+            </div>
+        </div>
+        <div class="main-content">
+            <h1>Relatórios</h1>
+            <div class="report-controls">
+                <select class="report-type-select" id="report-type">
+                    <option value="geral">Relatório Geral</option>
+                    <option value="nao-conformidades">Não Conformidades por Modalidade</option>
+                    <option value="cronoanalitico">Cronoanálise</option>
+                    <option value="tempo-ajuste">Tempo de Ajuste</option>
+                </select>
+                <select class="date-range-select" id="date-range">
+                    <option value="7">Últimos 7 dias</option>
+                    <option value="30">Últimos 30 dias</option>
+                    <option value="90">Últimos 90 dias</option>
+                    <option value="365">Último ano</option>
+                </select>
+                <select class="filter-select" id="filter">
+                    <option value="todos">Todos os processos</option>
+                    <option value="Ato Convocatório">Ato Convocatório</option>
+                    <option value="Pedido de Cotação">Pedido de Cotação</option>
+                    <option value="Dispensa">Dispensa</option>
+                    <option value="Inexigibilidade">Inexigibilidade</option>
+                </select>
+                <button class="generate-btn" onclick="generateReport()">Gerar Relatório</button>
+                <button class="export-pdf-btn" onclick="exportToPDF()">Exportar PDF</button>
+            </div>
+            <div class="report-content" id="report-content">
+                <!-- O conteúdo do relatório será gerado dinamicamente aqui -->
+            </div>
+        </div>
+    </div>
+    
+    <script>
+    function generateReport() {
+        const reportType = document.getElementById('report-type').value;
+        const dateRange = document.getElementById('date-range').value;
+        const filter = document.getElementById('filter').value;
+        const reportContent = document.getElementById('report-content');
+    
+        // Limpar conteúdo anterior
+        reportContent.innerHTML = '';
+    
+        // Gerar relatório com base no tipo selecionado
+        switch(reportType) {
+            case 'geral':
+                generateGeneralReport(dateRange, filter);
+                break;
+            case 'nao-conformidades':
+                generateNonConformitiesByModalityReport(dateRange, filter);
+                break;
+            case 'cronoanalitico':
+                generateChronoAnalysisReport(dateRange, filter);
+                break;
+            case 'tempo-ajuste':
+                generateAdjustmentTimeReport(dateRange, filter);
+                break;
+        }
+    }
+    
+    function generateGeneralReport(dateRange, filter) {
+        const reportContent = document.getElementById('report-content');
+        reportContent.innerHTML = `
+            <h2>Relatório Geral - Últimos ${dateRange} dias (${filter})</h2>
+            <table>
+                <tr>
+                    <th>Métrica</th>
+                    <th>Valor</th>
+                </tr>
+                <tr>
+                    <td>Total de Processos</td>
+                    <td>150</td>
+                </tr>
+                <tr>
+                    <td>Processos Concluídos</td>
+                    <td>120</td>
+                </tr>
+                <tr>
+                    <td>Processos em Andamento</td>
+                    <td>30</td>
+                </tr>
+                <tr>
+                    <td>Taxa de Conformidade</td>
+                    <td>85%</td>
+                </tr>
+                <tr>
+                    <td>Tempo Médio de Conclusão</td>
+                    <td>15 dias</td>
+                </tr>
+                <tr>
+                    <td>Total de Não Conformidades</td>
+                    <td>45</td>
+                </tr>
+                <tr>
+                    <td>Tempo Médio de Resolução de Não Conformidades</td>
+                    <td>2.5 dias</td>
+                </tr>
+            </table>
+            <div class="chart-container">
+                <div class="chart-item">
+                    <canvas id="generalChartBar"></canvas>
+                </div>
+                <div class="chart-item">
+                    <canvas id="generalChartPie"></canvas>
+                </div>
+            </div>
+        `;
+    
+        const ctxBar = document.getElementById('generalChartBar').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['Ato Convocatório', 'Pedido de Cotação', 'Dispensa', 'Inexigibilidade'],
+                datasets: [{
+                    label: 'Quantidade de Processos por Modalidade',
+                    data: [50, 40, 35, 25],
+                    backgroundColor: ['#3498db', '#2ecc71', '#f39c12', '#e74c3c']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    
+        const ctxPie = document.getElementById('generalChartPie').getContext('2d');
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['Ato Convocatório', 'Pedido de Cotação', 'Dispensa', 'Inexigibilidade'],
+                datasets: [{
+                    data: [50, 40, 35, 25],
+                    backgroundColor: ['#3498db', '#2ecc71', '#f39c12', '#e74c3c']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+    
+    function generateNonConformitiesByModalityReport(dateRange, filter) {
+        const reportContent = document.getElementById('report-content');
+        reportContent.innerHTML = `
+            <h2>Relatório de Não Conformidades por Modalidade - Últimos ${dateRange} dias (${filter})</h2>
+            <table>
+                <tr>
+                    <th>Modalidade</th>
+                    <th>Total de Processos</th>
+                    <th>Não Conformidades</th>
+                    <th>Percentual</th>
+                    <th>Tempo Médio de Resolução (dias)</th>
+                </tr>
+                <tr>
+                    <td>Ato Convocatório</td>
+                    <td>50</td>
+                    <td>15</td>
+                    <td>30%</td>
+                    <td>3.2</td>
+                </tr>
+                <tr>
+                    <td>Pedido de Cotação</td>
+                    <td>40</td>
+                    <td>10</td>
+                    <td>25%</td>
+                    <td>2.5</td>
+                </tr>
+                <tr>
+                    <td>Dispensa</td>
+                    <td>35</td>
+                    <td>12</td>
+                    <td>34%</td>
+                    <td>2.8</td>
+                </tr>
+                <tr>
+                    <td>Inexigibilidade</td>
+                    <td>25</td>
+                    <td>8</td>
+                    <td>32%</td>
+                    <td>3.5</td>
+                </tr>
+            </table>
+            <div class="chart-container">
+                <div class="chart-item">
+                    <canvas id="nonConformitiesChartBar"></canvas>
+                </div>
+                <div class="chart-item">
+                    <canvas id="nonConformitiesChartPie"></canvas>
+                </div>
+            </div>
+        `;
+    
+        const ctxBar = document.getElementById('nonConformitiesChartBar').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['Ato Convocatório', 'Pedido de Cotação', 'Dispensa', 'Inexigibilidade'],
+                datasets: [{
+                    label: 'Total de Processos',
+                    data: [50, 40, 35, 25],
+                    backgroundColor: '#3498db'
+                }, {
+                    label: 'Não Conformidades',
+                    data: [15, 10, 12, 8],
+                    backgroundColor: '#e74c3c'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    
+        const ctxPie = document.getElementById('nonConformitiesChartPie').getContext('2d');
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['Ato Convocatório', 'Pedido de Cotação', 'Dispensa', 'Inexigibilidade'],
+                datasets: [{
+                    data: [15, 10, 12, 8],
+                    backgroundColor: ['#3498db', '#2ecc71', '#f39c12', '#e74c3c']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribuição de Não Conformidades'
+                    }
+                }
+            }
+        });
+    }
+    
+    function generateChronoAnalysisReport(dateRange, filter) {
+        const reportContent = document.getElementById('report-content');
+        reportContent.innerHTML = `
+            <h2>Relatório Cronoanálise - Últimos ${dateRange} dias (${filter})</h2>
+            <div class="table-container">
+                <div class="table-column">
+                    <table>
+                        <tr>
+                            <th>Fase</th>
+                            <th>Tempo Médio (dias)</th>
+                            <th>Percentual do Tempo Total</th>
+                        </tr>
+                        <tr><td>Fase 1: Abertura do processo</td><td>2</td><td>3.33%</td></tr>
+                        <tr><td>Fase 2: Etapas preliminares</td><td>3</td><td>5%</td></tr>
+                        <tr><td>Fase 3: Consulta ao patrimônio</td><td>1</td><td>1.67%</td></tr>
+                        <tr><td>Fase 4: Elaboração do TdR</td><td>5</td><td>8.33%</td></tr>
+                        <tr><td>Fase 5: Formação de preço de referência e autorização</td><td>4</td><td>6.67%</td></tr>
+                        <tr><td>Fase 6: Dotação orçamentária</td><td>2</td><td>3.33%</td></tr>
+                        <tr><td>Fase 7: Elaboração da minuta Edital</td><td>4</td><td>6.67%</td></tr>
+                        <tr><td>Fase 8: Análise Jurídica da fase interna do ato convocatório ou pedido de cotação</td><td>3</td><td>5%</td></tr>
+                    </table>
+                </div>
+                <div class="table-column">
+                    <table>
+                        <tr>
+                            <th>Fase</th>
+                            <th>Tempo Médio (dias)</th>
+                            <th>Percentual do Tempo Total</th>
+                        </tr>
+                        <tr><td>Fase 9: Controle Interno - Checklist 1</td><td>2</td><td>3.33%</td></tr>
+                        <tr><td>Fase 10: Ato Convocatório ou pedido de cotação</td><td>7</td><td>11.67%</td></tr>
+                        <tr><td>Fase 11: Análise Jurídica do certame ou pedido de cotação</td><td>3</td><td>5%</td></tr>
+                        <tr><td>Fase 12: Controle Interno - Checklist 2</td><td>2</td><td>3.33%</td></tr>
+                        <tr><td>Fase 13: Homologação ou Seleção de Fornecedores</td><td>3</td><td>5%</td></tr>
+                        <tr><td>Fase 14: Tramites da assinatura do contrato</td><td>5</td><td>8.33%</td></tr>
+                        <tr><td>Fase 15: Gestão contratual</td><td>12</td><td>20%</td></tr>
+                        <tr><td>Fase 16: Encerramento</td><td>2</td><td>3.33%</td></tr>
+                    </table>
+                </div>
+            </div>
+            <div class="chart-container">
+                <div class="chart-item">
+                    <canvas id="chronoAnalysisChartBar"></canvas>
+                </div>
+                <div class="chart-item">
+                    <canvas id="chronoAnalysisChartPie"></canvas>
+                </div>
+            </div>
+        `;
+    
+        const phases = [
+            'Fase 1', 'Fase 2', 'Fase 3', 'Fase 4', 'Fase 5', 'Fase 6', 'Fase 7', 'Fase 8',
+            'Fase 9', 'Fase 10', 'Fase 11', 'Fase 12', 'Fase 13', 'Fase 14', 'Fase 15', 'Fase 16'
+        ];
+        const timeData = [2, 3, 1, 5, 4, 2, 4, 3, 2, 7, 3, 2, 3, 5, 12, 2];
+    
+        const ctxBar = document.getElementById('chronoAnalysisChartBar').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: phases,
+                datasets: [{
+                    label: 'Tempo Médio (dias)',
+                    data: timeData,
+                    backgroundColor: '#3498db'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    
+        const ctxPie = document.getElementById('chronoAnalysisChartPie').getContext('2d');
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: phases,
+                datasets: [{
+                    data: timeData,
+                    backgroundColor: [
+                        '#3498db', '#2ecc71', '#f39c12', '#e74c3c', '#9b59b6', 
+                        '#1abc9c', '#34495e', '#16a085', '#27ae60', '#2980b9', 
+                        '#8e44ad', '#f1c40f', '#e67e22', '#95a5a6', '#d35400',
+                        '#c0392b'
+                    ]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribuição do Tempo por Fase'
+                    }
+                }
+            }
+        });
+    }
+    
+    function generateAdjustmentTimeReport(dateRange, filter) {
+        const reportContent = document.getElementById('report-content');
+        reportContent.innerHTML = `
+            <h2>Relatório de Tempo de Ajuste - Últimos ${dateRange} dias (${filter})</h2>
+            <table>
+                <tr>
+                    <th>Modalidade</th>
+                    <th>Tempo Médio de Ajuste (dias)</th>
+                    <th>Tempo Mínimo (dias)</th>
+                    <th>Tempo Máximo (dias)</th>
+                </tr>
+                <tr>
+                    <td>Ato Convocatório</td>
+                    <td>3.2</td>
+                    <td>1</td>
+                    <td>7</td>
+                </tr>
+                <tr>
+                    <td>Pedido de Cotação</td>
+                    <td>2.5</td>
+                    <td>0.5</td>
+                    <td>5</td>
+                </tr>
+                <tr>
+                    <td>Dispensa</td>
+                    <td>2.8</td>
+                    <td>1</td>
+                    <td>6</td>
+                </tr>
+                <tr>
+                    <td>Inexigibilidade</td>
+                    <td>3.5</td>
+                    <td>1.5</td>
+                    <td>8</td>
+                </tr>
+            </table>
+            <div class="chart-container">
+                <div class="chart-item">
+                    <canvas id="adjustmentTimeChartBar"></canvas>
+                </div>
+                <div class="chart-item">
+                    <canvas id="adjustmentTimeChartPie"></canvas>
+                </div>
+            </div>
+        `;
+    
+        const ctxBar = document.getElementById('adjustmentTimeChartBar').getContext('2d');
+        new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['Ato Convocatório', 'Pedido de Cotação', 'Dispensa', 'Inexigibilidade'],
+                datasets: [{
+                    label: 'Tempo Médio de Ajuste (dias)',
+                    data: [3.2, 2.5, 2.8, 3.5],
+                    backgroundColor: '#2ecc71'
+                }, {
+                    label: 'Tempo Mínimo (dias)',
+                    data: [1, 0.5, 1, 1.5],
+                    backgroundColor: '#3498db'
+                }, {
+                    label: 'Tempo Máximo (dias)',
+                    data: [7, 5, 6, 8],
+                    backgroundColor: '#e74c3c'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    
+        const ctxPie = document.getElementById('adjustmentTimeChartPie').getContext('2d');
+        new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['Ato Convocatório', 'Pedido de Cotação', 'Dispensa', 'Inexigibilidade'],
+                datasets: [{
+                    data: [3.2, 2.5, 2.8, 3.5],
+                    backgroundColor: ['#3498db', '#2ecc71', '#f39c12', '#e74c3c']
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom'
+                    },
+                    title: {
+                        display: true,
+                        text: 'Distribuição do Tempo Médio de Ajuste'
+                    }
+                }
+            }
+        });
+    }
+    
+    function exportToPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        const reportContent = document.getElementById('report-content');
+    
+        html2canvas(reportContent).then((canvas) => {
+            const imgData = canvas.toDataURL('image/png');
+            const imgProps = doc.getImageProperties(imgData);
+            const pdfWidth = doc.internal.pageSize.getWidth();
+            const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+            doc.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+            doc.save('relatorio.pdf');
+        });
+    }
+    
+    // Gerar relatório geral por padrão ao carregar a página
+    generateGeneralReport(30, 'todos');
+    </script>
+    </body>
+    </html>

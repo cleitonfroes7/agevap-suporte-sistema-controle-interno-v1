@@ -1,0 +1,356 @@
+{
+  "tipo": "ato-convocatorio-p1",
+  "perguntas": [
+    {
+      "item": "1",
+      "elemento": "1- PROTOCOLO DO PROCESSO E FICHA DE ABERTURA F-0253",
+      "sub_perguntas": [
+        {"pergunta": "1.1 Foi gerado e cadastrado o protocolo no SIGA e SIGAD?"},
+        {"pergunta": "1.2 Os dados da ficha foram preenchidos corretamente?"},
+        {"pergunta": "1.3 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "2",
+      "elemento": "2- ORIGEM DA DEMANDA",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "2.1 Existe o documento (Carta / Ata / Registro de Reunião / Norma Interna / Nota Técnica / Resolução / Deliberação / Portaria)?"},
+        {"pergunta": "2.2 O documento tem relação com a demanda?"},
+        {"pergunta": "2.3 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "3",
+      "elemento": "3- NORMA INTERNA DE NOMEAÇÃO DO GESTOR DO PROCESSO ADMINISTRATIVO",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "3.1 A autoridade competente designou o agente responsável pela contratação e o gestor substituto?"},
+        {"pergunta": "3.2 Outros apontamentos:"}
+      ]
+    },
+    
+    {
+      "marco": "Abertura do Processo - itens 1, 2 e 3",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+   
+    {
+      "item": "4",
+      "elemento": "4- DOCUMENTO DE FORMALIZAÇÃO DA DEMANDA F-0263",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "4.1 Possui justificativa da demanda?"},
+        {"pergunta": "4.2 O código do item está correto?"},
+        {"pergunta": "4.3 Está autorizado pelo diretor-presidente?"},
+        {"pergunta": "4.4 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "5",
+      "elemento": "5- PLANEJAMENTO DO PROCESSO ADMINISTRATIVO F-0248",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "5.1 Possui preenchimento de todas as datas?"},
+        {"pergunta": "5.2 Está assinado por todos?"},
+        {"pergunta": "5.3 Foi utilizada a categoria correta?"},
+        {"pergunta": "5.4 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "6",
+      "elemento": "6- ESTUDO TÉCNICO PRELIMINAR F-0262",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "6.1 O documento contempla ao menos a descrição da necessidade?"},
+        {"pergunta": "6.2 O documento contempla a estimativa do quantitativo?"},
+        {"pergunta": "6.3 O documento contempla a manifestação sobre o parcelamento?"},
+        {"pergunta": "6.4 O documento contempla a manifestação sobre a viabilidade da contratação?"},
+        {"pergunta": "6.5 Foi feita a análise de riscos?"},
+        {"pergunta": "6.6 Outros apontamentos:"}
+      ]
+    },
+
+    {
+      "marco": "Etapas preliminares - itens 4, 5 e 6",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+
+    {
+      "item": "7",
+      "elemento": "7 - SOLICITAÇÃO DE PARECER DO SETOR DE PATRIMÔNIO SOBRE CLASSIFICAÇÃO DE BEM PERMANENTE",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "7.1 A solicitação foi realizada? (somente para os casos em que isso é necessário)."},
+        {"pergunta": "7.2 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "8",
+      "elemento": "8 - RESPOSTA QUANTO A CLASSIFICAÇÃO DO BEM",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "8.1 Teve respostas? Foi objetiva? (somente para os casos em que isso é necessário)."},
+        {"pergunta": "8.2 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "9",
+      "elemento": "9 - AUTORIZAÇÃO DO CONSELHO DE ADMINISTRAÇÃO DA AGEVAP - CA",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "9.1 Está assinada? (somente para os casos em que isso é necessário)."},
+        {"pergunta": "9.2 Outros apontamentos:"}
+      ]
+    },
+
+    {
+      "marco": "Consulta ao patrimônio - itens 7, 8 e 9",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+
+    {
+      "item": "10",
+      "elemento": "10 - TERMO DE REFERÊNCIA DO-0100 OU TERMO DE REFERÊNCIA SIMPLIFICADO D-0264",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "10.1 O documento está alinhado com o Plano de Contratações Anual?"},
+        {"pergunta": "10.2 Contempla definição do objeto?"},
+        {"pergunta": "10.3 Possui fundamentação da contratação?"},
+        {"pergunta": "10.4 Possui descrição da solução?"},
+        {"pergunta": "10.5 Contempla os requisitos da contratação?"},
+        {"pergunta": "10.6 Deixa claro o modelo de execução?"},
+        {"pergunta": "10.7 Deixa claro o modelo de gestão"},
+        {"pergunta": "10.8 Demonstra os critérios de medição e de pagamento?"},
+        {"pergunta": "10.9 Descreve a forma de seleção do fornecedor?"},
+        {"pergunta": "10.10 Possui estimativas do valor da contratação? Está em conformidade com o ETP? (Variação aceitável de até 20%)."},
+        {"pergunta": "10.11 As exigências de qualificação técnica estão em conformidade com o objeto da contratação?"},
+        {"pergunta": "10.12 O cronograma apresentado está em conformidade com o texto do documento?"},
+        {"pergunta": "10.13 Outros apontamentos:"}
+      ]
+    },
+
+    {
+      "marco": "Elaboração do TdR - item 10",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+
+    {
+      "item": "11",
+      "elemento": "11 - PESQUISA DE PREÇO DE MERCADO / REALIZAÇÃO DE COTAÇÕES / ORÇAMENTOS",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "11.1 As propostas comerciais possuem as informações do fornecedor (CNPJ, nome, contato, etc)?"},
+        {"pergunta": "11.2 Os itens e as quantidades correspondem ao objeto da contratação descrito no ETP?"},
+        {"pergunta": "11.3 A pesquisa foi feita com no mínimo 3 (três) fornecedores? Ou com planilhas de composição de custos?"},
+        {"pergunta": "11.4 A referência dos preços tem menos de seis meses?"},
+        {"pergunta": "11.5 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "12",
+      "elemento": "12 - PLANILHA ORÇAMENTÁRIA / QUADRO COMPARATIVO PRELIMINAR F-0267",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "12.1 Existem pelo menos três preços? Caso não, possui justificativa?"},
+        {"pergunta": "12.2 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "13",
+      "elemento": "13 - SOLICITAÇÃO DA COMPRA INCLUINDO A JUSTIFICATIVA DE PREÇO F-0265",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "13.1 Assinada pela assessoria e diretor-presidente?"},
+        {"pergunta": "13.2 Outros apontamentos:"}
+      ]
+    },
+
+    {
+      "marco": "Formação do preço de referência - itens 11, 12 e 13",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+
+    {
+      "item": "14",
+      "elemento": "14 - SOLICITAÇÃO DE DISPONIBILIDADE DE DOTAÇÃO ORÇAMENTÁRIA",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "14.1 Folha de Informação."},
+        {"pergunta": "14.2 As rubricas indicadas são as mesmas apresentadas no DFD? Se não, há justificativa para a mudança?"},
+        {"pergunta": "14.3 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "15",
+      "elemento": "15 - INFORMAÇÃO QUANTO A DISPONIBILIDADE DE DOTAÇÃO ORÇAMENTÁRIA",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "15.1 Folha de Informação."},
+        {"pergunta": "15.2 As rubricas indicadas são as mesmas apresentadas no DFD? Se não, há justificativa para a mudança?"},
+        {"pergunta": "15.3 Outros apontamentos:"}
+      ]
+    },
+
+     
+    {
+      "marco": "Dotação Orçamentária - itens 14 e 15",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+    
+    {
+      "item": "16",
+      "elemento": "16 - NOMEAÇÃO DO PREGOEIRO E DA COMISSÃO DE JULGAMENTO",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "16.1 Foi inserida a Norma Interna?"},
+        {"pergunta": "16.2 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "17",
+      "elemento": "17 - MINUTA DO ATO CONVOCATÓRIO",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "17.1 A revisão do modelo de edital está em conformidade com a versão vigente no SGQ?"},
+        {"pergunta": "17.2 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "18",
+      "elemento": "18 - MINUTA DO INSTRUMENTO JURÍDICO (CONTRATO / ORDEM DE SERVIÇO / AUTORIZAÇÃO DE FORNECIMENTO)",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "18.1 A revisão do modelo de edital está em conformidade com a versão vigente no SGQ?"},
+        {"pergunta": "18.2 Outros apontamentos:"}
+      ]
+    },
+
+    {
+      "marco": "Elaboração da Minuta do Edital - itens 16, 17 e 18",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+
+
+    {
+      "item": "19",
+      "elemento": "19 - ANÁLISE JURÍDICA",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "19.1 Há apontamentos no parecer jurídico?"}
+      ]
+    },
+    {
+      "item": "20",
+      "elemento": "20 - DEVOLUTIVAS À ANÁLISE JURÍDICA",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "20.1 Houve alguma revisão e complementação?"}
+      ]
+    },
+    {
+      "item": "21",
+      "elemento": "21 - ANÁLISE JURÍDICA COMPLEMENTAR DAS DEVOLUTIVAS",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "21.1 Há parecer final favorável à continuidade do processo pela assessoria jurídica?"}
+      ]
+    },
+
+    {
+      "marco": "Análise Jurídica do certame ou pedido de cotação - itens 19, 20 e 21",
+      "data_inicio": "",
+      "data_fim": "",
+      "tempo_dias": ""
+    },
+
+    {
+      "item": "22",
+      "elemento": "22 - ATUALIZAÇÃO BIMESTRAL DO PLANEJAMENTO DO PROCESSO ADMINISTRATIVO F-0248",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "22.1 Está atualizado no prazo correto?"},
+        {"pergunta": "22.2 As etapas foram cumpridas no prazo? Caso não, possui justificativa e plano de ação?"},
+        {"pergunta": "22.3 Está assinado?"},
+        {"pergunta": "22.4 Outros apontamentos:"}
+      ]
+    },
+    {
+      "item": "23",
+      "elemento": "23 - ENVIO DO PROCESSO PARA CONTROLE INTERNO",
+      "nup": "",
+      "análise": "",
+      "descricao": "",
+      "sub_perguntas": [
+        {"pergunta": "23.1 Folha de informação."}
+      ]
+    }
+  
+
+
+
+
+
+  
+    
+   
+   
+   
+  ]
+}

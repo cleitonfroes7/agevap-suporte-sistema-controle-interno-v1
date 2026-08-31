@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Controle Interno</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="/static/csrf.js"></script>
+    <style>
+        :root {
+            --brand-primary: #112a46;
+            --brand-secondary: #0099cc;
+            --brand-accent: #005ca0;
+            --surface: rgba(255, 255, 255, 0.97);
+            --surface-soft: rgba(247, 250, 252, 0.94);
+            --text-main: #112a46;
+            --text-soft: #60758f;
+            --border: rgba(148, 163, 184, 0.24);
+            --error: #b42318;
+            --error-bg: #fff1f2;
+            --success: #166534;
+            --success-bg: #ecfdf3;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            min-height: 100vh;
+            font-family: "Plus Jakarta Sans", sans-serif;
+            color: var(--text-main);
+            background:
+                radial-gradient(circle at top left, rgba(0, 153, 204, 0.18), transparent 22%),
+                linear-gradient(135deg, #17365d 0%, #112a46 52%, #0d2238 100%);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            background:
+                linear-gradient(60deg, transparent 0 48%, rgba(255, 255, 255, 0.03) 48% 52%, transparent 52% 100%),
+                linear-gradient(-60deg, transparent 0 48%, rgba(255, 255, 255, 0.025) 48% 52%, transparent 52% 100%);
+            background-size: 180px 180px;
+            opacity: 0.45;
+            pointer-events: none;
+        }
+
+        .login-shell {
+            min-height: 100vh;
+            display: grid;
+            place-items: center;
+            padding: 18px 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .login-frame {
+            width: min(940px, 100%);
+            display: grid;
+            grid-template-columns: minmax(300px, 0.9fr) minmax(340px, 0.78fr);
+            border-radius: 28px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            box-shadow: 0 28px 64px rgba(5, 16, 32, 0.26);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(16px);
+        }
+
+        .login-brand {
+            padding: 28px 30px 24px;
+            background:
+                radial-gradient(circle at top right, rgba(0, 153, 204, 0.22), transparent 24%),
+                linear-gradient(160deg, rgba(17, 42, 70, 0.92) 0%, rgba(13, 34, 56, 0.96) 100%);
+            color: #f8fbff;
+            display: grid;
+            align-content: space-between;
+            gap: 18px;
+            min-height: 500px;
+        }
+
+        .login-brand__top {
+            display: grid;
+            gap: 16px;
+        }
+
+        .login-brand__eyebrow {
+            width: fit-content;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 11px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            font-size: 0.66rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .login-brand__logo {
+            width: 142px;
+            max-width: 100%;
+            filter: drop-shadow(0 10px 18px rgba(0, 0, 0, 0.18));
+        }
+
+        .login-brand h1 {
+            font-size: clamp(1.58rem, 2.2vw, 2.05rem);
+            line-height: 1.04;
+            letter-spacing: -0.04em;
+            max-width: 12ch;
+        }
+
+        .login-brand p {
+            max-width: 39ch;
+            color: rgba(235, 244, 255, 0.82);
+            font-size: 0.86rem;
+            line-height: 1.5;
+        }
+
+        .login-brand__highlights {
+            display: grid;
+            gap: 9px;
+        }
+
+        .login-brand__item {
+            display: grid;
+            grid-template-columns: 34px 1fr;
+            gap: 10px;
+            align-items: start;
+            padding: 10px 12px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+
+        .login-brand__icon {
+            width: 34px;
+            height: 34px;
+            border-radius: 11px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 153, 204, 0.2);
+            color: #8fe7ff;
+            font-size: 0.82rem;
+        }
+
+        .login-brand__item strong {
+            display: block;
+            margin-bottom: 3px;
+            font-size: 0.81rem;
+        }
+
+        .login-brand__item span {
+            color: rgba(235, 244, 255, 0.78);
+            font-size: 0.77rem;
+            line-height: 1.38;
+        }
+
+        .login-panel {
+            background: linear-gradient(180deg, var(--surface) 0%, var(--surface-soft) 100%);
+            padding: 30px 28px 24px;
+            display: grid;
+            align-content: center;
+        }
+
+        .login-panel__header {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+
+        .login-panel__header h2 {
+            font-size: 1.4rem;
+            line-height: 1.06;
+            letter-spacing: -0.03em;
+            color: var(--brand-primary);
+        }
+
+        .login-panel__header p {
+            color: var(--text-soft);
+            line-height: 1.45;
+            font-size: 0.84rem;
+            max-width: 34ch;
+        }
+
+        .alert {
+            display: none;
+            margin-bottom: 14px;
+            padding: 12px 14px;
+            border-radius: 14px;
+            font-weight: 700;
+            font-size: 0.84rem;
+            line-height: 1.45;
+        }
+
+        .alert-error {
+            display: block;
+            color: var(--error);
+            background: var(--error-bg);
+            border: 1px solid rgba(180, 35, 24, 0.14);
+        }
+
+        .alert-success {
+            display: block;
+            color: var(--success);
+            background: var(--success-bg);
+            border: 1px solid rgba(22, 101, 52, 0.14);
+        }
+
+        .login-form {
+            display: grid;
+            gap: 14px;
+        }
+
+        .field {
+            display: grid;
+            gap: 7px;
+        }
+
+        .field label {
+            font-size: 0.83rem;
+            font-weight: 700;
+            color: var(--brand-primary);
+        }
+
+        .field__control {
+            position: relative;
+        }
+
+        .field input {
+            width: 100%;
+            height: 48px;
+            border-radius: 14px;
+            border: 1px solid #cdddef;
+            background: #ffffff;
+            padding: 0 42px 0 14px;
+            font-size: 0.91rem;
+            color: var(--brand-primary);
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .field input:focus {
+            outline: none;
+            border-color: var(--brand-secondary);
+            box-shadow: 0 0 0 4px rgba(0, 153, 204, 0.12);
+        }
+
+        .field__icon,
+        .field__toggle {
+            position: absolute;
+            right: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6b7f97;
+            font-size: 0.88rem;
+        }
+
+        .field__toggle {
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            padding: 0;
+        }
+
+        .login-meta {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 2px;
+        }
+
+        .remember {
+            display: inline-flex;
+            align-items: center;
+            gap: 9px;
+            color: var(--brand-primary);
+            font-size: 0.84rem;
+            font-weight: 700;
+        }
+
+        .remember input {
+            width: 16px;
+            height: 16px;
+            accent-color: var(--brand-accent);
+        }
+
+        .login-help {
+            color: var(--text-soft);
+            font-size: 0.79rem;
+            font-weight: 700;
+        }
+
+        .login-button {
+            height: 50px;
+            border: none;
+            border-radius: 16px;
+            background: linear-gradient(135deg, var(--brand-accent), var(--brand-secondary));
+            color: #ffffff;
+            font-size: 0.91rem;
+            font-weight: 800;
+            cursor: pointer;
+            box-shadow: 0 14px 24px rgba(0, 92, 160, 0.18);
+            transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.2s ease;
+            margin-top: 4px;
+        }
+
+        .login-button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 28px rgba(0, 92, 160, 0.22);
+        }
+
+        .login-button:disabled {
+            cursor: wait;
+            opacity: 0.85;
+        }
+
+        .loading {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .loading-spinner {
+            width: 16px;
+            height: 16px;
+            border: 2.5px solid rgba(255, 255, 255, 0.35);
+            border-top-color: #ffffff;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .login-footer {
+            margin-top: 16px;
+            padding-top: 14px;
+            border-top: 1px solid rgba(148, 163, 184, 0.18);
+            color: var(--text-soft);
+            font-size: 0.79rem;
+            line-height: 1.52;
+        }
+
+        .login-panel__footnote {
+            margin-top: 10px;
+            color: #7a8ca2;
+            font-size: 0.69rem;
+        }
+
+        @@keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        @@media (max-width: 980px) {
+            .login-frame {
+                grid-template-columns: 1fr;
+                max-width: 560px;
+            }
+
+            .login-brand {
+                min-height: auto;
+                padding: 24px 24px 20px;
+                gap: 18px;
+            }
+
+            .login-brand h1 {
+                max-width: 100%;
+            }
+
+            .login-panel {
+                padding: 24px 24px 22px;
+            }
+        }
+
+        @@media (max-width: 640px) {
+            .login-shell {
+                padding: 14px;
+            }
+
+            .login-frame {
+                border-radius: 22px;
+            }
+
+            .login-brand,
+            .login-panel {
+                padding-left: 18px;
+                padding-right: 18px;
+            }
+
+            .login-meta {
+                align-items: flex-start;
+                flex-direction: column;
+            }
+
+            .login-brand__logo {
+                width: 128px;
+            }
+
+            .login-panel__header h2 {
+                font-size: 1.34rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="login-shell">
+        <section class="login-frame">
+            <aside class="login-brand">
+                <div class="login-brand__top">
+                    <span class="login-brand__eyebrow">
+                        <i class="fas fa-shield-halved"></i>
+                        Acesso institucional
+                    </span>
+
+                    <a href="https://www.agevap.org.br/" target="_blank" rel="noopener">
+                        <img class="login-brand__logo" src="/static/logo_agevap.jpeg" alt="AGEVAP">
+                    </a>
+
+                    <div>
+                        <h1>Portal de Controle Interno</h1>
+                        <p>Ambiente unificado para acompanhamento de processos, checklists, conformidades e análises operacionais da AGEVAP.</p>
+                    </div>
+                </div>
+
+                <div class="login-brand__highlights">
+                    <div class="login-brand__item">
+                        <div class="login-brand__icon">
+                            <i class="fas fa-diagram-project"></i>
+                        </div>
+                        <div>
+                            <strong>Fluxo organizado</strong>
+                            <span>Visualize rotinas e registros de forma padronizada em um único portal.</span>
+                        </div>
+                    </div>
+
+                    <div class="login-brand__item">
+                        <div class="login-brand__icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div>
+                            <strong>Análise contínua</strong>
+                            <span>Acompanhe indicadores, conformidades e pontos de atenção com visão executiva.</span>
+                        </div>
+                    </div>
+
+                    <div class="login-brand__item">
+                        <div class="login-brand__icon">
+                            <i class="fas fa-user-lock"></i>
+                        </div>
+                        <div>
+                            <strong>Acesso seguro</strong>
+                            <span>Entre com sua conta institucional e mantenha as credenciais sempre atualizadas.</span>
+                        </div>
+                    </div>
+                </div>
+            </aside>
+
+            <section class="login-panel">
+                <div class="login-panel__header">
+                    <h2>Entrar no sistema</h2>
+                    <p>Use seu e-mail corporativo e sua senha para acessar o portal interno.</p>
+                </div>
+
+                <div id="alertMessage" class="alert"></div>
+
+                <form class="login-form" id="loginForm">
+                    <div class="field">
+                        <label for="email">E-mail</label>
+                        <div class="field__control">
+                            <input type="email" id="email" name="email" required placeholder="seu.email@agevap.org.br" autocomplete="username">
+                            <span class="field__icon">
+                                <i class="fas fa-envelope"></i>
+                            </span>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="password">Senha</label>
+                        <div class="field__control">
+                            <input type="password" id="password" name="password" required placeholder="Informe sua senha" autocomplete="current-password">
+                            <button type="button" class="field__toggle" id="passwordToggle" aria-label="Mostrar ou ocultar senha">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="login-meta">
+                        <label class="remember" for="remember">
+                            <input type="checkbox" id="remember" name="remember">
+                            <span>Lembrar-me</span>
+                        </label>
+
+                        <span class="login-help">Solicitação de acesso por e-mail formal</span>
+                    </div>
+
+                    <button type="submit" class="login-button">
+                        <span class="button-text">Entrar</span>
+                        <span class="loading">
+                            <span class="loading-spinner"></span>
+                            <span>Autenticando...</span>
+                        </span>
+                    </button>
+                </form>
+
+                <div class="login-footer">
+                    Para solicitar acesso, entre em contato com a Diretoria de Planejamento e Ações Estratégicas (DIPLAE) e formalize o pedido por e-mail.
+                </div>
+
+                <div class="login-panel__footnote">
+                    Ao acessar, você concorda com o uso institucional do ambiente interno.
+                </div>
+            </section>
+        </section>
+    </main>
+
+    <script>
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) {
+                return parts.pop().split(';')[0];
+            }
+            return null;
+        }
+
+        const loginForm = document.getElementById('loginForm');
+        const passwordInput = document.getElementById('password');
+        const passwordToggle = document.getElementById('passwordToggle');
+        const loginFrame = document.querySelector('.login-frame');
+
+        loginForm.addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = passwordInput.value;
+            const remember = document.getElementById('remember').checked;
+            const csrfToken = getCookie('XSRF-TOKEN');
+
+            const button = document.querySelector('.login-button');
+            const buttonText = button.querySelector('.button-text');
+            const loading = button.querySelector('.loading');
+            const alertMessage = document.getElementById('alertMessage');
+
+            alertMessage.style.display = 'none';
+            alertMessage.className = 'alert';
+
+            buttonText.style.display = 'none';
+            loading.style.display = 'inline-flex';
+            button.disabled = true;
+
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('password', password);
+            formData.append('remember', remember);
+
+            fetch('/login', {
+                method: 'POST',
+                credentials: 'same-origin',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': csrfToken || ''
+                }
+            })
+            .then(async response => {
+                if (response.redirected) {
+                    window.location.href = response.url;
+                    return null;
+                }
+
+                const contentType = response.headers.get('content-type') || '';
+                const aceitaJson = contentType.includes('application/json');
+                const data = aceitaJson ? await response.json().catch(() => null) : null;
+
+                if (response.status === 429) {
+                    return {
+                        success: false,
+                        message: data?.message || 'Muitas tentativas de login em pouco tempo. Aguarde 1 minuto e tente novamente.'
+                    };
+                }
+
+                if (!response.ok) {
+                    return {
+                        success: false,
+                        message: data?.message || 'Erro ao realizar login. Tente novamente.'
+                    };
+                }
+
+                return data;
+            })
+            .then(data => {
+                if (!data) {
+                    return;
+                }
+
+                buttonText.style.display = 'inline';
+                loading.style.display = 'none';
+                button.disabled = false;
+
+                if (data.success) {
+                    window.location.href = data.redirect || '/DASHBOARD-CONF';
+                    return;
+                }
+
+                alertMessage.style.display = 'block';
+                alertMessage.classList.add('alert-error');
+                alertMessage.textContent = data.message || 'Erro ao realizar login. Tente novamente.';
+            })
+            .catch(error => {
+                buttonText.style.display = 'inline';
+                loading.style.display = 'none';
+                button.disabled = false;
+
+                alertMessage.style.display = 'block';
+                alertMessage.classList.add('alert-error');
+                alertMessage.textContent = 'Erro de conexão. Tente novamente em instantes.';
+                console.error('Erro:', error);
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            loginFrame.style.opacity = '0';
+            loginFrame.style.transform = 'translateY(16px)';
+
+            setTimeout(() => {
+                loginFrame.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+                loginFrame.style.opacity = '1';
+                loginFrame.style.transform = 'translateY(0)';
+            }, 80);
+        });
+
+        passwordToggle.addEventListener('click', function () {
+            const visible = passwordInput.getAttribute('type') === 'text';
+            passwordInput.setAttribute('type', visible ? 'password' : 'text');
+            passwordToggle.innerHTML = visible
+                ? '<i class="fas fa-eye"></i>'
+                : '<i class="fas fa-eye-slash"></i>';
+        });
+    </script>
+</body>
+</html>
