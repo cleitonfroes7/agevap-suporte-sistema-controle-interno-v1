@@ -133,9 +133,11 @@ namespace versaoCsharp.Services
                 usuario.Name = nomeInformado;
             }
 
+            string? perfilSelecionado = null;
             if (dados.TryGetValue("perfil", out var perfil) && !string.IsNullOrWhiteSpace(perfil))
             {
-                usuario.Perfil = NormalizarPerfil(perfil);
+                perfilSelecionado = NormalizarPerfil(perfil);
+                usuario.Perfil = perfilSelecionado;
             }
 
             string? empresaSelecionada = null;
@@ -157,6 +159,17 @@ namespace versaoCsharp.Services
             }
 
             await _db.SaveChangesAsync();
+
+            if (perfilSelecionado != null)
+            {
+                await _db.Usuarios
+                    .Where(u => u.Id == id)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.Perfil, perfilSelecionado));
+
+                await _db.Entry(usuario).ReloadAsync();
+                if (!string.Equals(usuario.Perfil, perfilSelecionado, StringComparison.Ordinal))
+                    throw new InvalidOperationException("O banco de dados não confirmou o perfil selecionado.");
+            }
 
             if (empresaSelecionada != null)
             {
