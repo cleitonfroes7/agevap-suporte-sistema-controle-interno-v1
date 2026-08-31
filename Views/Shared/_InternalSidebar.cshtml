@@ -3,6 +3,7 @@
     var activeNav = ViewData["ActiveNav"] as string ?? "";
     var isAdmin = User?.IsInRole(PerfisAcesso.UserAdm) ?? false;
     var canOperate = isAdmin || (User?.IsInRole(PerfisAcesso.UserCi) ?? false);
+    var canViewFluxoArvore = canOperate || (User?.IsInRole(PerfisAcesso.UserPadrao) ?? false);
     var empresaClaim = (User?.FindFirst("empresa")?.Value ?? string.Empty).Trim().ToUpperInvariant();
     var email = (User?.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value ?? string.Empty).Trim();
     var empresa = empresaClaim;
@@ -49,29 +50,32 @@
         </div>
     </div>
     <nav class="sidebar__nav">
-        @if (canOperate)
+        @if (canViewFluxoArvore)
         {
             <div class="sidebar__section-label">Operação</div>
-            <a href="/TELA-LISTA-PROCESSO" class="@NavClass("processos")" title="Processos">
-                <i class="fas fa-folder-tree"></i>
-                <span>Processos</span>
-            </a>
-            <a href="/TELA-LISTA-CHECKLIST" class="@NavClass("checklists")" title="Checklists">
-                <i class="fas fa-list-check"></i>
-                <span>Checklists</span>
-            </a>
-        }
+            @if (canOperate)
+            {
+                <a href="/TELA-LISTA-PROCESSO" class="@NavClass("processos")" title="Processos">
+                    <i class="fas fa-folder-tree"></i>
+                    <span>Processos</span>
+                </a>
+                <a href="/TELA-LISTA-CHECKLIST" class="@NavClass("checklists")" title="Checklists">
+                    <i class="fas fa-list-check"></i>
+                    <span>Checklists</span>
+                </a>
+            }
 
-        <a href="/FluxoArvore" class="@NavClass("fluxo-arvore")" title="Fluxo Árvore">
-            <i class="fas fa-code-branch"></i>
-            <span>Fluxo Árvore</span>
-        </a>
-        @if (canOperate)
-        {
-            <a href="/Organograma" class="@NavClass("organograma")" title="Organograma">
-                <i class="fas fa-building-columns"></i>
-                <span>Organograma</span>
+            <a href="/FluxoArvore" class="@NavClass("fluxo-arvore")" title="Fluxo Árvore">
+                <i class="fas fa-code-branch"></i>
+                <span>Fluxo Árvore</span>
             </a>
+            @if (canOperate)
+            {
+                <a href="/Organograma" class="@NavClass("organograma")" title="Organograma">
+                    <i class="fas fa-building-columns"></i>
+                    <span>Organograma</span>
+                </a>
+            }
         }
 
         <div class="sidebar__section-label">Análise</div>

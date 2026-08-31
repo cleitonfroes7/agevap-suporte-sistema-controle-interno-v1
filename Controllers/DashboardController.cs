@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -790,6 +792,17 @@ namespace versaoCsharp.Controllers
                 return string.Empty;
             }
 
+            var chave = NormalizarChaveModalidade(texto);
+            if (chave == "ato convocatorio")
+            {
+                return "Ato Convocatório";
+            }
+
+            if (chave == "pedido de cotacao")
+            {
+                return "Pedido de Cotação";
+            }
+
             return texto.ToLowerInvariant() switch
             {
                 "ato-convocatorio" => "Ato Convocatório",
@@ -806,6 +819,17 @@ namespace versaoCsharp.Controllers
         private static List<string> ObterValoresAceitosParaModalidade(string modalidade)
         {
             var valor = NormalizarModalidadeOuOriginal(modalidade);
+            var chave = NormalizarChaveModalidade(modalidade);
+            if (chave == "ato convocatorio")
+            {
+                return ["ato-convocatorio", "ato_convocatorio", "ato convocatorio", "ato convocatório", "Ato Convocatorio", "Ato Convocatório", "ATO CONVOCATORIO", "ATO CONVOCATÓRIO"];
+            }
+
+            if (chave == "pedido de cotacao")
+            {
+                return ["pedido-cotacao", "pedido_cotacao", "pedido de cotacao", "pedido de cotação", "Pedido de Cotacao", "Pedido de Cotação", "PEDIDO DE COTACAO", "PEDIDO DE COTAÇÃO"];
+            }
+
             return valor switch
             {
                 "Ato Convocatório" => ["ato-convocatorio", "Ato Convocatório", "ato convocatório"],
@@ -814,6 +838,27 @@ namespace versaoCsharp.Controllers
                 "Inexigibilidade" => ["inexigibilidade", "Inexigibilidade"],
                 _ => [modalidade.Trim()]
             };
+        }
+
+        private static string NormalizarChaveModalidade(string valor)
+        {
+            var semAcentos = new StringBuilder();
+            foreach (var caractere in valor.Normalize(NormalizationForm.FormD))
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(caractere) != UnicodeCategory.NonSpacingMark)
+                {
+                    semAcentos.Append(caractere);
+                }
+            }
+
+            return string.Join(
+                ' ',
+                semAcentos
+                    .ToString()
+                    .Replace('-', ' ')
+                    .Replace('_', ' ')
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                .ToLowerInvariant();
         }
 
         private static int? CalcularDuracao(DateTime? inicio, DateTime? fim)

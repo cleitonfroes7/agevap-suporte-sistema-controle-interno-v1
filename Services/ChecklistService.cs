@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -1019,16 +1020,52 @@ namespace versaoCsharp.Services
                 .Select(g => new { Status = g.Key, Count = g.Count() })
                 .ToListAsync();
 
-            var porModalidade = await _db.Checklists
-                .GroupBy(c => c.Modalidade)
-                .Select(g => new { Modalidade = g.Key, Count = g.Count() })
+            var modalidades = await _db.Checklists
+                .Select(c => c.Modalidade)
                 .ToListAsync();
+
+            var porModalidade = modalidades
+                .GroupBy(NormalizarModalidade)
+                .Select(g => new { Modalidade = g.Key, Count = g.Count() })
+                .ToList();
 
             return (
                 total,
                 porStatus.ToDictionary(x => x.Status, x => x.Count),
                 porModalidade.ToDictionary(x => x.Modalidade, x => x.Count)
             );
+        }
+
+        private static string NormalizarModalidade(string? valor)
+        {
+            var texto = (valor ?? string.Empty).Trim();
+            if (string.IsNullOrWhiteSpace(texto))
+                return "Não informado";
+
+            var semAcentos = new StringBuilder();
+            foreach (var caractere in texto.Normalize(NormalizationForm.FormD))
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(caractere) != UnicodeCategory.NonSpacingMark)
+                    semAcentos.Append(caractere);
+            }
+
+            var chave = string.Join(
+                ' ',
+                semAcentos
+                    .ToString()
+                    .Replace('-', ' ')
+                    .Replace('_', ' ')
+                    .Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
+                .ToLowerInvariant();
+
+            return chave switch
+            {
+                "ato convocatorio" => "Ato Convocatório",
+                "pedido de cotacao" => "Pedido de Cotação",
+                "dispensa" => "Dispensa",
+                "inexigibilidade" => "Inexigibilidade",
+                _ => texto
+            };
         }
 
         public async Task<double> ObterTaxaConformidadeAsync(int checklistId)
