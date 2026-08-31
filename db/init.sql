@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS processo (
   data_abertura VARCHAR(20) NOT NULL,
   modalidade VARCHAR(20) NOT NULL,
   competencia VARCHAR(200) NOT NULL,
-  area VARCHAR(100) NULL,
   gestor VARCHAR(100) NULL,
+  area VARCHAR(100) NULL,
   PRIMARY KEY (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
