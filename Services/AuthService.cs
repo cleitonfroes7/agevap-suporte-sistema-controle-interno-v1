@@ -160,26 +160,27 @@ namespace versaoCsharp.Services
 
             await _db.SaveChangesAsync();
 
-            if (perfilSelecionado != null)
+            // Confirma diretamente no banco todos os campos permitidos na edição administrativa.
+            await _db.Usuarios
+                .Where(u => u.Id == id)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(u => u.Name, usuario.Name)
+                    .SetProperty(u => u.Login, usuario.Login)
+                    .SetProperty(u => u.Email, usuario.Email)
+                    .SetProperty(u => u.Perfil, usuario.Perfil)
+                    .SetProperty(u => u.Empresa, usuario.Empresa)
+                    .SetProperty(u => u.Ativo, usuario.Ativo)
+                    .SetProperty(u => u.Senha, usuario.Senha));
+
+            await _db.Entry(usuario).ReloadAsync();
+
+            if ((!string.IsNullOrWhiteSpace(nomeInformado) && !string.Equals(usuario.Name, nomeInformado, StringComparison.Ordinal)) ||
+                (!string.IsNullOrWhiteSpace(loginInformado) && !string.Equals(usuario.Login, loginInformado, StringComparison.Ordinal)) ||
+                (!string.IsNullOrWhiteSpace(emailInformado) && !string.Equals(usuario.Email, emailInformado, StringComparison.Ordinal)) ||
+                (perfilSelecionado != null && !string.Equals(usuario.Perfil, perfilSelecionado, StringComparison.Ordinal)) ||
+                (empresaSelecionada != null && !string.Equals(usuario.Empresa, empresaSelecionada, StringComparison.Ordinal)))
             {
-                await _db.Usuarios
-                    .Where(u => u.Id == id)
-                    .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.Perfil, perfilSelecionado));
-
-                await _db.Entry(usuario).ReloadAsync();
-                if (!string.Equals(usuario.Perfil, perfilSelecionado, StringComparison.Ordinal))
-                    throw new InvalidOperationException("O banco de dados não confirmou o perfil selecionado.");
-            }
-
-            if (empresaSelecionada != null)
-            {
-                await _db.Usuarios
-                    .Where(u => u.Id == id)
-                    .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.Empresa, empresaSelecionada));
-
-                await _db.Entry(usuario).ReloadAsync();
-                if (!string.Equals(usuario.Empresa, empresaSelecionada, StringComparison.Ordinal))
-                    throw new InvalidOperationException("O banco de dados não confirmou a empresa selecionada.");
+                throw new InvalidOperationException("O banco de dados não confirmou todas as alterações do usuário.");
             }
 
             return usuario;
