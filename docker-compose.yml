@@ -35,8 +35,8 @@ services:
     ports:
       - "${APP_HTTP_PORT:-5016}:5014"
     volumes:
-      - app_ci_v2_keys:/root/.aspnet/DataProtection-Keys
-      - app_ci_v2_logs:/app/Logs
+      - app_ci_v3_keys:/root/.aspnet/DataProtection-Keys
+      - app_ci_v3_logs:/app/Logs
 
 volumes:
   mysql_app_ci_data:
