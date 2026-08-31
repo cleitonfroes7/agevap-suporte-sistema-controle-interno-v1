@@ -1,13 +1,13 @@
 services:
   db:
     image: mysql:8.4
-    container_name: app_ci_v2_db
+    container_name: app_ci_v3_db
     restart: always
     environment:
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-admin}
       MYSQL_DATABASE: ${MYSQL_DATABASE:-app5p}
     ports:
-      - "3307:3306"
+      - "3308:3306"
     volumes:
       - mysql_app_ci_data:/var/lib/mysql
       - ./db/init.sql:/docker-entrypoint-initdb.d/001_init.sql:ro
@@ -23,7 +23,7 @@ services:
 
   web:
     build: .
-    container_name: app_ci_v2_web
+    container_name: app_ci_v3_web
     restart: always
     environment:
       ASPNETCORE_ENVIRONMENT: ${ASPNETCORE_ENVIRONMENT:-Production}
@@ -40,5 +40,5 @@ services:
 
 volumes:
   mysql_app_ci_data:
-  app_ci_v2_keys:
-  app_ci_v2_logs:
+  app_ci_v3_keys:
+  app_ci_v3_logs:
