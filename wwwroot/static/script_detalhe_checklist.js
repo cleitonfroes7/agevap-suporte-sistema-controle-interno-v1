@@ -87,10 +87,12 @@
     function renderChecklistDetalhe(checklist) {
         const { area, gestor, competencia } = checklist.__contexto || {};
         const totalItens = checklist.itens.length;
+        const totalElementos = checklist.elementos?.length ?? 0;
         const cntConforme = checklist.itens.filter((item) => item.analise === 'conforme').length;
         const cntNaoConforme = checklist.itens.filter((item) => item.analise === 'nao_conforme').length;
         const cntNA = checklist.itens.filter((item) => item.analise === 'nao_se_aplica').length;
-        const taxaConf = totalItens ? ((cntConforme / totalItens) * 100) : 0;
+        const totalAvaliados = cntConforme + cntNaoConforme;
+        const taxaConf = totalAvaliados ? ((cntConforme / totalAvaliados) * 100) : 0;
 
         container.innerHTML = `
             <div class="checklist-detalhe-page">
@@ -125,7 +127,7 @@
                 <section class="checklist-detalhe-section">
                     <h3>Sumário Executivo</h3>
                     <div class="checklist-detalhe-box">
-                        Este relatório apresenta a análise de conformidade do processo ${checklist.numero_processo || '-'} (${mapearModalidade(checklist.modalidade) || '-'}). Dos ${cntConforme + cntNaoConforme} itens avaliados em ${totalElementos} documentos, ${cntConforme} estão conformes e ${cntNaoConforme} não conformes, resultando em ${taxaConf.toFixed(1)}% de conformidade. Na sequência, são apresentados os resultados por documento, as não conformidades, o parecer do Controle Interno e a manifestação da Assessoria Jurídica.
+                        Este relatório apresenta a análise de conformidade do processo ${checklist.numero_processo || '-'} (${mapearModalidade(checklist.modalidade) || '-'}). Dos ${totalAvaliados} itens avaliados em ${totalElementos} documentos, ${cntConforme} estão conformes e ${cntNaoConforme} não conformes, resultando em ${taxaConf.toFixed(1)}% de conformidade. Na sequência, são apresentados os resultados por documento, as não conformidades, o parecer do Controle Interno e a manifestação da Assessoria Jurídica.
                     </div>
                 </section>
 

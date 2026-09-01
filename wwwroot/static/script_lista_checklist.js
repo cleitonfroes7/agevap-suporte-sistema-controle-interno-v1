@@ -1100,6 +1100,7 @@ async function visualizarChecklist(id) {
         // Override: aplicar layout profissional do modal (sumário, NCs, timeline)
         try {
             const totalItens = Array.isArray(checklist.itens) ? checklist.itens.length : 0;
+            const totalElementos = Array.isArray(checklist.elementos) ? checklist.elementos.length : 0;
             const cntConforme = totalItens ? checklist.itens.filter(i => i.analise === 'conforme').length : 0;
             const cntNaoConforme = totalItens ? checklist.itens.filter(i => i.analise === 'nao_conforme').length : 0;
             const cntNA = totalItens ? checklist.itens.filter(i => i.analise === 'nao_se_aplica').length : 0;
