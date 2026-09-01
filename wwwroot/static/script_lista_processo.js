@@ -1,8 +1,8 @@
 ﻿(function(){ window.__DEBUG__ = window.__DEBUG__ || false; const __origLog = console.log.bind(console); console.log = (...args)=>{ if(window.__DEBUG__) __origLog(...args); };})();
 (function () {
     const state = {
-        todos: [],
-        filtrados: [],
+        itens: [],
+        total: 0,
         paginaAtual: 1,
         porPagina: 15,
         processoEmEdicao: null,
@@ -196,10 +196,7 @@
         const areasCatalogo = state.areasOficiais.length
             ? state.areasOficiais
             : AREAS_OFICIAIS_FALLBACK;
-        const areasDisponiveis = [...new Set([
-            ...areasCatalogo,
-            ...state.todos.filter((processo) => !processo.areaAusente).map((processo) => processo.area)
-        ])].sort((a, b) => a.localeCompare(b, 'pt-BR'));
+        const areasDisponiveis = [...new Set(areasCatalogo)].sort((a, b) => a.localeCompare(b, 'pt-BR'));
             refs.filtroArea.innerHTML = '<option value="">Todas as áreas</option><option value="__SEM_AREA__">Sem área</option>';
         areasDisponiveis.forEach((area) => {
                 const option = document.createElement('option');
@@ -252,19 +249,44 @@
         hidden.value = valores.join(', ');
     }
 
-    async function carregarProcessos() {
+    async function carregarProcessos(resetPagina = false) {
         try {
+            if (resetPagina) {
+                state.paginaAtual = 1;
+            }
+
             mostrarMensagemTabela('Carregando processos...');
-            const resposta = await fetch('/api/processos', {
+            const parametros = new URLSearchParams({
+                pagina: String(state.paginaAtual),
+                porPagina: String(state.porPagina)
+            });
+            const busca = refs.filtro ? refs.filtro.value.trim() : '';
+            const area = refs.filtroArea ? refs.filtroArea.value.trim() : '';
+            if (busca) {
+                parametros.set('busca', busca);
+            }
+            if (area) {
+                parametros.set('area', area);
+            }
+
+            const resposta = await fetch(`/api/processos/paginados?${parametros.toString()}`, {
                 headers: { 'Accept': 'application/json' }
             });
             if (!resposta.ok) {
                 throw new Error('Não foi possível carregar os processos');
             }
             const data = await resposta.json();
-            state.todos = Array.isArray(data) ? data.map(normalizarProcesso) : [];
-            preencherFiltroAreas();
-            aplicarFiltros(true);
+            state.itens = Array.isArray(data.itens) ? data.itens.map(normalizarProcesso) : [];
+            state.total = Number.isFinite(data.total) ? data.total : 0;
+
+            if (!state.itens.length && state.total > 0 && state.paginaAtual > 1) {
+                state.paginaAtual -= 1;
+                await carregarProcessos();
+                return;
+            }
+
+            renderTabela();
+            renderPaginacao();
         } catch (erro) {
             console.error('Erro ao carregar processos:', erro);
             mostrarMensagemTabela('Não foi possível carregar os processos.');
@@ -307,65 +329,21 @@
     }
 
     function aplicarFiltros(reset = false) {
-        const termo = refs.filtro ? refs.filtro.value.trim().toLowerCase() : '';
-        const areaSelecionada = refs.filtroArea ? refs.filtroArea.value.trim() : '';
-        const normalizarAreaParaFiltro = (valor) => String(valor || '')
-            .normalize('NFD')
-            .replace(/[\u0300-\u036f]/g, '')
-            .toLowerCase()
-            .trim();
-        if (!termo) {
-            state.filtrados = [...state.todos];
-        } else {
-            state.filtrados = state.todos.filter((processo) => {
-                return [
-                    processo.numero,
-                    processo.descricao,
-                    processo.modalidade,
-                    processo.competenciasTexto,
-                    processo.area,
-                    processo.gestor
-                ].join(' ').toLowerCase().includes(termo);
-            });
-        }
-
-        if (areaSelecionada === '__SEM_AREA__') {
-            state.filtrados = state.filtrados.filter((processo) => processo.areaAusente);
-        } else if (areaSelecionada) {
-            const areaSelecionadaNormalizada = normalizarAreaParaFiltro(areaSelecionada);
-            state.filtrados = state.filtrados.filter((processo) =>
-                !processo.areaAusente && normalizarAreaParaFiltro(processo.area) === areaSelecionadaNormalizada
-            );
-        }
-
-        if (reset) {
-            state.paginaAtual = 1;
-        } else {
-            const totalPaginas = calcularTotalPaginas();
-            if (state.paginaAtual > totalPaginas) {
-                state.paginaAtual = totalPaginas;
-            }
-        }
-        renderTabela();
-        renderPaginacao();
+        return carregarProcessos(reset);
     }
 
     function calcularTotalPaginas() {
-        return Math.max(1, Math.ceil(state.filtrados.length / state.porPagina));
+        return Math.max(1, Math.ceil(state.total / state.porPagina));
     }
 
     function renderTabela() {
-        if (!state.filtrados.length) {
+        if (!state.itens.length) {
             mostrarMensagemTabela('Nenhum processo encontrado.');
             return;
         }
 
-        const inicio = (state.paginaAtual - 1) * state.porPagina;
-        const fim = inicio + state.porPagina;
-        const registros = state.filtrados.slice(inicio, fim);
-
         const fragment = document.createDocumentFragment();
-        registros.forEach((processo) => {
+        state.itens.forEach((processo) => {
             const tr = document.createElement('tr');
             if (processo.areaAusente) {
                 tr.classList.add('row-missing-area');
@@ -395,27 +373,7 @@
 
         refs.tabelaBody.innerHTML = '';
         refs.tabelaBody.appendChild(fragment);
-        marcarMenusUltimasLinhas(refs.tabelaBody, 5);
         atualizarInfoPaginacao();
-    }
-
-    function marcarMenusUltimasLinhas(tbody, quantidadeProtegida = 5) {
-        if (!tbody) {
-            return;
-        }
-
-        const linhas = Array.from(tbody.querySelectorAll('tr'));
-        const totalLinhas = linhas.length;
-
-        linhas.forEach((linha, index) => {
-            const menu = linha.querySelector('.action-menu');
-            if (!menu) {
-                return;
-            }
-
-            const estaNasUltimasLinhas = totalLinhas - index <= quantidadeProtegida;
-            menu.classList.toggle('action-menu--up-preferred', estaNasUltimasLinhas);
-        });
     }
 
     function mostrarMensagemTabela(mensagem) {
@@ -427,7 +385,7 @@
         if (!refs.infoPaginacao) {
             return;
         }
-        const total = totalForcado !== undefined ? totalForcado : state.filtrados.length;
+        const total = totalForcado !== undefined ? totalForcado : state.total;
         if (!total) {
             refs.infoPaginacao.textContent = '';
             return;
@@ -476,8 +434,7 @@
             return;
         }
         state.paginaAtual = paginaAjustada;
-        renderTabela();
-        renderPaginacao();
+        carregarProcessos();
     }
 
     function criarMenuAcoes(items) {
@@ -546,11 +503,6 @@
 
     function ajustarPosicionamentoMenu(menu, dropdown) {
         menu.classList.remove('action-menu--up');
-
-        if (menu.classList.contains('action-menu--up-preferred')) {
-            menu.classList.add('action-menu--up');
-            return;
-        }
 
         const menuRect = menu.getBoundingClientRect();
         const dropdownHeight = Math.max(dropdown.scrollHeight || 0, 180);

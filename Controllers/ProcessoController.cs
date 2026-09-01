@@ -103,6 +103,76 @@ namespace versaoCsharp.Controllers
             }
         }
 
+        [HttpGet("/api/processos/paginados")]
+        public async Task<IActionResult> ListarProcessosPaginados(
+            [FromQuery] int pagina = 1,
+            [FromQuery] int porPagina = 15,
+            [FromQuery] string? busca = null,
+            [FromQuery] string? area = null)
+        {
+            Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+            Response.Headers["Pragma"] = "no-cache";
+            Response.Headers["Expires"] = "0";
+
+            try
+            {
+                pagina = Math.Max(1, pagina);
+                porPagina = Math.Clamp(porPagina, 1, 100);
+
+                IQueryable<Processo> query = _db.Processos.AsNoTracking();
+
+                if (!string.IsNullOrWhiteSpace(busca))
+                {
+                    var termo = busca.Trim();
+                    query = query.Where(p =>
+                        p.Numero.Contains(termo) ||
+                        p.Objeto.Contains(termo) ||
+                        p.Modalidade.Contains(termo) ||
+                        p.Competencia.Contains(termo) ||
+                        (p.Area != null && p.Area.Contains(termo)) ||
+                        (p.Gestor != null && p.Gestor.Contains(termo)));
+                }
+
+                if (string.Equals(area, "__SEM_AREA__", StringComparison.Ordinal))
+                {
+                    query = query.Where(p => p.Area == null || p.Area == string.Empty);
+                }
+                else if (!string.IsNullOrWhiteSpace(area))
+                {
+                    var areasAceitas = AreaOrganogramaCatalog.ObterValoresAceitosParaFiltro(area.Trim());
+                    query = query.Where(p => p.Area != null && areasAceitas.Contains(p.Area));
+                }
+
+                var total = await query.CountAsync();
+                var itens = await query
+                    .OrderByDescending(p => p.DataAbertura)
+                    .ThenByDescending(p => p.Id)
+                    .Skip((pagina - 1) * porPagina)
+                    .Take(porPagina)
+                    .Select(p => new
+                    {
+                        id = p.Id,
+                        numero_processo = p.Numero,
+                        objeto = p.Objeto,
+                        modalidade = p.Modalidade,
+                        data_abertura = p.DataAbertura,
+                        competencia = p.Competencia,
+                        area = AreaOrganogramaCatalog.NormalizarAreaOuOriginal(p.Area),
+                        gestor = p.Gestor,
+                        status = "Em andamento"
+                    })
+                    .ToListAsync();
+
+                return Json(new { itens, total, pagina, porPagina });
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Erro ao listar processos paginados");
+                Response.StatusCode = 500;
+                return Json(new { error = "Erro interno" });
+            }
+        }
+
         [HttpGet("/api/processos/{id:int}")]
         public async Task<IActionResult> ObterProcesso(int id)
         {
