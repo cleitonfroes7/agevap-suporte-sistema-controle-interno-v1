@@ -72,8 +72,10 @@ namespace versaoCsharp.Services
 
         public async Task<Processo> AtualizarProcessoAsync(int id, Dictionary<string, string?> dados)
         {
-            var processo = await _db.Processos.FindAsync(id)
-                           ?? throw new InvalidOperationException("Processo não encontrado");
+            var processo = await _db.Processos
+                .AsTracking()
+                .FirstOrDefaultAsync(p => p.Id == id)
+                ?? throw new InvalidOperationException("Processo não encontrado");
 
             if (dados.TryGetValue("numero", out var novoNumero) && !string.IsNullOrWhiteSpace(novoNumero))
             {

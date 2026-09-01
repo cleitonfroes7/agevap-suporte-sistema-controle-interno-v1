@@ -14,6 +14,8 @@
     const MAPA_MODALIDADES = {
         'pedido-cotacao': 'Pedido de cotação',
         'ato-convocatorio': 'Ato convocatório',
+        'agegoias-consulta': 'Consulta de Preços',
+        'agegoias-selecao': 'Seleção de Propostas',
         'dispensa': 'Dispensa',
         'inexigibilidade': 'Inexigibilidade'
     };
@@ -104,6 +106,13 @@
         } catch {
             return null;
         }
+    }
+
+    function obterTokenCsrf() {
+        const cookie = document.cookie
+            .split('; ')
+            .find((item) => item.startsWith('XSRF-TOKEN='));
+        return cookie ? decodeURIComponent(cookie.split('=').slice(1).join('=')) : '';
     }
 
     document.addEventListener('DOMContentLoaded', init);
@@ -790,9 +799,16 @@
         }
 
         try {
+            const headers = { 'Content-Type': 'application/json' };
+            const tokenCsrf = obterTokenCsrf();
+            if (tokenCsrf) {
+                headers['X-CSRF-TOKEN'] = tokenCsrf;
+            }
+
             const resposta = await fetch(`/api/editar-processo/${id}`, {
                 method: 'PUT',
-                headers: { 'Content-Type': 'application/json' },
+                headers,
+                credentials: 'same-origin',
                 body: JSON.stringify(payload)
             });
             const dataResposta = await lerJsonSeguro(resposta);
