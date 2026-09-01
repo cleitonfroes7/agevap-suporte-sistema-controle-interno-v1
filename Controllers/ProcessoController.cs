@@ -283,6 +283,12 @@ namespace versaoCsharp.Controllers
                 await _processoService.DeletarProcessoAsync(id);
                 return Json(new { success = true, message = "Processo deletado com sucesso" });
             }
+            catch (InvalidOperationException e)
+            {
+                _logger.LogWarning(e, "Não foi possível deletar processo {ProcessoId}", id);
+                Response.StatusCode = 400;
+                return Json(new { success = false, message = e.Message });
+            }
             catch (Exception e)
             {
                 _logger.LogError(e, "Erro ao deletar processo {ProcessoId}", id);
@@ -407,4 +413,3 @@ namespace versaoCsharp.Controllers
         }
     }
 }
-

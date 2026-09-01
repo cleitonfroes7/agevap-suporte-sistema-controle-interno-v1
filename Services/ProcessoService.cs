@@ -116,8 +116,16 @@ namespace versaoCsharp.Services
 
         public async Task DeletarProcessoAsync(int id)
         {
-            var processo = await _db.Processos.FindAsync(id)
+            var processo = await _db.Processos
+                .AsTracking()
+                .Include(p => p.Checklists)
+                .FirstOrDefaultAsync(p => p.Id == id)
                            ?? throw new InvalidOperationException("Processo não encontrado");
+            if (processo.Checklists.Count > 0)
+            {
+                throw new InvalidOperationException("Não é possível excluir este processo porque ele possui checklist vinculado.");
+            }
+
             _db.Processos.Remove(processo);
             await _db.SaveChangesAsync();
         }
