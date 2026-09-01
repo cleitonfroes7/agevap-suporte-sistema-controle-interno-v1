@@ -287,7 +287,7 @@ namespace versaoCsharp.Services
                 </div>
                 <div class="section-title">Sumário Executivo</div>
                 <div class="exec">
-                  Este relatório apresenta uma análise qualitativa de conformidade do processo {{Html(request.NumeroProcesso)}} ({{Html(modalidade)}}), com {{itensImpressao.Count}} itens avaliados a partir de uma relação de {{request.Elementos.Count}} documentos presentes no referido processo. Do total, {{conformes}} itens estão conformes, {{naoConformes}} não conformes, {{naoSeAplica}} não se aplicam e {{itensPendentes.Count}} permanecem sem resposta, com uma taxa de {{taxa}}% de conformidade sobre os itens efetivamente avaliados. As seções seguintes detalham os registros de não conformidade, o status de conformidade por documento e o parecer do Controle Interno.
+                  Este relatório apresenta a análise de conformidade do processo {{Html(request.NumeroProcesso)}} ({{Html(modalidade)}}). Dos {{totalConsiderados}} itens avaliados em {{request.Elementos.Count}} documentos, {{conformes}} estão conformes e {{naoConformes}} não conformes, resultando em {{taxa}}% de conformidade. Na sequência, são apresentados os resultados por documento, as não conformidades, o parecer do Controle Interno e a manifestação da Assessoria Jurídica.
                 </div>
                 <div class="section-title">Tratativa das não conformidades</div>
                 {{tratativaHtml}}
@@ -298,6 +298,8 @@ namespace versaoCsharp.Services
                 <div class="print-block-keep">
                   <div class="section-title">Parecer Controle Interno</div>
                   <div class="exec">{{Html(parecerTexto)}}</div>
+                  <div class="section-title">Manifestação da Assessoria Jurídica</div>
+                  <div class="exec">A Assessoria Jurídica atesta que procedeu à análise do presente processo administrativo. Registra-se que, na ausência de despacho ou parecer jurídico formalizado nos autos, considera-se que não foram identificados óbices jurídicos que impeçam o regular prosseguimento do processo, podendo este seguir para as demais instâncias competentes.</div>
                   <div class="footer">
                     <div><strong>{{Html(responsavelAnalise)}}</strong><br>Controle Interno</div>
                     <div>Data/Hora: {{DateTime.Now.ToString("dd/MM/yyyy HH:mm", new CultureInfo("pt-BR"))}}</div>

@@ -1,0 +1,21 @@
+services:
+  web:
+    build: .
+    container_name: app_ci_v3_web
+    restart: always
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: "Server=${DB_HOST:?Defina DB_HOST no Dockploy};Port=${DB_PORT:-3306};Database=${DB_NAME:-app5p};User Id=${DB_USER:?Defina DB_USER no Dockploy};Password=${DB_PASSWORD:?Defina DB_PASSWORD no Dockploy};"
+      DataProtection__KeysPath: ${DATA_PROTECTION_KEYS_PATH:-/root/.aspnet/DataProtection-Keys}
+      DatabaseInitialization__ApplyMigrations: "false"
+      DatabaseInitialization__EnsureCreatedIfNoTables: "false"
+      DatabaseInitialization__RunCompatibilityPatches: "true"
+    ports:
+      - "${APP_HTTP_PORT:-5015}:5014"
+    volumes:
+      - app_ci_v3_keys:/root/.aspnet/DataProtection-Keys
+      - app_ci_v3_logs:/app/Logs
+
+volumes:
+  app_ci_v3_keys:
+  app_ci_v3_logs:

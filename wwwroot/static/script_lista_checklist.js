@@ -1185,7 +1185,7 @@ async function visualizarChecklist(id) {
                 <div class="section">
                   <h3>Sumário Executivo</h3>
                   <div class="exec-summary">
-                    Este relatório consolida a verificação do processo ${checklist.numero_processo || '-'} (${mapearModalidade(checklist.modalidade) || '-'}) criado em ${formatarData(checklist.data_criacao) || '-'}. Foram avaliados ${totalItens} itens, com ${cntConforme} conformes, ${cntNaoConforme} não conformes e ${cntNA} não aplicáveis. A taxa de conformidade estimada é de ${taxaConf.toFixed(1)}%.
+                    Este relatório apresenta a análise de conformidade do processo ${checklist.numero_processo || '-'} (${mapearModalidade(checklist.modalidade) || '-'}). Dos ${cntConforme + cntNaoConforme} itens avaliados em ${totalElementos} documentos, ${cntConforme} estão conformes e ${cntNaoConforme} não conformes, resultando em ${taxaConf.toFixed(1)}% de conformidade. Na sequência, são apresentados os resultados por documento, as não conformidades, o parecer do Controle Interno e a manifestação da Assessoria Jurídica.
                   </div>
                 </div>
                 <div class="section">
@@ -1456,7 +1456,7 @@ async function imprimirChecklist() {
                 <div class="k"><div class="kv">${taxaR}%</div><div class="kl">Taxa de conformidade</div></div>
               </div>
               <h3>Sumário Executivo</h3>
-              <div class="exec">Este relatório descreve a análise do processo ${checklist.numero_processo || '-'} (${mapearModalidade(checklist.modalidade) || '-'}) com ${totalItensR} itens avaliados de ${totalElementosR} documentos. Observou-se ${confR} itens conformes (${taxaR}%), ${naoR} não conformes e ${naR} não aplicáveis. As seções seguintes detalham não conformidades, evidências por elemento e o parecer do controle interno.</div>
+              <div class="exec">Este relatório apresenta a análise de conformidade do processo ${checklist.numero_processo || '-'} (${mapearModalidade(checklist.modalidade) || '-'}). Dos ${confR + naoR} itens avaliados em ${totalElementosR} documentos, ${confR} estão conformes e ${naoR} não conformes, resultando em ${taxaR}% de conformidade. Na sequência, são apresentados os resultados por documento, as não conformidades, o parecer do Controle Interno e a manifestação da Assessoria Jurídica.</div>
               <h3>Tratativa das Não Conformidades</h3>
               ${tratativaHtml}
               <h3>Registro de Não Conformidades</h3>
@@ -1465,6 +1465,8 @@ async function imprimirChecklist() {
               ${elementosHTML}
               <h3>Parecer Controle Interno</h3>
               <div class="exec">${parecerTexto}</div>
+              <h3>Manifestação da Assessoria Jurídica</h3>
+              <div class="exec">A Assessoria Jurídica atesta que procedeu à análise do presente processo administrativo. Registra-se que, na ausência de despacho ou parecer jurídico formalizado nos autos, considera-se que não foram identificados óbices jurídicos que impeçam o regular prosseguimento do processo, podendo este seguir para as demais instâncias competentes.</div>
               <div class="ft"><div class="sign"><div class="line"></div><div>${nomeUsuario}</div><div>Controle Interno</div></div><div>Emitido em ${new Date().toLocaleDateString('pt-BR')} ${new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}</div></div>
             </body></html>`;
             doc.write(html);
@@ -2240,10 +2242,7 @@ function gerarHTMLImpressaoAGEVAP(ctx) {
 
         <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M7 3h7l5 5v13a1 1 0 0 1-1 1H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2Z"/><path d="M14 3v6h6"/><path d="M9 13h6"/><path d="M9 17h6"/><path d="M9 9h1"/></svg><span>Sumário Executivo</span></div>
         <div class="exec">
-        Este relatório apresenta uma análise qualitativa de conformidade do processo ${checklist.numero_processo || '-'}
-        (${mapearModalidade(checklist.modalidade) || '-'}), com ${total} itens avaliados a partir de uma
-        relação de ${totalElementos} documentos presentes no referido processo. Do total, ${conf} itens estão
-        conformes, ${nao} não conformes, ${na} não se aplicam e ${itensPendentes.length} permanecem sem resposta, com uma taxa de ${taxa}% de conformidade sobre os itens efetivamente avaliados. As seções seguintes detalham os registros de não conformidade, o Status de conformidade por Documento e o Parecer do Controle Interno.
+        Este relatório apresenta a análise de conformidade do processo ${checklist.numero_processo || '-'} (${mapearModalidade(checklist.modalidade) || '-'}). Dos ${conf + nao} itens avaliados em ${totalElementos} documentos, ${conf} estão conformes e ${nao} não conformes, resultando em ${taxa}% de conformidade. Na sequência, são apresentados os resultados por documento, as não conformidades, o parecer do Controle Interno e a manifestação da Assessoria Jurídica.
         </div>
 
         <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg><span>Tratativa das não conformidades</span></div>
@@ -2258,6 +2257,8 @@ function gerarHTMLImpressaoAGEVAP(ctx) {
         <div class="print-block-keep">
           <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 12l2 2 4-4"/><path d="M12 3l7 4v5c0 5-3.5 8-7 9-3.5-1-7-4-7-9V7l7-4Z"/></svg><span>Parecer Controle Interno</span></div>
           <div class="exec">${parecerTexto}</div>
+          <div class="section-title"><svg class="section-title__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 3 4 7v5c0 5 3.5 8 8 9 4.5-1 8-4 8-9V7l-8-4Z"/><path d="M9 12l2 2 4-4"/></svg><span>Manifestação da Assessoria Jurídica</span></div>
+          <div class="exec">A Assessoria Jurídica atesta que procedeu à análise do presente processo administrativo. Registra-se que, na ausência de despacho ou parecer jurídico formalizado nos autos, considera-se que não foram identificados óbices jurídicos que impeçam o regular prosseguimento do processo, podendo este seguir para as demais instâncias competentes.</div>
 
           <div class="footer">
             <div><strong>${nomeUsuario || 'Responsavel'}</strong><br/>Controle Interno</div>
