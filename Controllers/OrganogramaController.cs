@@ -7,7 +7,7 @@ using versaoCsharp.Models;
 
 namespace versaoCsharp.Controllers
 {
-    [Authorize(Roles = PerfisAcesso.UserAdm + "," + PerfisAcesso.UserCi)]
+    [Authorize(Roles = PerfisAcesso.UserAdm)]
     public class OrganogramaController : Controller
     {
         private readonly AppDbContext _db;

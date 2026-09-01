@@ -419,8 +419,7 @@
     z-index: 80;
 }
 
-.action-menu--up .action-menu__dropdown,
-.action-menu--up-preferred .action-menu__dropdown {
+.action-menu--up .action-menu__dropdown {
     top: auto;
     bottom: calc(100% + 10px);
     transform: translateY(-8px);
