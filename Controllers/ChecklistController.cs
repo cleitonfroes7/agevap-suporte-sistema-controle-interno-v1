@@ -78,7 +78,7 @@ namespace versaoCsharp.Controllers
         }
 
         [HttpGet("/api/checklists")]
-        public async Task<IActionResult> ListarChecklists([FromQuery] int? page, [FromQuery] int? per_page)
+        public async Task<IActionResult> ListarChecklists([FromQuery] int? page, [FromQuery] int? per_page, [FromQuery] string? busca)
         {
             try
             {
@@ -95,7 +95,20 @@ namespace versaoCsharp.Controllers
                 if (pageSize > maxPageSize)
                     pageSize = maxPageSize;
 
-                var query = _db.Checklists
+                IQueryable<Checklist> checklistsQuery = _db.Checklists;
+
+                if (!string.IsNullOrWhiteSpace(busca))
+                {
+                    var termo = busca.Trim();
+                    checklistsQuery = checklistsQuery.Where(c =>
+                        (c.Processo != null && c.Processo.Numero.Contains(termo)) ||
+                        c.Tipo.Contains(termo) ||
+                        c.Modalidade.Contains(termo) ||
+                        c.Competencia.Contains(termo));
+                }
+
+                var query = checklistsQuery
+                    .AsNoTracking()
                     .Select(c => new
                     {
                         c.Id,

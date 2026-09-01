@@ -2,8 +2,8 @@
 let paginaAtual = 1;
 let itensPorPagina = 15;
 let dadosChecklists = [];
-let dadosFiltrados = [];
 let totalPaginas = 0;
+let totalChecklists = 0;
 
 // Mapeamento de modalidades para rótulos legíveis
 const MAPA_MODALIDADES = {
@@ -222,14 +222,23 @@ function carregarResumoChecklist() {
 }
 
 // Função para carregar os checklists
-async function carregarChecklists() {
+async function carregarChecklists(resetPagina = false) {
     console.log('=== FUNÇÃO CARREGAR CHECKLISTS CHAMADA ===');
     try {
+        if (resetPagina) {
+            paginaAtual = 1;
+        }
+
         console.log('Iniciando carregamento dos checklists...');
-        
-        // Adicionar timestamp para evitar cache
-        const timestamp = new Date().getTime();
-        const url = `/api/checklists?t=${timestamp}`;
+        const parametros = new URLSearchParams({
+            page: String(paginaAtual),
+            per_page: String(itensPorPagina)
+        });
+        const busca = document.getElementById('filtroPesquisa')?.value.trim() || '';
+        if (busca) {
+            parametros.set('busca', busca);
+        }
+        const url = `/api/checklists?${parametros.toString()}`;
         
         const response = await fetch(url, {
             method: 'GET',
@@ -249,7 +258,10 @@ async function carregarChecklists() {
             throw new Error(`Erro ao carregar checklists: ${response.status} - ${errorText}`);
         }
         
-        dadosChecklists = await response.json();
+        const data = await response.json();
+        dadosChecklists = Array.isArray(data.items) ? data.items : [];
+        totalChecklists = Number.isFinite(data.meta?.total) ? data.meta.total : 0;
+        totalPaginas = Math.max(1, Math.ceil(totalChecklists / itensPorPagina));
         console.log('Dados recebidos:', dadosChecklists);
         
         // Log detalhado dos primeiros 5 checklists
@@ -264,13 +276,12 @@ async function carregarChecklists() {
             });
         });
         
-        if (!Array.isArray(dadosChecklists)) {
-            console.error('Dados recebidos não são um array:', dadosChecklists);
-            throw new Error('Formato de dados inválido');
+        if (!dadosChecklists.length && totalChecklists > 0 && paginaAtual > 1) {
+            paginaAtual--;
+            await carregarChecklists();
+            return;
         }
-        
-        dadosFiltrados = [...dadosChecklists];
-        totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
+
         atualizarTabela();
         atualizarPaginacao();
     } catch (error) {
@@ -290,12 +301,10 @@ function atualizarTabela() {
     
     tbody.innerHTML = '';
 
-    const inicio = (paginaAtual - 1) * itensPorPagina;
-    const fim = inicio + itensPorPagina;
-    const dadosPagina = dadosFiltrados.slice(inicio, fim);
+    const dadosPagina = dadosChecklists;
 
     console.log('Dados da página:', dadosPagina);
-    console.log('Início:', inicio, 'Fim:', fim, 'Página atual:', paginaAtual);
+    console.log('Página atual:', paginaAtual);
 
     if (dadosPagina.length === 0) {
         const tr = document.createElement('tr');
@@ -381,8 +390,6 @@ function atualizarTabela() {
         console.log(`Linha ${index + 1} adicionada com botões`);
     });
 
-    marcarMenusUltimasLinhas(tbody, 5);
-    
     // Verificar se os botões foram criados
     setTimeout(() => {
         const botoes = document.querySelectorAll('.btn-acao');
@@ -391,25 +398,6 @@ function atualizarTabela() {
             console.log(`Botão ${index + 1}:`, botao.className, botao.innerHTML);
         });
     }, 100);
-}
-
-function marcarMenusUltimasLinhas(tbody, quantidadeProtegida = 5) {
-    if (!tbody) {
-        return;
-    }
-
-    const linhas = Array.from(tbody.querySelectorAll('tr'));
-    const totalLinhas = linhas.length;
-
-    linhas.forEach((linha, index) => {
-        const menu = linha.querySelector('.action-menu');
-        if (!menu) {
-            return;
-        }
-
-        const estaNasUltimasLinhas = totalLinhas - index <= quantidadeProtegida;
-        menu.classList.toggle('action-menu--up-preferred', estaNasUltimasLinhas);
-    });
 }
 
 function criarMenuAcoes(items) {
@@ -433,8 +421,7 @@ function criarMenuAcoes(items) {
         actionBtn.innerHTML = `<i class="fas ${item.icon}"></i><span>${item.label}</span>`;
         actionBtn.addEventListener('click', (event) => {
             event.stopPropagation();
-            menu.classList.remove('is-open');
-            trigger.setAttribute('aria-expanded', 'false');
+            fecharMenuAcoes(menu);
             item.onClick();
         });
         dropdown.appendChild(actionBtn);
@@ -450,27 +437,21 @@ function criarMenuAcoes(items) {
         event.stopPropagation();
         document.querySelectorAll('.action-menu.is-open').forEach((openMenu) => {
             if (openMenu !== menu) {
-                openMenu.classList.remove('is-open');
-                openMenu.classList.remove('action-menu--up');
-                const openTrigger = openMenu.querySelector('.action-menu__trigger');
-                if (openTrigger) {
-                    openTrigger.setAttribute('aria-expanded', 'false');
-                }
+                fecharMenuAcoes(openMenu);
             }
         });
 
         const vaiAbrir = !menu.classList.contains('is-open');
         if (vaiAbrir) {
-            ajustarPosicionamentoMenu(menu, dropdown);
+            abrirMenuAcoes(menu, trigger, dropdown);
         } else {
-            menu.classList.remove('action-menu--up');
+            fecharMenuAcoes(menu);
         }
-
-        const open = menu.classList.toggle('is-open');
-        trigger.setAttribute('aria-expanded', open ? 'true' : 'false');
     });
 
     menu.append(trigger, dropdown);
+    menu._dropdown = dropdown;
+    dropdown.addEventListener('click', (event) => event.stopPropagation());
     return menu;
 }
 
@@ -478,22 +459,46 @@ function abrirDetalhesChecklist(id) {
     window.location.href = `/detalhes-checklist/${id}`;
 }
 
-function ajustarPosicionamentoMenu(menu, dropdown) {
-    menu.classList.remove('action-menu--up');
+function abrirMenuAcoes(menu, trigger, dropdown) {
+    document.body.appendChild(dropdown);
+    dropdown.classList.add('action-menu__dropdown--portal');
+    dropdown.style.visibility = 'hidden';
+    dropdown.style.display = 'block';
 
-    if (menu.classList.contains('action-menu--up-preferred')) {
-        menu.classList.add('action-menu--up');
+    const triggerRect = trigger.getBoundingClientRect();
+    const dropdownWidth = dropdown.offsetWidth;
+    const dropdownHeight = dropdown.offsetHeight;
+    const margem = 12;
+    const espacoAbaixo = window.innerHeight - triggerRect.bottom;
+    const abreAbaixo = espacoAbaixo >= dropdownHeight + margem || triggerRect.top < dropdownHeight + margem;
+    const left = Math.max(margem, Math.min(triggerRect.right - dropdownWidth, window.innerWidth - dropdownWidth - margem));
+    const top = abreAbaixo
+        ? triggerRect.bottom + 10
+        : Math.max(margem, triggerRect.top - dropdownHeight - 10);
+
+    dropdown.style.left = `${left}px`;
+    dropdown.style.top = `${top}px`;
+    dropdown.style.display = '';
+    dropdown.style.visibility = '';
+    dropdown.classList.add('is-open');
+    menu.classList.add('is-open');
+    trigger.setAttribute('aria-expanded', 'true');
+}
+
+function fecharMenuAcoes(menu) {
+    const dropdown = menu._dropdown;
+    const trigger = menu.querySelector('.action-menu__trigger');
+
+    menu.classList.remove('is-open');
+    trigger?.setAttribute('aria-expanded', 'false');
+
+    if (!dropdown) {
         return;
     }
 
-    const menuRect = menu.getBoundingClientRect();
-    const dropdownHeight = Math.max(dropdown.scrollHeight || 0, 180);
-    const espacoAbaixo = window.innerHeight - menuRect.bottom;
-    const espacoAcima = menuRect.top;
-
-    if (espacoAbaixo < dropdownHeight + 24 && espacoAcima > espacoAbaixo) {
-        menu.classList.add('action-menu--up');
-    }
+    dropdown.classList.remove('is-open', 'action-menu__dropdown--portal');
+    dropdown.removeAttribute('style');
+    menu.appendChild(dropdown);
 }
 
 // Função para atualizar a paginação
@@ -518,8 +523,7 @@ function atualizarPaginacao() {
         button.textContent = i;
         button.onclick = () => {
             paginaAtual = i;
-            atualizarTabela();
-            atualizarPaginacao();
+            carregarChecklists();
         };
         numerosPagina.appendChild(button);
     }
@@ -527,6 +531,13 @@ function atualizarPaginacao() {
     // Atualizar estado dos botões anterior/próximo
     document.getElementById('btnAnterior').disabled = paginaAtual === 1;
     document.getElementById('btnProximo').disabled = paginaAtual === totalPaginas;
+
+    const infoPaginacao = document.getElementById('infoPaginacao');
+    if (infoPaginacao) {
+        const inicio = totalChecklists ? (paginaAtual - 1) * itensPorPagina + 1 : 0;
+        const fim = Math.min(paginaAtual * itensPorPagina, totalChecklists);
+        infoPaginacao.textContent = totalChecklists ? `Exibindo ${inicio}-${fim} de ${totalChecklists}` : '';
+    }
 }
 
 // Função para atualizar os botões de paginação (mantida para compatibilidade)
@@ -548,25 +559,12 @@ function mudarPagina(direcao) {
         paginaAtual = totalPaginas;
     }
 
-    atualizarTabela();
-    atualizarPaginacao();
+    carregarChecklists();
 }
 
 // Função para aplicar filtros
 function aplicarFiltros() {
-    const filtro = document.getElementById('filtroPesquisa').value.toLowerCase();
-    
-    dadosFiltrados = dadosChecklists.filter(checklist => 
-        (checklist.numero_processo || '').toLowerCase().includes(filtro) ||
-        (checklist.tipo || '').toLowerCase().includes(filtro) ||
-        (checklist.modalidade || '').toLowerCase().includes(filtro) ||
-        (Array.isArray(checklist.competencias) ? checklist.competencias.join(', ') : checklist.competencias || '').toLowerCase().includes(filtro)
-    );
-
-    paginaAtual = 1;
-    totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
-    atualizarTabela();
-    atualizarPaginacao();
+    carregarChecklists(true);
 }
 
 // Função para formatar data
@@ -2277,16 +2275,14 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('btnAnterior').addEventListener('click', () => {
         if (paginaAtual > 1) {
             paginaAtual--;
-            atualizarTabela();
-            atualizarPaginacao();
+            carregarChecklists();
         }
     });
 
     document.getElementById('btnProximo').addEventListener('click', () => {
         if (paginaAtual < totalPaginas) {
             paginaAtual++;
-            atualizarTabela();
-            atualizarPaginacao();
+            carregarChecklists();
         }
     });
 
@@ -2298,9 +2294,7 @@ document.addEventListener('DOMContentLoaded', function() {
         selectItensPorPagina.addEventListener('change', (e) => {
             itensPorPagina = 15;
             paginaAtual = 1;
-            totalPaginas = Math.ceil(dadosFiltrados.length / itensPorPagina);
-            atualizarTabela();
-            atualizarPaginacao();
+            carregarChecklists(true);
         });
     }
 }); 
@@ -2327,10 +2321,14 @@ document.head.appendChild(styleBtnAdd);
 
 document.addEventListener('click', () => {
     document.querySelectorAll('.action-menu.is-open').forEach((menu) => {
-        menu.classList.remove('is-open');
-        const trigger = menu.querySelector('.action-menu__trigger');
-        if (trigger) {
-            trigger.setAttribute('aria-expanded', 'false');
-        }
+        fecharMenuAcoes(menu);
     });
 });
+
+window.addEventListener('resize', () => {
+    document.querySelectorAll('.action-menu.is-open').forEach((menu) => fecharMenuAcoes(menu));
+});
+
+window.addEventListener('scroll', () => {
+    document.querySelectorAll('.action-menu.is-open').forEach((menu) => fecharMenuAcoes(menu));
+}, true);
