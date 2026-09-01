@@ -255,7 +255,6 @@
                 state.paginaAtual = 1;
             }
 
-            mostrarMensagemTabela('Carregando processos...');
             const parametros = new URLSearchParams({
                 pagina: String(state.paginaAtual),
                 porPagina: String(state.porPagina)
