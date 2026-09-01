@@ -55,8 +55,19 @@ namespace versaoCsharp.Controllers
                     .Where(v => !string.IsNullOrWhiteSpace(v))
                     .ToListAsync();
 
+                var modalidadesPadrao = new[]
+                {
+                    "Ato Convocatório",
+                    "Pedido de Cotação",
+                    "Dispensa",
+                    "Inexigibilidade",
+                    "Consulta de Preços",
+                    "Seleção de Propostas"
+                };
+
                 var modalidades = modalidadesRaw
                     .Select(NormalizarModalidadeOuOriginal)
+                    .Concat(modalidadesPadrao)
                     .Where(v => !string.IsNullOrWhiteSpace(v))
                     .Distinct()
                     .OrderBy(v => v)
@@ -803,6 +814,16 @@ namespace versaoCsharp.Controllers
                 return "Pedido de Cotação";
             }
 
+            if (chave == "consulta de precos")
+            {
+                return "Consulta de Preços";
+            }
+
+            if (chave == "selecao de propostas")
+            {
+                return "Seleção de Propostas";
+            }
+
             return texto.ToLowerInvariant() switch
             {
                 "ato-convocatorio" => "Ato Convocatório",
@@ -810,6 +831,12 @@ namespace versaoCsharp.Controllers
                 "pedido de cotação" => "Pedido de Cotação",
                 "pedido de cotacao" => "Pedido de Cotação",
                 "pedido-cotacao" => "Pedido de Cotação",
+                "agegoias-consulta" => "Consulta de Preços",
+                "consulta de preços" => "Consulta de Preços",
+                "consulta de precos" => "Consulta de Preços",
+                "agegoias-selecao" => "Seleção de Propostas",
+                "seleção de propostas" => "Seleção de Propostas",
+                "selecao de propostas" => "Seleção de Propostas",
                 "dispensa" => "Dispensa",
                 "inexigibilidade" => "Inexigibilidade",
                 _ => texto
@@ -830,10 +857,22 @@ namespace versaoCsharp.Controllers
                 return ["pedido-cotacao", "pedido_cotacao", "pedido de cotacao", "pedido de cotação", "Pedido de Cotacao", "Pedido de Cotação", "PEDIDO DE COTACAO", "PEDIDO DE COTAÇÃO"];
             }
 
+            if (chave == "consulta de precos")
+            {
+                return ["agegoias-consulta", "consulta de precos", "consulta de preços", "Consulta de Preços", "Consulta de Precos"];
+            }
+
+            if (chave == "selecao de propostas")
+            {
+                return ["agegoias-selecao", "selecao de propostas", "seleção de propostas", "Seleção de Propostas", "Selecao de Propostas"];
+            }
+
             return valor switch
             {
                 "Ato Convocatório" => ["ato-convocatorio", "Ato Convocatório", "ato convocatório"],
                 "Pedido de Cotação" => ["pedido-cotacao", "Pedido de Cotação", "pedido de cotação", "pedido de cotacao"],
+                "Consulta de Preços" => ["agegoias-consulta", "Consulta de Preços", "consulta de preços", "consulta de precos"],
+                "Seleção de Propostas" => ["agegoias-selecao", "Seleção de Propostas", "seleção de propostas", "selecao de propostas"],
                 "Dispensa" => ["dispensa", "Dispensa"],
                 "Inexigibilidade" => ["inexigibilidade", "Inexigibilidade"],
                 _ => [modalidade.Trim()]
