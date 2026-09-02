@@ -15,7 +15,7 @@ namespace versaoCsharp.Controllers
         }
 
         [HttpGet("/TELA-LISTA-PROCESSO")]
-        [Authorize(Roles = PerfisAcesso.UserAdm)]
+        [Authorize(Roles = PerfisAcesso.UserAdm + "," + PerfisAcesso.UserCi)]
         public IActionResult ListaProcesso()
         {
             return View("TELA-LISTA-PROCESSO");
