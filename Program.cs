@@ -438,26 +438,14 @@ LIMIT 1;");
 
             var checklists = db.Checklists
                 .AsTracking()
-                .Include(c => c.Elementos)
                 .Include(c => c.Itens)
-                .Include(c => c.CronoAnalises)
-                .AsSplitQuery()
                 .ToList();
 
             var saneados = 0;
             foreach (var checklist in checklists)
             {
                 var itens = checklist.Itens.ToList();
-                var elementos = checklist.Elementos.ToList();
-                var cronos = checklist.CronoAnalises.ToList();
                 var possuiNaoConformidade = itens.Any(i => string.Equals(i.Analise, "nao_conforme", StringComparison.OrdinalIgnoreCase));
-                var completo = ChecklistCompletoParaStatus(elementos, itens, cronos);
-
-                if (string.Equals((checklist.Status ?? string.Empty).Trim(), "concluido", StringComparison.OrdinalIgnoreCase) && !completo)
-                {
-                    checklist.Status = "em_preenchimento";
-                    saneados++;
-                }
 
                 if (string.IsNullOrWhiteSpace(checklist.CriadoPorNome))
                 {
@@ -642,59 +630,6 @@ static string? ObterTexto(AppDbContext db, string sql)
     cmd.CommandText = sql;
     var result = cmd.ExecuteScalar();
     return result is null || result == DBNull.Value ? null : result.ToString();
-}
-
-static bool ChecklistCompletoParaStatus(
-    List<versaoCsharp.Models.Elemento> elementos,
-    List<versaoCsharp.Models.Item> itens,
-    List<versaoCsharp.Models.CronoAnalise> cronos)
-{
-    if (elementos.Count == 0 || itens.Count == 0 || cronos.Count == 0)
-    {
-        return false;
-    }
-
-    foreach (var elemento in elementos)
-    {
-        var itensElemento = itens.Where(i => i.ElementoId == elemento.Id).ToList();
-        if (itensElemento.Count == 0)
-        {
-            return false;
-        }
-
-        var todosNaoSeAplica = itensElemento.All(i => string.Equals(i.Analise, "nao_se_aplica", StringComparison.OrdinalIgnoreCase));
-        foreach (var item in itensElemento)
-        {
-            var analise = (item.Analise ?? string.Empty).Trim().ToLowerInvariant();
-            if (analise != "conforme" && analise != "nao_conforme" && analise != "nao_se_aplica")
-            {
-                return false;
-            }
-
-            if (analise == "nao_conforme" && string.IsNullOrWhiteSpace(item.Categoria))
-            {
-                return false;
-            }
-        }
-
-        if (!todosNaoSeAplica && (!elemento.DataElemento.HasValue || string.IsNullOrWhiteSpace(elemento.Nup)))
-        {
-            return false;
-        }
-    }
-
-    foreach (var crono in cronos)
-    {
-        if (string.IsNullOrWhiteSpace(crono.Fase) ||
-            !crono.DataInicio.HasValue ||
-            !crono.DataFim.HasValue ||
-            !crono.Duracao.HasValue)
-        {
-            return false;
-        }
-    }
-
-    return true;
 }
 
 static int CalcularDuracaoCrono(DateTime dataInicio, DateTime dataFim)
