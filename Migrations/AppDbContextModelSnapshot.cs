@@ -248,7 +248,7 @@ namespace versaoCsharp.Migrations
                 b.HasKey("Id");
                 b.HasIndex("Area").HasDatabaseName("ix_processo_area");
                 b.HasIndex("Modalidade").HasDatabaseName("ix_processo_modalidade");
-                b.HasIndex("Numero").HasDatabaseName("ix_processo_numero");
+                b.HasIndex("Numero").IsUnique().HasDatabaseName("ix_processo_numero");
                 b.ToTable("processo");
             });
 
@@ -300,8 +300,8 @@ namespace versaoCsharp.Migrations
                     .HasColumnName("senha");
 
                 b.HasKey("Id");
-                b.HasIndex("Email").HasDatabaseName("ix_usuario_email");
-                b.HasIndex("Login").HasDatabaseName("ix_usuario_login");
+                b.HasIndex("Email").IsUnique().HasDatabaseName("ix_usuario_email");
+                b.HasIndex("Login").IsUnique().HasDatabaseName("ix_usuario_login");
                 b.ToTable("usuario");
             });
 

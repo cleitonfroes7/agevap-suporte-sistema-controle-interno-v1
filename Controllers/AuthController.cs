@@ -275,7 +275,8 @@ namespace versaoCsharp.Controllers
                         CriarPrincipal(u),
                         new AuthenticationProperties
                         {
-                            IsPersistent = User.Identity?.IsAuthenticated ?? false
+                            // A atualização de perfil não deve transformar uma sessão comum em "lembrar acesso".
+                            IsPersistent = false
                         });
                 }
 

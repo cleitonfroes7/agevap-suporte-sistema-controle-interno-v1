@@ -249,6 +249,18 @@ using (var scope = app.Services.CreateScope())
     {
         GarantirCompatibilidadeSchema(db, startupLogger, adminBootstrapOptions);
     }
+
+    var checklistService = scope.ServiceProvider.GetRequiredService<ChecklistService>();
+    var categoriasNormalizadas = await checklistService.NormalizarCategoriasNaoConformidadeAsync();
+    var checklistsConcluidos = await checklistService.NormalizarChecklistsCompletosAsync();
+
+    if (categoriasNormalizadas > 0 || checklistsConcluidos > 0)
+    {
+        startupLogger.LogInformation(
+            "Reconciliação de checklists concluída: {CategoriasNormalizadas} categorias normalizadas e {ChecklistsConcluidos} checklists concluídos.",
+            categoriasNormalizadas,
+            checklistsConcluidos);
+    }
 }
 
 app.Run();
@@ -282,30 +294,16 @@ static void GarantirCompatibilidadeSchema(
                 logger.LogInformation("Schema compat: coluna usuario.empresa criada.");
             }
 
-            if (adminBootstrapOptions.EnableLegacyAdminSeed)
-            {
-                db.Database.ExecuteSqlRaw(@"
-UPDATE `usuario`
-SET `perfil` = CASE
-    WHEN LOWER(TRIM(`email`)) = 'cleiton.froes@agevap.org.br' THEN 'USER_ADM'
-    WHEN `perfil` IS NULL OR `perfil` = '' OR `perfil` = 'admin' THEN 'USER_CI'
-    ELSE `perfil`
-END,
-`ativo` = 1
-WHERE `email` IS NOT NULL;");
-                logger.LogInformation("Bootstrap legado de administrador mantido ativo por compatibilidade.");
-            }
-            else
-            {
-                db.Database.ExecuteSqlRaw(@"
+            db.Database.ExecuteSqlRaw(@"
 UPDATE `usuario`
 SET `perfil` = CASE
     WHEN `perfil` IS NULL OR `perfil` = '' OR `perfil` = 'admin' THEN 'USER_CI'
     ELSE `perfil`
-END,
-`ativo` = 1
+END
 WHERE `email` IS NOT NULL;");
-            }
+
+            GarantirIndiceUnico(db, logger, "usuario", "ix_usuario_email", "email");
+            GarantirIndiceUnico(db, logger, "usuario", "ix_usuario_login", "login");
 
             if (adminBootstrapOptions.EnableConfiguredAdminPromotion &&
                 !string.IsNullOrWhiteSpace(adminBootstrapOptions.ConfiguredAdminEmail))
@@ -335,6 +333,8 @@ WHERE `perfil` NOT IN ('USER_ADM', 'USER_CI', 'USER_PADRAO');");
         {
             return;
         }
+
+        GarantirIndiceUnico(db, logger, "processo", "ix_processo_numero", "numero");
 
         var tipoObjeto = ObterTexto(db, @"
 SELECT DATA_TYPE
@@ -441,6 +441,7 @@ LIMIT 1;");
                 .Include(c => c.Elementos)
                 .Include(c => c.Itens)
                 .Include(c => c.CronoAnalises)
+                .AsSplitQuery()
                 .ToList();
 
             var saneados = 0;
@@ -559,6 +560,72 @@ WHERE table_schema = DATABASE()
   AND table_name = '{tabela}'
   AND column_name = '{coluna}';");
     return total > 0;
+}
+
+static bool IndiceExiste(AppDbContext db, string tabela, string indice)
+{
+    var total = ObterLong(db, $@"
+SELECT COUNT(*)
+FROM information_schema.statistics
+WHERE table_schema = DATABASE()
+  AND table_name = '{tabela}'
+  AND index_name = '{indice}';");
+    return total > 0;
+}
+
+static bool IndiceUnicoExiste(AppDbContext db, string tabela, string indice)
+{
+    var total = ObterLong(db, $@"
+SELECT COUNT(*)
+FROM information_schema.statistics
+WHERE table_schema = DATABASE()
+  AND table_name = '{tabela}'
+  AND index_name = '{indice}'
+  AND non_unique = 0;");
+    return total > 0;
+}
+
+static void GarantirIndiceUnico(AppDbContext db, ILogger logger, string tabela, string indice, string coluna)
+{
+    var duplicados = ObterLong(db, $@"
+SELECT COUNT(*)
+FROM (
+    SELECT `{coluna}`
+    FROM `{tabela}`
+    GROUP BY `{coluna}`
+    HAVING COUNT(*) > 1
+) AS valores_duplicados;");
+
+    if (duplicados > 0)
+    {
+        logger.LogWarning(
+            "Índice único {Indice} não foi aplicado: existem {Duplicados} valor(es) duplicado(s) em {Tabela}.{Coluna}.",
+            indice,
+            duplicados,
+            tabela,
+            coluna);
+        return;
+    }
+
+    if (IndiceUnicoExiste(db, tabela, indice))
+    {
+        return;
+    }
+
+    if (IndiceExiste(db, tabela, indice))
+    {
+        ExecutarComandoSchema(db, $"ALTER TABLE `{tabela}` DROP INDEX `{indice}`;");
+    }
+
+    ExecutarComandoSchema(db, $"ALTER TABLE `{tabela}` ADD UNIQUE INDEX `{indice}` (`{coluna}`);");
+    logger.LogInformation("Schema compat: índice único {Indice} aplicado.", indice);
+}
+
+static void ExecutarComandoSchema(AppDbContext db, string sql)
+{
+    using var cmd = db.Database.GetDbConnection().CreateCommand();
+    cmd.CommandText = sql;
+    cmd.ExecuteNonQuery();
 }
 
 static long ObterLong(AppDbContext db, string sql)

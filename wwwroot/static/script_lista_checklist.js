@@ -1875,7 +1875,7 @@ async function imprimirComprovanteCorrecao(checklistId) {
             throw new Error(data.message || 'Nao foi possivel carregar os dados do comprovante.');
         }
 
-        const checklist = data.checklist;
+        const checklist = sanitizeDeep(data.checklist);
         const proc = checklist.processo_id ? await buscarDadosProcesso(checklist.processo_id) : null;
         const area = escapeHtml(proc?.area || '-');
         const gestor = escapeHtml(proc?.gestor || '-');

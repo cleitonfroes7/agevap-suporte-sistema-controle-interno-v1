@@ -557,9 +557,6 @@
             }
 
             input.disabled = allNaoSeAplica;
-            if (allNaoSeAplica) {
-                input.value = '';
-            }
         });
     }
 

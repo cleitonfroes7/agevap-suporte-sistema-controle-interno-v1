@@ -42,6 +42,32 @@
         'Classificação incorreta',
         'Outro'
     ];
+
+    function normalizarTextoComparacao(valor) {
+        return String(valor || '')
+            .normalize('NFD')
+            .replace(/[\u0300-\u036f]/g, '')
+            .trim()
+            .toLowerCase();
+    }
+
+    function normalizarCategoriaNaoConformidade(valor) {
+        const texto = String(valor || '').trim();
+        if (!texto) {
+            return '';
+        }
+
+        return categoriasNaoConformidade.find((categoria) =>
+            normalizarTextoComparacao(categoria) === normalizarTextoComparacao(texto))
+            || texto;
+    }
+
+    function obterOpcoesCategoria(categoriaAtual) {
+        const categoriaNormalizada = normalizarCategoriaNaoConformidade(categoriaAtual);
+        return categoriasNaoConformidade.includes(categoriaNormalizada)
+            ? categoriasNaoConformidade
+            : [...categoriasNaoConformidade, categoriaNormalizada];
+    }
     const MARCADOR_APONTAMENTOS = '\n• ';
 
     let checklistAtual = null;
@@ -139,6 +165,7 @@
 
     function renderItem(item, itemIndex) {
         const analise = item.analise || '';
+        const categoriaAtual = normalizarCategoriaNaoConformidade(item.categoria);
         const groupName = `analise_${item.id}`;
         const showNC = analise === 'nao_conforme';
         const permiteApontamentosExtras = aceitaApontamentosExtras(item.pergunta);
@@ -176,7 +203,7 @@
                             <label>Categoria da não conformidade</label>
                             <select class="js-item-categoria" ${showNC ? '' : 'disabled'}>
                                 <option value="">Selecione a categoria</option>
-                                ${categoriasNaoConformidade.map((categoria) => `<option value="${escapeHtml(categoria)}" ${item.categoria === categoria ? 'selected' : ''}>${escapeHtml(categoria)}</option>`).join('')}
+                                ${obterOpcoesCategoria(categoriaAtual).map((categoria) => `<option value="${escapeHtml(categoria)}" ${categoriaAtual === categoria ? 'selected' : ''}>${escapeHtml(categoria)}</option>`).join('')}
                             </select>
                         </div>
                     </div>
@@ -391,9 +418,6 @@
             }
 
             input.disabled = allNaoSeAplica;
-            if (allNaoSeAplica) {
-                input.value = '';
-            }
         });
     }
 
@@ -608,7 +632,7 @@
                     id: Number(itemEl.getAttribute('data-item-id')),
                     analise: itemEl.querySelector('input[type="radio"]:checked')?.value || '',
                     justificativa: serializarJustificativa(itemEl, itemEl.querySelector('.question-card__text label')?.textContent || ''),
-                    categoria: itemEl.querySelector('.js-item-categoria')?.value || ''
+                    categoria: normalizarCategoriaNaoConformidade(itemEl.querySelector('.js-item-categoria')?.value || '')
                 }))
             };
         });

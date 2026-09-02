@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
@@ -213,6 +214,12 @@ namespace versaoCsharp.Controllers
                 return Json(new { success = false, message = "Os dados do processo são inválidos." });
             }
 
+            if (!DataAberturaEhValida(dados.DataAbertura))
+            {
+                Response.StatusCode = 400;
+                return Json(new { success = false, message = "A data de abertura deve estar no formato yyyy-MM-dd." });
+            }
+
             var payload = new Dictionary<string, string?>
             {
                 ["numero"] = dados.Numero.Trim(),
@@ -296,6 +303,12 @@ namespace versaoCsharp.Controllers
                 {
                     Response.StatusCode = 400;
                     return Json(new { success = false, message = "Os dados do processo são inválidos." });
+                }
+
+                if (dados.DataAbertura != null && !DataAberturaEhValida(dados.DataAbertura))
+                {
+                    Response.StatusCode = 400;
+                    return Json(new { success = false, message = "A data de abertura deve estar no formato yyyy-MM-dd." });
                 }
 
                 var dadosAtualizacao = new Dictionary<string, string?>
@@ -480,6 +493,17 @@ namespace versaoCsharp.Controllers
             }
 
             return false;
+        }
+
+        private static bool DataAberturaEhValida(string? data)
+        {
+            return !string.IsNullOrWhiteSpace(data) &&
+                   DateTime.TryParseExact(
+                       data.Trim(),
+                       "yyyy-MM-dd",
+                       CultureInfo.InvariantCulture,
+                       DateTimeStyles.None,
+                       out _);
         }
     }
 }

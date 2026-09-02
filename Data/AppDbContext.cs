@@ -25,8 +25,8 @@ namespace versaoCsharp.Data
             {
                 entity.ToTable("usuario");
                 entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.Email).HasDatabaseName("ix_usuario_email");
-                entity.HasIndex(e => e.Login).HasDatabaseName("ix_usuario_login");
+                entity.HasIndex(e => e.Email).IsUnique().HasDatabaseName("ix_usuario_email");
+                entity.HasIndex(e => e.Login).IsUnique().HasDatabaseName("ix_usuario_login");
                 entity.Property(e => e.Id).HasColumnName("id");
                 entity.Property(e => e.Name).HasColumnName("name").HasMaxLength(100).IsRequired();
                 entity.Property(e => e.Login).HasColumnName("login").HasMaxLength(50).IsRequired();
@@ -41,7 +41,7 @@ namespace versaoCsharp.Data
             {
                 entity.ToTable("processo");
                 entity.HasKey(e => e.Id);
-                entity.HasIndex(e => e.Numero).HasDatabaseName("ix_processo_numero");
+                entity.HasIndex(e => e.Numero).IsUnique().HasDatabaseName("ix_processo_numero");
                 entity.HasIndex(e => e.Area).HasDatabaseName("ix_processo_area");
                 entity.HasIndex(e => e.Modalidade).HasDatabaseName("ix_processo_modalidade");
                 entity.Property(e => e.Id).HasColumnName("id");

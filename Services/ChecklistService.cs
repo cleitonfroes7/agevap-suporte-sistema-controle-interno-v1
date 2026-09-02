@@ -899,9 +899,11 @@ namespace versaoCsharp.Services
         public async Task<int> NormalizarChecklistsCompletosAsync()
         {
             var checklists = await _db.Checklists
+                .AsTracking()
                 .Include(c => c.Elementos)
                 .Include(c => c.Itens)
                 .Include(c => c.CronoAnalises)
+                .AsSplitQuery()
                 .ToListAsync();
 
             var alterados = 0;
@@ -923,6 +925,29 @@ namespace versaoCsharp.Services
             {
                 await _db.SaveChangesAsync();
             }
+
+            return alterados;
+        }
+
+        public async Task<int> NormalizarCategoriasNaoConformidadeAsync()
+        {
+            var itens = await _db.Itens
+                .Where(i => i.Analise == "nao_conforme" && i.Categoria != null && i.Categoria != "")
+                .ToListAsync();
+
+            var alterados = 0;
+            foreach (var item in itens)
+            {
+                var categoriaNormalizada = NormalizarCategoriaNaoConformidade(item.Categoria);
+                if (string.Equals(item.Categoria, categoriaNormalizada, StringComparison.Ordinal))
+                    continue;
+
+                item.Categoria = categoriaNormalizada;
+                alterados++;
+            }
+
+            if (alterados > 0)
+                await _db.SaveChangesAsync();
 
             return alterados;
         }
