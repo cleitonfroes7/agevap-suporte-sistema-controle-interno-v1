@@ -267,6 +267,42 @@
             border: 1px solid #fecdd3;
         }
 
+        .access-card__header-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: flex-end;
+        }
+
+        .access-modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1100;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+            background: rgba(8, 28, 49, 0.58);
+            backdrop-filter: blur(5px);
+        }
+
+        .access-modal.is-open {
+            display: flex;
+        }
+
+        .access-modal__dialog {
+            width: min(760px, 100%);
+            max-height: calc(100vh - 48px);
+            overflow-y: auto;
+            margin: 0;
+            box-shadow: 0 28px 80px rgba(5, 22, 39, 0.3);
+        }
+
+        body.access-modal-open {
+            overflow: hidden;
+        }
+
         .access-toolbar {
             display: flex;
             justify-content: space-between;
@@ -467,6 +503,16 @@
                 min-width: 0;
                 width: 100%;
             }
+
+            .access-modal {
+                align-items: flex-end;
+                padding: 12px;
+            }
+
+            .access-modal__dialog {
+                max-height: calc(100vh - 24px);
+                border-radius: 22px;
+            }
         }
     </style>
 }
@@ -494,13 +540,17 @@
         </div>
     </section>
 
-    <article class="access-card">
+    <div id="createUserModal" class="access-modal" role="dialog" aria-modal="true" aria-labelledby="createUserModalTitle" aria-hidden="true">
+        <article class="access-card access-modal__dialog">
         <div class="access-card__header">
             <div>
-                <h3>Novo usuário</h3>
+                <h3 id="createUserModalTitle">Novo usuário</h3>
                 <p>Cadastre o usuário, perfil e empresa já no início para que a experiência do portal fique correta desde o primeiro acesso.</p>
             </div>
-            <span class="access-pill">ADM</span>
+            <div class="access-card__header-actions">
+                <span class="access-pill">ADM</span>
+                <button type="button" class="access-btn access-btn--ghost" id="closeCreateUserModal" aria-label="Fechar cadastro de usuário">Fechar</button>
+            </div>
         </div>
 
         <div id="createAlert" class="access-alert"></div>
@@ -558,7 +608,8 @@
             </div>
             <div class="access-password-panel__hint">Entregue essa senha ao usuário e oriente a troca imediata em <strong>Meu Perfil</strong>.</div>
         </div>
-    </article>
+        </article>
+    </div>
 
     <article class="access-card">
         <div class="access-card__header">
@@ -566,7 +617,10 @@
                 <h3>Usuários cadastrados</h3>
                 <p>Use o filtro por empresa e mantenha a base organizada. Ações de edição e exclusão ficam na última coluna.</p>
             </div>
-            <span class="access-pill">Base</span>
+            <div class="access-card__header-actions">
+                <span class="access-pill">Base</span>
+                <button type="button" class="access-btn access-btn--primary" id="openCreateUserModal">+ Novo usuário</button>
+            </div>
         </div>
 
         <div id="listAlert" class="access-alert"></div>
@@ -629,6 +683,9 @@
         const createdPasswordPanel = document.getElementById('createdPasswordPanel');
         const createdPasswordValue = document.getElementById('createdPasswordValue');
         const copyCreatedPasswordButton = document.getElementById('copyCreatedPasswordButton');
+        const createUserModal = document.getElementById('createUserModal');
+        const openCreateUserModalButton = document.getElementById('openCreateUserModal');
+        const closeCreateUserModalButton = document.getElementById('closeCreateUserModal');
 
         const state = {
             usuarios: [],
@@ -666,6 +723,30 @@
         function ocultarSenhaGerada() {
             createdPasswordValue.textContent = '';
             createdPasswordPanel.classList.remove('is-visible');
+        }
+
+        function prepararNovoUsuario() {
+            createForm.reset();
+            createPerfilSelect.value = 'USER_CI';
+            createEmpresaSelect.value = 'AGEVAP';
+            createSenhaInput.value = gerarSenhaTemporaria();
+            ocultarSenhaGerada();
+            hideAlert(createAlert);
+        }
+
+        function abrirCadastroUsuario() {
+            prepararNovoUsuario();
+            createUserModal.classList.add('is-open');
+            createUserModal.setAttribute('aria-hidden', 'false');
+            document.body.classList.add('access-modal-open');
+            window.setTimeout(() => createNameInput.focus(), 0);
+        }
+
+        function fecharCadastroUsuario() {
+            createUserModal.classList.remove('is-open');
+            createUserModal.setAttribute('aria-hidden', 'true');
+            document.body.classList.remove('access-modal-open');
+            openCreateUserModalButton.focus();
         }
 
         function escapeHtml(value) {
@@ -849,6 +930,19 @@
             createSenhaInput.value = gerarSenhaTemporaria();
         });
 
+        openCreateUserModalButton.addEventListener('click', abrirCadastroUsuario);
+        closeCreateUserModalButton.addEventListener('click', fecharCadastroUsuario);
+        createUserModal.addEventListener('click', function (event) {
+            if (event.target === createUserModal) {
+                fecharCadastroUsuario();
+            }
+        });
+        document.addEventListener('keydown', function (event) {
+            if (event.key === 'Escape' && createUserModal.classList.contains('is-open')) {
+                fecharCadastroUsuario();
+            }
+        });
+
         copyCreatedPasswordButton.addEventListener('click', async function () {
             const ok = await copiarTexto(createdPasswordValue.textContent.trim());
             if (ok) {
@@ -1007,9 +1101,7 @@
             }
         });
 
-        createPerfilSelect.value = 'USER_CI';
-        createEmpresaSelect.value = 'AGEVAP';
-        createSenhaInput.value = gerarSenhaTemporaria();
+        prepararNovoUsuario();
 
         userSearch.addEventListener('input', aplicarFiltros);
         userCompanyFilter.addEventListener('change', aplicarFiltros);
